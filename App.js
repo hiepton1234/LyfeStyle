@@ -1,5 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import {useState} from "react";
+import { StyleSheet, Text, View, ScrollView, Button, TextInput} from 'react-native';
+
 import AppleHealthKit, {
   HealthValue,
   HealthKitPermissions,
@@ -8,10 +10,23 @@ import AppleHealthKit, {
 /* Permission options */
 const permissions = {
   permissions: {
-    read: [AppleHealthKit.Constants.Permissions.HeartRate],
-    write: [AppleHealthKit.Constants.Permissions.Steps],
+    read: [
+        AppleHealthKit.Constants.Permissions.HeartRate,
+        AppleHealthKit.Constants.Permissions.ActiveEnergyBurned,
+        AppleHealthKit.Constants.Permissions.Height,
+        AppleHealthKit.Constants.Permissions.Weight,
+        AppleHealthKit.Constants.Permissions.StepCount,
+        AppleHealthKit.Constants.Permissions.DateOfBirth,
+        AppleHealthKit.Constants.Permissions.BiologicalSex,
+        AppleHealthKit.Constants.Permissions.SleepAnalysis,
+        AppleHealthKit.Constants.Permissions.EnergyConsumed,
+        AppleHealthKit.Constants.Permissions.Protein,
+        // AppleHealthKit.Constants.Permissions.AllergyRecord
+    ],
+    // writing data permissions here, add if needed
+    write: [],
   },
-} as HealthKitPermissions;
+}
 
 AppleHealthKit.initHealthKit(permissions, (error) => {
   /* Called after we receive a response from the system */
@@ -24,14 +39,67 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
 
   const options = {
     startDate: new Date(2020, 1, 1).toISOString(),
+    endDate: new Date().toISOString(), // optional; default now
+    type: 'AllergyRecord',
   }
 
-  AppleHealthKit.getHeartRateSamples(
+  AppleHealthKit.getSleepSamples(
       options,
-      (callbackError, results) => {
+      (callbackError, result) => {
         /* Samples are now collected from HealthKit */
+        console.log(result[0])
       },
   )
+  AppleHealthKit.getBiologicalSex(
+      options,
+      (callBackError, result) => {
+        console.log(result)
+      }
+  )
+  AppleHealthKit.getLatestWeight(
+      options,
+      (callBackError, result) => {
+        console.log(result)
+      }
+  )
+  AppleHealthKit.getDateOfBirth(
+    options,
+    (callbackError, result) => {
+        console.log(result)
+    }
+  )
+
+  AppleHealthKit.getActiveEnergyBurned(
+      options,
+      (callbackError, result) => {
+        console.log(result[0])
+      }
+  )
+
+    AppleHealthKit.getEnergyConsumedSamples(
+        options,
+        (callbackError, result) => {
+            console.log(result[0])
+        }
+    )
+    AppleHealthKit.getProteinSamples(
+        options,
+        (callbackError, result) => {
+            console.log(result[0])
+        }
+    )
+    AppleHealthKit.getProteinSamples(
+        options,
+        (callbackError, result) => {
+            console.log(result[0])
+        }
+    )
+    // AppleHealthKit.getClinicalRecords(
+    //     options,
+    //     (callbackError, result) => {
+    //         console.log(result[0])
+    //     }
+    // )
 })
 
 export default function App() {
@@ -99,5 +167,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  appContainer: {
+    flex: 1,
+    padding: 50,
+  },
+  inputContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#cccccc',
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#cccccc",
+    // in most places where you can set size as num pixels, you can also use percentages passed as a string
+    // want this element to take up 80% of available width, defined by the container in which the element sits
+    width: '70%',
+    marginRight: 8,
+    padding: 8,
+  },
+  goalsContainer: {
+    flex: 6
+  },
+  goalItem: {
+    margin: 8,
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: '#5e0acc',
+  },
+  goalText: {
+    color: 'white',
   },
 });
