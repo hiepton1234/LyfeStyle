@@ -56,6 +56,18 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
         console.log(result)
       }
   )
+  AppleHealthKit.getLatestHeight(
+    options,
+      (callBackError, result) => {
+        console.log(result)
+    }
+  )
+    AppleHealthKit.getDailyStepCountSamples(
+        options,
+        (callBackError, result) => {
+            console.log(result[0])
+        }
+    )
   AppleHealthKit.getLatestWeight(
       options,
       (callBackError, result) => {
