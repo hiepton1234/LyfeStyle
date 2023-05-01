@@ -1,24 +1,41 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput } from 'react-native';
+import { StyleSheet, Text, View, Button, Platform } from 'react-native';
 import {useState} from "react";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
   export default function App() {
-    const [text, setText] = useState('');
+    const [date, setDate] = useState(new Date());
+    const [showPicker, setShowPicker] = useState(true);
+
+    const handleDateChange = (event, selectedDate) => {
+      setShowPicker(Platform.OS === 'ios');
+      setDate(selectedDate || date);
+    };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Personicle</Text>
       <Text style={styles.subtitle}>Sleep</Text>
-      <TextInput
-          style={styles.input}
-          onChangeText={text => setText(text)}
-          value={text}
-          placeholder="Enter some text here"
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit</Text>
-      </TouchableOpacity>
+      {showPicker && (
+          <DateTimePicker
+              value={date}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={handleDateChange}
+          />
+      )}
+      <Text style={styles.subtitle}> to </Text>
+      {showPicker && (
+          <DateTimePicker
+              value={date}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={handleDateChange}
+          />
+      )}
       <StatusBar style="auto" />
     </View>
   );
@@ -35,34 +52,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     paddingTop: 70,
-    marginBottom: 40,
+    marginBottom: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    fontFamily: 'TimesNewRomanPS-BoldMT',
+    fontFamily: 'Times New Roman',
   },
 
   subtitle: {
     fontSize: 16,
-    color: '#555',
+    marginTop: 10,
+    marginBottom: 10,
+    color: '#000000',
+    fontFamily: 'Times New Roman',
   },
-
-  input: {
-    height: 40,
-    width: '80%',
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    marginBottom: 20,
-  },
-
-  button: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 5,
-  },
-
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  }
 });
