@@ -29,15 +29,16 @@ export default function App() {
         backgroundGradientFrom: '#f0f0f0',
         backgroundGradientTo: '#e0e0e0',
         decimalPlaces: 0,
-        color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
+        color: (opacity = 0) => `rgba(5, 105, 107, ${opacity})`,
         style: {
             borderRadius: 16,
         },
         barWidth: 20,
         barPercentage: 0.7,
         categoryPercentage: 0.2,
-        yAxisInterval: 1,
-        yAxisMinValue: 0,
+        contentInset: {
+            left: 0,
+        },
     };
 
     return (
@@ -66,8 +67,8 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 24,
-    paddingTop: 70,
-    marginBottom: 30,
+    paddingTop: 50,
+    marginBottom: 10,
     fontWeight: 'bold',
     textAlign: 'center',
     fontFamily: 'Times New Roman',
