@@ -1,47 +1,59 @@
 import { StatusBar } from 'expo-status-bar';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 
 
-  export default function App() {
-    const data = {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [{
-          data: [7.5, 8, 7, 6, 6.5, 9, 8.5],
-        }],
+function ScrollableBarChart({ data, width, height, chartConfig }) {
+    return (
+        <ScrollView horizontal={true}>
+            <BarChart
+                data={data}
+                width={width}
+                height={height}
+                chartConfig={chartConfig}
+                withInnerLines={false}
+                bezier
+            />
+        </ScrollView>
+    );
+}
+
+export default function App() {
+    const chartData = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
+    }), []);
+
+    const chartConfig = {
+        backgroundGradientFrom: '#f0f0f0',
+        backgroundGradientTo: '#e0e0e0',
+        decimalPlaces: 0,
+        color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
+        style: {
+            borderRadius: 16,
+        },
+        barWidth: 20,
+        barPercentage: 0.7,
+        categoryPercentage: 0.2,
+        yAxisInterval: 1,
+        yAxisMinValue: 0,
     };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Personicle</Text>
-      <Text style={styles.subtitle}>Sleep</Text>
-        <View style={{ alignItems: 'center' }}>
-            <ScrollView horizontal={true}>
-                <BarChart
-                    data={data}
-                    width={700} // adjust the width of the chart to fit the screen
+    return (
+        <View style={styles.container}>
+            <Text style={styles.title}>Personicle</Text>
+            <Text style={styles.subtitle}>Sleep</Text>
+            <View style={{ alignItems: 'center' }}>
+                <ScrollableBarChart
+                    data={chartData}
+                    width={400}
                     height={250}
-                    chartConfig={{
-                        backgroundGradientFrom: '#f0f0f0',
-                        backgroundGradientTo: '#e0e0e0',
-                        decimalPlaces: 0,
-                        color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
-                        style: {
-                            borderRadius: 16,
-                        },
-                    }}
-                    style={{
-                        marginVertical: 8,
-                        borderRadius: 16,
-                    }}
-                    withInnerLines={false}
-                    bezier
+                    chartConfig={chartConfig}
                 />
-            </ScrollView>
+            </View>
         </View>
-      <StatusBar style="auto" />
-    </View>
-  );
+    );
 }
 
 const styles = StyleSheet.create({
