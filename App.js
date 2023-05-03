@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import {useState} from "react";
-import { StyleSheet, Text, View, ScrollView, Button, TextInput} from 'react-native';
+import {StyleSheet, Text, View, ScrollView, Button, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 
 import AppleHealthKit, {
   HealthValue,
@@ -84,7 +84,7 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
     options,
     (callbackError, result) => {
         console.log(result)
-      dob = result.value
+      dob = result.value.substring(0, 10)
       age = result.age
     }
   )
@@ -117,64 +117,80 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
 })
 
 export default function App() {
-  let defaultTemp={text:''}
+  // Define some example data for the ScrollView
+  const [profileElems, setProfileElems] = useState([
+    { id: 'Name:', text: '' },
+    { id: 'Age:', text: age },
+    { id: 'Date of Birth:', text: dob},
+    { id: 'Gender:', text: bio_sex},
+    { id: 'Height:', text: height },
+    { id: 'Home Address:', text: ''},
+    { id: 'Work Address:', text: ''},
+    { id: 'Favorite Place 1:', text: ''},
+    { id: 'Favorite Place 2:', text: ''},
+  ]);
 
-  let [temp,setTemp] = useState(defaultTemp); //We will store current being edited input's data and index
-
-  // registers new state, set to empty string initially
-  // enteredGoalText state can be updated with setEnteredGoalText function
-  const [enteredGoalText, setEnteredGoalText] = useState('');
-
-  // new state to add list of goals. typical case for using state is when some data dynamically changes
-  // and with it, UI should be changed. initialized with empty array, initially no goals
-  const [courseGoals, setCourseGoals] = useState([]);
-
-  function getInputHandler(enteredText){
-    setEnteredGoalText(enteredText);
-  }
-  function addGoalHandler(){
-    /// ... is JS spread operator. keep content of courseGoals array, add enteredGoalText
-    // setCourseGoals([...courseGoals, enteredGoalText]);
-
-    // better way/best practice of above statement. use arrow function when new state depends on previous state.
-    setCourseGoals(currentCourseGoals => [...currentCourseGoals, enteredGoalText]);
+  // Define a function to update a data item by ID
+  function updateDataItem(id, newText) {
+    setProfileElems(previousData => {
+      const newData = [...previousData];
+      const index = newData.findIndex(item => item.id === id);
+      newData[index] = { ...newData[index], text: newText };
+      return newData;
+    });
   }
 
   return (
-    <View style={styles.appContainer}>
+    // adjusts view to still show what is being typed if otherwise would be covered by keyboard
+    <KeyboardAvoidingView
+      style={styles.appContainer}
+      behavior='padding'
+    >
       <ScrollView>
-        <Text style={styles.baseText}>
-          <Text style={styles.sectionHeading}>
-            My Profile
-            {'\n'}
-          </Text>
-          <Text>
-            Full Name:
-            Age: {age + "\n"}
-            Date of Birth: {dob.substring(0, 10) + '\n'}
-          </Text>
-          <View style={{flexDirection: "row"}}>
-            <Text style = {styles.baseText}>
-            Gender:
+        <Text style={styles.sectionHeading}>
+          My Profile
+        </Text>
+        {/* Each profile element in its own view, allows side by side TextInput*/}
+        {profileElems.map(item => (
+          <View style={styles.item} key={item.id}>
+            <Text style={styles.baseText}>
+              {item.id}
             </Text>
-            
             <TextInput
-              style={styles.textInput}
-              placeholder={bio_sex}
-              onFocus={() => setTemp({editingIndex: })}
+              style={styles.input}
+              placeholder={"Type here"}
+              value={item.text}
+              onChangeText={newText => updateDataItem(item.id, newText)}
             />
           </View>
-          <Text>
-            {'\n'}
-            Height: {height}
-            Home Address:
-            Work Address:
-            Favorite Place 1:
-            Favorite Place 2:
-          </Text>
-        </Text>
+        ))}
+        <View style={styles.save_or_cancel}>
+            <Pressable
+              // add function to call when pressed to read all inputs and save to DB
+              // onPress={}
+              style={({pressed}) => [
+                {
+                  opacity : pressed ? 0.3 : 1
+                }
+              ]}>
+              <Text style={styles.customButton}>
+                ✅
+              </Text>
+            </Pressable>
+            <Pressable
+              // onPress={}
+              style={({pressed}) => [
+              {
+                opacity : pressed ? 0.3 : 1
+              }
+              ]}>
+              <Text style={styles.customButton}>
+                🚫
+              </Text>
+            </Pressable>
+        </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -183,11 +199,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir-Book',
     fontSize: 20,
     lineHeight: 40,
+    marginRight: 10,
   },
   sectionHeading: {
+    fontFamily: 'Avenir-Book',
     fontWeight: "bold",
     fontSize: 40,
     lineHeight: 50,
+  },
+  customButton: {
+    fontFamily: 'Avenir-Book',
+    fontSize: 50,
+    fontWeight: "600"
   },
   // container: {
   //   flex: 1,
@@ -196,6 +219,7 @@ const styles = StyleSheet.create({
   //   justifyContent: 'center',
   // },
   appContainer: {
+    backgroundColor: '#edf7f5',
     flex: 1,
     paddingTop: 50,
     padding: 25,
@@ -217,6 +241,7 @@ const styles = StyleSheet.create({
     width: '60%',
     margin: 8,
     padding: 8,
+    justifyContent: ''
   },
   // goalsContainer: {
   //   flex: 6
@@ -230,4 +255,21 @@ const styles = StyleSheet.create({
   // goalText: {
   //   color: 'white',
   // },
+  save_or_cancel: {
+    flexDirection: "row",
+    justifyContent: 'space-evenly',
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  input: {
+    fontFamily: 'Avenir-Book',
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 20,
+  },
 });
