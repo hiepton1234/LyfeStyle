@@ -1,23 +1,15 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import {StyleSheet, Text, View, ScrollView, Dimensions} from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 
+const screenWidth = Dimensions.get('window').width;
 
-function ScrollableBarChart({ data, width, height, chartConfig }) {
-    return (
-        <ScrollView horizontal={true}>
-            <BarChart
-                data={data}
-                width={width}
-                height={height}
-                chartConfig={chartConfig}
-                withInnerLines={false}
-                bezier
-            />
-        </ScrollView>
-    );
-}
+const xAxis = {
+    name: 'Months',
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontColor: '#333',
+};
 
 export default function App() {
     const chartData = useMemo(() => ({
@@ -28,27 +20,24 @@ export default function App() {
     const chartConfig = {
         backgroundGradientFrom: '#f0f0f0',
         backgroundGradientTo: '#e0e0e0',
-        decimalPlaces: 0,
-        color: (opacity = 0) => `rgba(5, 105, 107, ${opacity})`,
+        decimalPlaces: 2,
+        color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
+        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
             borderRadius: 16,
         },
         barWidth: 20,
-        barPercentage: 0.7,
-        categoryPercentage: 0.2,
-        contentInset: {
-            left: 0,
-        },
+        barPercentage: 0.6,
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Personicle</Text>
             <Text style={styles.subtitle}>Sleep</Text>
-            <View style={{ alignItems: 'center' }}>
-                <ScrollableBarChart
+            <View>
+                <BarChart
                     data={chartData}
-                    width={400}
+                    width={screenWidth}
                     height={250}
                     chartConfig={chartConfig}
                 />
@@ -57,28 +46,29 @@ export default function App() {
     );
 }
 
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+    },
 
-  title: {
-    fontSize: 24,
-    paddingTop: 50,
-    marginBottom: 10,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontFamily: 'Times New Roman',
-  },
+    title: {
+        fontSize: 24,
+        paddingTop: 50,
+        marginBottom: 10,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        fontFamily: 'Times New Roman',
+    },
 
-  subtitle: {
-    fontSize: 16,
-    marginTop: 10,
-    marginBottom: 10,
-    color: '#000000',
-    fontFamily: 'Times New Roman',
-  },
+    subtitle: {
+        fontSize: 16,
+        marginTop: 10,
+        marginBottom: 10,
+        color: '#000000',
+        fontFamily: 'Times New Roman',
+    },
 });
