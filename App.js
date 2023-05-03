@@ -28,6 +28,10 @@ const permissions = {
   },
 }
 
+let height;
+let dob = "";
+let age;
+let bio_sex;
 AppleHealthKit.initHealthKit(permissions, (error) => {
   /* Called after we receive a response from the system */
 
@@ -54,12 +58,14 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
       options,
       (callBackError, result) => {
         console.log(result)
+        bio_sex = result.value
       }
   )
   AppleHealthKit.getLatestHeight(
     options,
       (callBackError, result) => {
         console.log(result)
+        height = result.value
     }
   )
     AppleHealthKit.getDailyStepCountSamples(
@@ -78,6 +84,8 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
     options,
     (callbackError, result) => {
         console.log(result)
+      dob = result.value
+      age = result.age
     }
   )
 
@@ -91,13 +99,7 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
     AppleHealthKit.getEnergyConsumedSamples(
         options,
         (callbackError, result) => {
-            console.log(result[0])
-        }
-    )
-    AppleHealthKit.getProteinSamples(
-        options,
-        (callbackError, result) => {
-            console.log(result[0])
+          console.log(result[0])
         }
     )
     AppleHealthKit.getProteinSamples(
@@ -115,6 +117,10 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
 })
 
 export default function App() {
+  let defaultTemp={text:''}
+
+  let [temp,setTemp] = useState(defaultTemp); //We will store current being edited input's data and index
+
   // registers new state, set to empty string initially
   // enteredGoalText state can be updated with setEnteredGoalText function
   const [enteredGoalText, setEnteredGoalText] = useState('');
@@ -135,83 +141,93 @@ export default function App() {
   }
 
   return (
-      <View style={styles.appContainer}>
-        {/* holds input area where users can enter text for goal and click a button to add the goal*/}
-        <View style={styles.inputContainer}>
-          <TextInput
+    <View style={styles.appContainer}>
+      <ScrollView>
+        <Text style={styles.baseText}>
+          <Text style={styles.sectionHeading}>
+            My Profile
+            {'\n'}
+          </Text>
+          <Text>
+            Full Name:
+            Age: {age + "\n"}
+            Date of Birth: {dob.substring(0, 10) + '\n'}
+          </Text>
+          <View style={{flexDirection: "row"}}>
+            <Text style = {styles.baseText}>
+            Gender:
+            </Text>
+            
+            <TextInput
               style={styles.textInput}
-              placeholder={'Your course goal!'}
-              /* onChangeText listener will send text to getInputHandler as param*/
-              onChangeText={getInputHandler}
-          />
-          <Button
-              title={"Add goal"}
-              onPress={addGoalHandler}
-          />
-        </View>
-        {/*holds list of goals rendered*/}
-        <View style={styles.goalsContainer}>
-          <ScrollView>
-            {/* output something dynamic by using {} */}
-            {/* map method is a standard JS method that receives function which, as an argument/param, gets
-          the individual values stored in courseGoals. function is called for each goal element in courseGoals array
-          return the JSX element that should be rendered for the individual goal.
-          value passed to key can be anything, but should uniquely identify the concrete value you are outputting.
-          here we use goal, which is not necessarily unique, but we will make this better later. */}
-            {courseGoals.map((goal) =>
-                //   style and key now applied to View which is more versatile, so rounded corners will appear on iOS
-                <View style={styles.goalItem} key={goal}>
-                  {/*must add a style to child text component since styles do not cascade like CSS*/}
-                  <Text style={styles.goalText}>
-                    {goal}
-                  </Text>
-                </View>
-            )}
-          </ScrollView>
-        </View>
-      </View>
+              placeholder={bio_sex}
+              onFocus={() => setTemp({editingIndex: })}
+            />
+          </View>
+          <Text>
+            {'\n'}
+            Height: {height}
+            Home Address:
+            Work Address:
+            Favorite Place 1:
+            Favorite Place 2:
+          </Text>
+        </Text>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+  baseText: {
+    fontFamily: 'Avenir-Book',
+    fontSize: 20,
+    lineHeight: 40,
   },
+  sectionHeading: {
+    fontWeight: "bold",
+    fontSize: 40,
+    lineHeight: 50,
+  },
+  // container: {
+  //   flex: 1,
+  //   backgroundColor: '#fff',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
   appContainer: {
     flex: 1,
-    padding: 50,
+    paddingTop: 50,
+    padding: 25,
   },
-  inputContainer: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc',
-  },
+  // inputContainer: {
+  //   flex: 1,
+  //   flexDirection: "row",
+  //   justifyContent: "space-between",
+  //   alignItems: "center",
+  //   marginBottom: 24,
+  //   borderBottomWidth: 1,
+  //   borderBottomColor: '#cccccc',
+  // },
   textInput: {
     borderWidth: 1,
     borderColor: "#cccccc",
     // in most places where you can set size as num pixels, you can also use percentages passed as a string
     // want this element to take up 80% of available width, defined by the container in which the element sits
-    width: '70%',
-    marginRight: 8,
-    padding: 8,
-  },
-  goalsContainer: {
-    flex: 6
-  },
-  goalItem: {
+    width: '60%',
     margin: 8,
     padding: 8,
-    borderRadius: 6,
-    backgroundColor: '#5e0acc',
   },
-  goalText: {
-    color: 'white',
-  },
+  // goalsContainer: {
+  //   flex: 6
+  // },
+  // goalItem: {
+  //   margin: 8,
+  //   padding: 8,
+  //   borderRadius: 6,
+  //   backgroundColor: '#5e0acc',
+  // },
+  // goalText: {
+  //   color: 'white',
+  // },
 });
