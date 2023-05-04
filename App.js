@@ -1,60 +1,58 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useMemo } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
-
-
-function ScrollableBarChart({ data, width, height, chartConfig }) {
-    return (
-        <ScrollView horizontal={true}>
-            <BarChart
-                data={data}
-                width={width}
-                height={height}
-                chartConfig={chartConfig}
-                withInnerLines={false}
-                bezier
-            />
-        </ScrollView>
-    );
-}
+import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  ProgressChart,
+  ContributionGraph,
+  StackedBarChart
+} from "react-native-chart-kit";
 
 export default function App() {
-    const chartData = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
-    }), []);
+  return (
+    <View style={styles.container}>
+      <Text style={styles.titleText}>Calories Consumed</Text>
+      <StatusBar style="auto" />
 
-    const chartConfig = {
-        backgroundGradientFrom: '#f0f0f0',
-        backgroundGradientTo: '#e0e0e0',
-        decimalPlaces: 0,
-        color: (opacity = 0) => `rgba(5, 105, 107, ${opacity})`,
-        style: {
-            borderRadius: 16,
-        },
-        barWidth: 20,
-        barPercentage: 0.7,
-        categoryPercentage: 0.2,
-        contentInset: {
-            left: 0,
-        },
-    };
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Personicle</Text>
-            <Text style={styles.subtitle}>Sleep</Text>
-            <View style={{ alignItems: 'center' }}>
-                <ScrollableBarChart
-                    data={chartData}
-                    width={400}
-                    height={250}
-                    chartConfig={chartConfig}
-                />
-            </View>
-        </View>
-    );
+       <LineChart
+        data={{
+          labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+          datasets: [
+            {
+              data: [1000, 1500, 1250, 1000, 1175, 1215, 1300]
+            }
+          ]
+        }}
+        width={650} // from react-native
+        height={400}
+        yAxisLabel=""
+        yAxisSuffix="cal"
+        yAxisInterval={1} // optional, defaults to 1
+        chartConfig={{
+          backgroundColor: "#e26a00",
+          backgroundGradientFrom: "#2A4858",
+          backgroundGradientTo: "#2A4858",
+          decimalPlaces: 0, // optional, defaults to 2dp
+          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          style: {
+            borderRadius: 16
+          },
+          propsForDots: {
+            r: "6",
+            strokeWidth: "2",
+            stroke: "#A6B3BA"
+          }
+        }}
+        bezier
+        style={{
+          marginVertical: 8,
+          borderRadius: 16
+        }}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -62,23 +60,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
-
-  title: {
-    fontSize: 24,
-    paddingTop: 50,
-    marginBottom: 10,
+  titleText : {
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
-    fontFamily: 'Times New Roman',
-  },
-
-  subtitle: {
-    fontSize: 16,
-    marginTop: 10,
-    marginBottom: 10,
-    color: '#000000',
-    fontFamily: 'Times New Roman',
   },
 });
