@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import {StyleSheet, Text, View, ScrollView, Dimensions} from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+import {BarChart, ContributionGraph} from 'react-native-chart-kit';
 
 
 const screenWidth = Dimensions.get('window').width;
@@ -26,6 +26,21 @@ export default function App() {
         datasets: [{ data: [2.45, 5.34, 6.87, 0.72, 3.12, 1.89, 6.57] }],
     }), []);
 
+    const commitsData = [
+        { date: "2017-01-02", count: 1 },
+        { date: "2017-01-03", count: 2 },
+        { date: "2017-01-04", count: 3 },
+        { date: "2017-01-05", count: 4 },
+        { date: "2017-01-06", count: 5 },
+        { date: "2017-01-30", count: 2 },
+        { date: "2017-01-31", count: 3 },
+        { date: "2017-03-01", count: 2 },
+        { date: "2017-04-02", count: 4 },
+        { date: "2017-03-05", count: 2 },
+        { date: "2017-02-30", count: 4 }
+    ];
+
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Personicle</Text>
@@ -41,7 +56,7 @@ export default function App() {
                         backgroundGradientTo: '#e0e0e0',
                         decimalPlaces: 1,
                         barPercentage: 0.6,
-                        color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
+                        color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
                         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                     }}
                     style={{ paddingBottom: 30 }}
@@ -94,6 +109,24 @@ export default function App() {
                     }}
                     style={{ paddingBottom: 30 }}
                 />
+
+                <Text style={styles.subtitle}>Daily Activities</Text>
+                <ScrollView horizontal={true}>
+                    <ContributionGraph
+                        values={commitsData}
+                        endDate={new Date("2017-04-01")}
+                        width={screenWidth}
+                        height={220}
+                        showMonthLabels={true}
+                        chartConfig={{
+                            backgroundGradientFrom: "#f0f0f0",
+                            backgroundGradientTo: "#e0e0e0",
+                            color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                        }}
+                        style={{ paddingBottom: 50 }}
+                    />
+                </ScrollView>
             </ScrollView>
         </View>
     );
