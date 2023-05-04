@@ -51,6 +51,7 @@ export default function App() {
                     data={sleep_chart_data}
                     width={screenWidth}
                     height={250}
+                    yAxisSuffix=" Hrs"
                     chartConfig={{
                         backgroundGradientFrom: '#f0f0f0',
                         backgroundGradientTo: '#e0e0e0',
@@ -75,9 +76,8 @@ export default function App() {
                         color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
                         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                     }}
-                    style={{ paddingBottom: 30 }}
+                    style={{ paddingBottom: 30}}
                 />
-
                 <Text style={styles.subtitle}>Calories Burned</Text>
                 <BarChart
                     data={caloric_lost_chart_data}
