@@ -255,7 +255,7 @@ export default function App() {
           </Profile>
         </View>
     );
-
+}
 
 const styles = StyleSheet.create({
     container: {
