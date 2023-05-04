@@ -15,7 +15,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hiepton1234.LyfeStyle"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +26,20 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d7f86632-722f-4187-b3fe-5650cfa98ea6"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d7f86632-722f-4187-b3fe-5650cfa98ea6"
+    },
+    "plugins": [
+      "react-native-health"
+    ]
   }
 }
