@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import {useState} from "react";
 import {StyleSheet, Text, View, Modal, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import {Profile} from './Profile'
+import {HealthGoals} from "./HealthGoals";
 
 import AppleHealthKit, {
   HealthValue,
@@ -119,14 +120,19 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
 
 export default function App() {
   return (
-    <Profile
-      age={age}
-      dob={dob}
-      bio_sex={bio_sex}
-      height={height}
-    >
-
-    </Profile>
+    <View style={styles.centeredView}>
+      <Profile
+        age={age}
+        dob={dob}
+        bio_sex={bio_sex}
+        height={height}
+      />
+      <HealthGoals
+        age={age}
+        dob={dob}
+        bio_sex={bio_sex}
+        height={height}/>
+    </View>
   );
 }
 
