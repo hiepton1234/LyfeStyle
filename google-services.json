@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "59074829052",
+    "firebase_url": "https://cs125-708d8-default-rtdb.firebaseio.com",
+    "project_id": "cs125-708d8",
+    "storage_bucket": "cs125-708d8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59074829052:android:4e405f6be849ffff2d5579",
+        "android_client_info": {
+          "package_name": "com.hiepton1234.LyfeStyle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "59074829052-q49bld4qcc0jidkt1rus9ibpd6urf9dk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALMA_Omv-vUkJm6zGvxbnv8WJ53n1TLZQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "59074829052-q49bld4qcc0jidkt1rus9ibpd6urf9dk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "59074829052-6g77ov31173fhj5ggbdesprd3schp6uu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hiepton1234.LyfeStyle"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

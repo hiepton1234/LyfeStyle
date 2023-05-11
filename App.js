@@ -3,6 +3,8 @@ import {useState} from "react";
 import {StyleSheet, Text, View, Modal, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
+import { initializeApp } from 'firebase/app';
+import {RNFirebase} from "./RNFirebase";
 
 import AppleHealthKit, {
   HealthValue,
@@ -117,8 +119,10 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
     //     }
     // )
 })
-
 export default function App() {
+
+  RNFirebase()
+
   return (
     <View style={styles.centeredView}>
       <Profile
