@@ -56,17 +56,13 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
   }
 
   AppleHealthKit.getSleepSamples(
-      options,
-      (callbackError, result) => {
-        /* Samples are now collected from HealthKit */
-        console.log(result[0])
-        for (let i = 0; i < result.length; i++) {
-          newReference.child("Health Info/Sleep Samples").push()
-            .update({
-              [result[i]["startDate"].substring(0, 10)] : result[i]
-            })
-        }
-      },
+    options,
+    (callbackError, result) => {
+      /* Samples are now collected from HealthKit */
+      console.log(result[0])
+        newReference.child("Health Info/Sleep Samples")
+          .set(result)
+    },
   )
   AppleHealthKit.getBiologicalSex(
       options,
@@ -96,12 +92,10 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
       options,
       (callBackError, result) => {
         console.log(result[0])
-        for (let i = 0; i < 90; i++) {
-          newReference.child("Health Info/Step Counts").push()
-            .update({
-              [result[i]["startDate"].substring(0, 10)] : result[i]
-            })
-        }
+        newReference.child("Health Info/Step Counts")
+          .set(
+            result.slice(0, 90)
+          )
       }
     )
   AppleHealthKit.getLatestWeight(
@@ -133,12 +127,10 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
     options,
     (callbackError, result) => {
       console.log(result[0])
-      for (let i = 0; i < 90; i++) {
-        newReference.child("Health Info/Active Energy Burned").push()
-          .update({
-            [result[i]["startDate"].substring(0, 10)] : result[i]
-          })
-      }
+      newReference.child("Health Info/Active Energy Burned")
+        .set(
+          result
+        )
     }
   )
 
@@ -147,12 +139,10 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
       (callbackError, result) => {
         console.log(result[0])
 
-        for (let i = 0; i < result.length; i++) {
-          newReference.child("Health Info/Energy Consumed Samples").push()
-            .update({
-              [result[i]["startDate"].substring(0, 10)] : result[i]
-            })
-        }
+        newReference.child("Health Info/Energy Consumed Samples")
+          .set(
+            result
+          )
       }
     )
     AppleHealthKit.getProteinSamples(
@@ -160,12 +150,10 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
       (callbackError, result) => {
         console.log(result[0])
 
-        for (let i = 0; i < result.length; i++) {
-          newReference.child("Health Info/Protein Samples").push()
-            .update({
-              [result[i]["startDate"].substring(0, 10)] : result[i]
-            })
-        }
+        newReference.child("Health Info/Protein Samples")
+          .set(
+            result
+          )
       }
     )
     // AppleHealthKit.getClinicalRecords(
