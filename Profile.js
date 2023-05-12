@@ -1,19 +1,20 @@
 import {useState} from "react";
 import {Alert, StyleSheet, Modal, Text, View, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
+import database from "@react-native-firebase/database";
 
 function Profile (props) {
   const [modalVisible, setModalVisible] = useState(false);
   // Define some example data for the ScrollView
   const [profileElems, setProfileElems] = useState([
-    { id: 'Name:', text: '' },
-    { id: 'Age:', text: props.age.toString() },
-    { id: 'Date of Birth:', text: props.dob.toString()},
-    { id: 'Gender:', text: props.bio_sex.toString()},
-    { id: 'Height:', text: props.height.toString() },
-    { id: 'Home Address:', text: ''},
-    { id: 'Work Address:', text: ''},
-    { id: 'Favorite Place 1:', text: ''},
-    { id: 'Favorite Place 2:', text: ''},
+    { id: 'Name', text: '' },
+    { id: 'Age', text: props.age.toString() },
+    { id: 'Date of Birth', text: props.dob.toString()},
+    { id: 'Gender', text: props.bio_sex.toString()},
+    { id: 'Height', text: props.height.toString() },
+    { id: 'Home Address', text: ''},
+    { id: 'Work Address', text: ''},
+    { id: 'Favorite Place 1', text: ''},
+    { id: 'Favorite Place 2', text: ''},
   ]);
 
   // Define a function to update a data item by ID
@@ -21,9 +22,25 @@ function Profile (props) {
     setProfileElems(previousData => {
       const newData = [...previousData];
       const index = newData.findIndex(item => item.id === id);
-      newData[index] = { ...newData[index], text: newText };
+      newData[index] = { ...newData[index], text: newText};
       return newData;
     });
+  }
+
+  function saveProfile(profileElems) {
+    // NOTE: Name is not technically unique, change in final product
+    const newReference = database().ref('user/' + profileElems[0].text);
+
+    console.log('newReference key: ', newReference.key);
+
+    // store contents of profile page user inputs to firebase
+    for (let i = 0; i < profileElems.length; i++){
+      newReference.child("profile")
+        .update({
+          [profileElems[i].id] : profileElems[i].text,
+        })
+        .then(() => console.log('Data updated.'));
+    }
   }
 
   return (
@@ -62,7 +79,10 @@ function Profile (props) {
             <View style={styles.save_or_cancel}>
               <Pressable
                 // add function to call when pressed to read all inputs and save to DB
-                // onPress={}
+                onPress={() => {
+                  saveProfile(profileElems)
+                  setModalVisible(!setModalVisible)
+                }}
                 style={({pressed}) => [
                   {
                     opacity : pressed ? 0.3 : 1

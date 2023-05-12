@@ -5,6 +5,7 @@ import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
+import database from "@react-native-firebase/database";
 
 import AppleHealthKit, {
   HealthValue,
@@ -36,6 +37,9 @@ let height = 0;
 let dob = "";
 let age = 0;
 let bio_sex = "";
+// likely change once authentication is figured out
+const newReference = database().ref('user/').push();
+
 AppleHealthKit.initHealthKit(permissions, (error) => {
   /* Called after we receive a response from the system */
 
@@ -56,6 +60,12 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
       (callbackError, result) => {
         /* Samples are now collected from HealthKit */
         console.log(result[0])
+        for (let i = 0; i < result.length; i++) {
+          newReference.child("Health Info/Sleep Samples").push()
+            .update({
+              [result[i]["startDate"].substring(0, 10)] : result[i]
+            })
+        }
       },
   )
   AppleHealthKit.getBiologicalSex(
@@ -63,6 +73,11 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
       (callBackError, result) => {
         console.log(result)
         bio_sex = result.value
+
+        newReference.child("Health Info")
+          .update({
+            bio_sex : bio_sex
+          })
       }
   )
   AppleHealthKit.getLatestHeight(
@@ -70,19 +85,35 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
       (callBackError, result) => {
         console.log(result)
         height = result.value
+
+        newReference.child("Health Info")
+          .update({
+            height : height
+          })
     }
   )
     AppleHealthKit.getDailyStepCountSamples(
-        options,
-        (callBackError, result) => {
-            console.log(result[0])
-        }
-    )
-  AppleHealthKit.getLatestWeight(
       options,
       (callBackError, result) => {
-        console.log(result)
+        console.log(result[0])
+        for (let i = 0; i < 90; i++) {
+          newReference.child("Health Info/Step Counts").push()
+            .update({
+              [result[i]["startDate"].substring(0, 10)] : result[i]
+            })
+        }
       }
+    )
+  AppleHealthKit.getLatestWeight(
+    options,
+    (callBackError, result) => {
+      console.log(result)
+
+      newReference.child("Health Info")
+        .update({
+          weight : result
+        })
+    }
   )
   AppleHealthKit.getDateOfBirth(
     options,
@@ -90,27 +121,52 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
         console.log(result)
       dob = result.value.substring(0, 10)
       age = result.age
+      newReference.child("Health Info")
+        .update({
+          dob : dob,
+          age : age
+        })
     }
   )
 
   AppleHealthKit.getActiveEnergyBurned(
-      options,
-      (callbackError, result) => {
-        console.log(result[0])
+    options,
+    (callbackError, result) => {
+      console.log(result[0])
+      for (let i = 0; i < 90; i++) {
+        newReference.child("Health Info/Active Energy Burned").push()
+          .update({
+            [result[i]["startDate"].substring(0, 10)] : result[i]
+          })
       }
+    }
   )
 
     AppleHealthKit.getEnergyConsumedSamples(
-        options,
-        (callbackError, result) => {
-          console.log(result[0])
+      options,
+      (callbackError, result) => {
+        console.log(result[0])
+
+        for (let i = 0; i < result.length; i++) {
+          newReference.child("Health Info/Energy Consumed Samples").push()
+            .update({
+              [result[i]["startDate"].substring(0, 10)] : result[i]
+            })
         }
+      }
     )
     AppleHealthKit.getProteinSamples(
-        options,
-        (callbackError, result) => {
-            console.log(result[0])
+      options,
+      (callbackError, result) => {
+        console.log(result[0])
+
+        for (let i = 0; i < result.length; i++) {
+          newReference.child("Health Info/Protein Samples").push()
+            .update({
+              [result[i]["startDate"].substring(0, 10)] : result[i]
+            })
         }
+      }
     )
     // AppleHealthKit.getClinicalRecords(
     //     options,
@@ -119,6 +175,7 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
     //     }
     // )
 })
+
 export default function App() {
 
   RNFirebase()

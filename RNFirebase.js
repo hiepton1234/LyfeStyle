@@ -3,28 +3,18 @@ import database from '@react-native-firebase/database';
 
 function RNFirebase() {
   // Initialize Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyDhpG1bIG5aXbZhHHXIQTEnblRDzx2yZDU",
-    authDomain: "cs125-708d8.firebaseapp.com",
-    databaseURL: "https://cs125-708d8-default-rtdb.firebaseio.com",
-    projectId: "cs125-708d8",
-    storageBucket: "cs125-708d8.appspot.com",
-    messagingSenderId: "59074829052",
-    appId: "1:59074829052:web:5c7618bdfa29e5822d5579",
-    measurementId: "G-X80PP1VQJ6"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDhpG1bIG5aXbZhHHXIQTEnblRDzx2yZDU",
+      authDomain: "cs125-708d8.firebaseapp.com",
+      databaseURL: "https://cs125-708d8-default-rtdb.firebaseio.com",
+      projectId: "cs125-708d8",
+      storageBucket: "cs125-708d8.appspot.com",
+      messagingSenderId: "59074829052",
+      appId: "1:59074829052:web:5c7618bdfa29e5822d5579",
+      measurementId: "G-X80PP1VQJ6"
+    };
 
-  const app = initializeApp(firebaseConfig);
-
-  const newReference = database().ref('/user').push();
-
-  console.log('Auto generated key: ', newReference.key);
-
-  newReference
-    .set({
-      age: 32,
-    })
-    .then(() => console.log('Data updated.'));
+    const app = initializeApp(firebaseConfig);
 }
 
 export { RNFirebase };
