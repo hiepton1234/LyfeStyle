@@ -3,6 +3,7 @@ import {useState} from "react";
 import {StyleSheet, Text, View, Modal, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
+import {Personicle} from "./Personicle";
 import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
@@ -176,11 +177,16 @@ export default function App() {
         bio_sex={bio_sex}
         height={height}
       />
+
       <HealthGoals
         age={age}
         dob={dob}
         bio_sex={bio_sex}
-        height={height}/>
+        height={height}
+      />
+
+      <Personicle
+      />
     </View>
   );
 }
@@ -192,6 +198,7 @@ const styles = StyleSheet.create({
     lineHeight: 40,
     marginRight: 10,
   },
+
   centeredView: {
     flex: 1,
     justifyContent: 'center',
