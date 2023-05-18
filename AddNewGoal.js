@@ -15,7 +15,7 @@ function AddNewGoal(props) {
     if (enteredGoal.trim() === '') {
       return;
     }
-    setGoalList((currentGoals) => [...currentGoals, enteredGoal]);
+    props.setGoalList((currentGoals) => [...currentGoals, enteredGoal]);
     setEnteredGoal('');
   };
 
@@ -45,7 +45,6 @@ function AddNewGoal(props) {
               onPress={() => {
                 setModalVisible(!modalVisible)
                 addGoalHandler()
-                saveGoals()
               }
             }>
               <Text style={styles.textStyle}>Submit New Goal</Text>

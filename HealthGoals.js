@@ -50,7 +50,11 @@ function HealthGoals (props) {
         }}>
         <View style={styles.appContainer}>
           <Pressable
-            onPress={() => setModalVisible(!setModalVisible)}
+            onPress={() => {
+              setModalVisible(!setModalVisible)
+              saveGoals()
+            }
+          }
             style={({pressed}) => [
               {
                 opacity : pressed ? 0.3 : 1
@@ -61,7 +65,18 @@ function HealthGoals (props) {
           <Text style={styles.sectionHeading}>
             My Health Goals
           </Text>
-          <AddNewGoal goalfuncs = {[goalList, setGoalList]}/>
+          <AddNewGoal
+            goalList = {goalList}
+            setGoalList = {setGoalList}
+          />
+          <FlatList
+            data={goalList}
+            renderItem={(itemData) => (
+              <View style={styles.goalItem}>
+                <Text style={styles.modalText}>{itemData.item}</Text>
+              </View>
+            )}
+          />
         </View>
       </Modal>
       <Pressable
@@ -69,14 +84,6 @@ function HealthGoals (props) {
         onPress={() => setModalVisible(true)}>
         <Text style={styles.textStyle}>Health Goals</Text>
       </Pressable>
-      <FlatList
-        data={goalList}
-        renderItem={(itemData) => (
-          <View style={styles.goalItem}>
-            <Text style={styles.modalText}>{itemData.item}</Text>
-          </View>
-        )}
-      />
     </View>
   );
 }
@@ -141,6 +148,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 22,
+  },
+  modalText: {
+    fontFamily: 'Avenir-Book',
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginBottom: 5,
+    textAlign: 'center',
   },
   buttonOpen: {
     backgroundColor: '#F194FF',
