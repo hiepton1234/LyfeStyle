@@ -9,12 +9,21 @@ import {
   TextInput,
   Pressable,
   KeyboardAvoidingView,
-  Button
+  Button, FlatList
 } from 'react-native';
 import {AddNewGoal} from './AddNewGoal'
+import database from "@react-native-firebase/database";
 
 function HealthGoals (props) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [goalList, setGoalList] = useState([]);
+
+  const saveGoals = () => {
+    const newReference = database().ref('user/Goals');
+
+    console.log(goalList)
+    newReference.set(goalList).then(() => console.log("Saved Goals"))
+  }
   // Define some example data for the ScrollView
   const [profileElems, setProfileElems] = useState([
     { id: 'Name:', text: '' },
@@ -28,16 +37,6 @@ function HealthGoals (props) {
     { id: 'Favorite Place 2:', text: ''},
   ]);
 
-  // Define a function to update a data item by ID
-  function updateDataItem(id, newText) {
-    setProfileElems(previousData => {
-      const newData = [...previousData];
-      const index = newData.findIndex(item => item.id === id);
-      newData[index] = { ...newData[index], text: newText };
-      return newData;
-    });
-  }
-
   return (
     <View style={styles.centeredView}>
       {/*adjusts view to still show what is being typed if otherwise would be covered by keyboard*/}
@@ -50,10 +49,19 @@ function HealthGoals (props) {
           setModalVisible(!modalVisible);
         }}>
         <View style={styles.appContainer}>
+          <Pressable
+            onPress={() => setModalVisible(!setModalVisible)}
+            style={({pressed}) => [
+              {
+                opacity : pressed ? 0.3 : 1
+              }
+            ]}>
+            <Text style={styles.customButton}>❌</Text>
+          </Pressable>
           <Text style={styles.sectionHeading}>
             My Health Goals
           </Text>
-          <AddNewGoal/>
+          <AddNewGoal goalfuncs = {[goalList, setGoalList]}/>
         </View>
       </Modal>
       <Pressable
@@ -61,6 +69,14 @@ function HealthGoals (props) {
         onPress={() => setModalVisible(true)}>
         <Text style={styles.textStyle}>Health Goals</Text>
       </Pressable>
+      <FlatList
+        data={goalList}
+        renderItem={(itemData) => (
+          <View style={styles.goalItem}>
+            <Text style={styles.modalText}>{itemData.item}</Text>
+          </View>
+        )}
+      />
     </View>
   );
 }
@@ -82,8 +98,9 @@ const styles = StyleSheet.create({
   },
   customButton: {
     fontFamily: 'Avenir-Book',
-    fontSize: 50,
-    fontWeight: "600"
+    fontSize: 35,
+    fontWeight: "600",
+    textAlign: "right",
   },
   appContainer: {
     backgroundColor: '#edf7f5',
