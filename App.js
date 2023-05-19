@@ -3,6 +3,7 @@ import {useState} from "react";
 import {StyleSheet, Text, View, Modal, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
+import {FoodPage} from "./FoodPage";
 import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
@@ -181,6 +182,9 @@ export default function App() {
         dob={dob}
         bio_sex={bio_sex}
         height={height}/>
+      <FoodPage
+        // personalModel = {personalModel} replace when we have one
+      />
     </View>
   );
 }

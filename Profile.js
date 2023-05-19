@@ -110,7 +110,7 @@ function Profile (props) {
       <Pressable
         style={[styles.button, styles.buttonOpen]}
         onPress={() => setModalVisible(true)}>
-        <Text style={styles.textStyle}>Show Modal</Text>
+        <Text style={styles.textStyle}>Profile</Text>
       </Pressable>
     </View>
   );
