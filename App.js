@@ -9,25 +9,43 @@ import {
   StackedBarChart
 } from "react-native-chart-kit";
 
+
+export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
+  var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
+  var s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
+  var i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
+
+  return 100 - a_dev - s_dev - i_dev;
+
+}
+
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Calories Consumed</Text>
+      <Text style={styles.titleText}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
+      <Text style={styles.smallerTitleText}>This Week's Lifestyle Scores</Text>
       <StatusBar style="auto" />
 
-       <LineChart
+      <LineChart
         data={{
           labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+
           datasets: [
             {
-              data: [1000, 1500, 1250, 1000, 1175, 1215, 1300]
+              data: [score(100,100,100,100,100,100),
+                    score(50,100,75,100,90,100),
+                    score(60,100,85,100,120,100),
+                    score(100,100,75,100,90,100),
+                    score(90,100,105,100,110,100),
+                    score(50,100,75,100,100,100),
+                    score(150,100,90,100,90,100),]
             }
           ]
         }}
         width={650} // from react-native
         height={400}
         yAxisLabel=""
-        yAxisSuffix="cal"
+        yAxisSuffix=""
         yAxisInterval={1} // optional, defaults to 1
         chartConfig={{
           backgroundColor: "#e26a00",
@@ -63,7 +81,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   titleText : {
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: 'bold',
+  },
+  smallerTitleText : {
+    fontSize: 20,
+    textAlign: "left",
   },
 });
