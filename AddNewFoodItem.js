@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import {Alert, StyleSheet, Modal, Text, View, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import database from "@react-native-firebase/database";
+import {Picker} from "@react-native-picker/picker";
 
 class FoodItem {
   constructor(name, serving_size, num_servings, calories) {
@@ -12,6 +13,10 @@ class FoodItem {
 }
 function AddNewFoodItem() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedServings, setSelectedServings] = useState();
+  const possible_num_servings = ['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75', '2']
+  const [selectedLike, setSelectedLike] = useState();
+  const like_scale = ['1', '2', '3', '4', '5']
 
   return (
     <View>
@@ -25,23 +30,52 @@ function AddNewFoodItem() {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Add Food</Text>
             <View style={styles.item}>
               <TextInput
                 style={styles.input}
-                placeholder={"Type here"}
-                // onChangeText={goalInputHandler}
-                // value={enteredGoal}
+                placeholder={"Food name here"}
+                // onChangeText={foodInputHandler}
+                // value={enteredFood}
               />
+            </View>
+            <View style={styles.pickerSection}>
+              <View style={{flex: 1}}>
+                <Text style={styles.modalText}># of Servings</Text>
+              </View>
+              <View style={{flex: 1}}>
+                <Text style={styles.modalText}>Like Rating</Text>
+              </View>
+            </View>
+            <View style={styles.pickerSection}>
+              <Picker
+                style={{ flex: 1 }}
+                selectedValue={selectedServings}
+                onValueChange={(itemValue, itemIndex) =>
+                  setSelectedServings(itemValue)
+                }>
+                {possible_num_servings.map((item, index) => (
+                  <Picker.Item label={item} value={item} />
+                ))}
+              </Picker>
+              <Picker
+                style={{ flex: 1 }}
+                selectedValue={selectedLike}
+                onValueChange={(itemValue, itemIndex) =>
+                  setSelectedLike(itemValue)
+                }>
+                {like_scale.map((item, index) => (
+                  <Picker.Item label={item} value={item} />
+                ))}
+              </Picker>
             </View>
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => {
                 setModalVisible(!modalVisible)
-                // addGoalHandler()
+                // addFoodHandler()
               }
               }>
-              <Text style={styles.textStyle}>Add Food</Text>
+                <Text style={styles.modalText}>Add Food Entry</Text>
             </Pressable>
           </View>
         </View>
@@ -92,14 +126,11 @@ const styles = StyleSheet.create({
     padding: 8,
     justifyContent: ''
   },
-  save_or_cancel: {
-    flexDirection: "row",
-    justifyContent: 'space-evenly',
-  },
   item: {
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
+    flexDirection: "row",
+  },
+  pickerSection: {
+    flexDirection: "row",
   },
   goalInput: {
     fontFamily: 'Avenir-Book',
@@ -112,6 +143,7 @@ const styles = StyleSheet.create({
   },
   centeredView: {
     flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -120,14 +152,35 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir-Book',
     fontWeight: 'bold',
     fontSize: 20,
-    marginBottom: 5,
     textAlign: 'center',
+  },
+  modalView: {
+    backgroundColor: 'white',
+    margin: 20,
+    flex: 1,
+    borderRadius: 20,
+    paddingTop: 35,
+    paddingBottom: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   buttonOpen: {
     backgroundColor: '#2196F3',
   },
   buttonClose: {
     backgroundColor: '#F194FF',
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    margin: 10,
   },
   textStyle: {
     color: 'white',
@@ -139,5 +192,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 20,
     lineHeight: 25,
-  }
+  },
+  input: {
+    fontFamily: 'Avenir-Book',
+    borderWidth: 1,
+    borderRadius: 5,
+    margin: 10,
+    padding: 10,
+    fontSize: 15,
+    flex: 1
+  },
 })

@@ -20,7 +20,8 @@
     "firebase": "^9.21.0",
     "react": "18.2.0",
     "react-native": "0.71.6",
-    "react-native-health": "^1.14.0"
+    "react-native-health": "^1.14.0",
+    "react-native-picker": "^4.3.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
