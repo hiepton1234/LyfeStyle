@@ -59,7 +59,7 @@ function HealthGoals (props) {
       <Pressable
         style={[styles.button, styles.buttonOpen]}
         onPress={() => setModalVisible(true)}>
-        <Text style={styles.textStyle}>Health Goals</Text>
+        <Text style={{ fontFamily: 'American Typewriter' }}>Health Goals</Text>
       </Pressable>
     </View>
   );
@@ -125,11 +125,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 22,
   },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
   buttonOpen: {
-    backgroundColor: '#F194FF',
+    backgroundColor: '#64D2FF',
   },
   buttonClose: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#64D2FF',
   },
   textStyle: {
     color: 'white',

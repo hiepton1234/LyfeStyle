@@ -56,6 +56,25 @@ function Personicle() {
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <Text style={styles.title}>Personicle</Text>
+
+                        <ScrollView contentContainerStyle={styles.scrollView}>
+                            <Text style={styles.subtitle}>Sleep</Text>
+                            <BarChart
+                                data={sleep_chart_data}
+                                width={screenWidth}
+                                height={250}
+                                yAxisSuffix=" Hrs"
+                                chartConfig={{
+                                    backgroundGradientFrom: '#f0f0f0',
+                                    backgroundGradientTo: '#e0e0e0',
+                                    decimalPlaces: 1,
+                                    barPercentage: 0.6,
+                                    color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                }}
+                                style={{ paddingBottom: 30 }}
+                            />
+                        </ScrollView>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
                             onPress={() => setModalVisible(!modalVisible)}>
@@ -65,7 +84,7 @@ function Personicle() {
                 </View>
             </Modal>
             <Pressable
-                style={[styles.button, styles.buttonClose]}
+                style={[styles.button, styles.buttonOpen]}
                 onPress={() => setModalVisible(!modalVisible)}>
                 <Text style={{ fontFamily: 'American Typewriter' }}>Show Personicle</Text>
             </Pressable>
@@ -121,8 +140,12 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
 
+    buttonOpen: {
+        backgroundColor: '#64D2FF',
+    },
+
     buttonClose: {
-        backgroundColor: '#87CEEB',
+        backgroundColor: '#64D2FF',
     },
 });
 
