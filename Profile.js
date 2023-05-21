@@ -1,21 +1,53 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Alert, StyleSheet, Modal, Text, View, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import database from "@react-native-firebase/database";
 
 function Profile (props) {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [info, setInfo] = useState("");
   // Define some example data for the ScrollView
   const [profileElems, setProfileElems] = useState([
-    { id: 'Name', text: '' },
+    { id: 'Name', text: ''},
     { id: 'Age', text: props.age.toString() },
     { id: 'Date of Birth', text: props.dob.toString()},
     { id: 'Gender', text: props.bio_sex.toString()},
-    { id: 'Height', text: props.height.toString() },
+    { id: 'Height', text: props.height.toString()},
     { id: 'Home Address', text: ''},
     { id: 'Work Address', text: ''},
     { id: 'Favorite Place 1', text: ''},
     { id: 'Favorite Place 2', text: ''},
   ]);
+
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  const loadProfileData = () => {
+    database()
+      .ref('user/' + props.user.uid + '/profile/')
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          setInfo(data);
+
+          // Update the profileElems array with the respective data from info
+          const updatedProfileElems = profileElems.map((elem) => {
+            if (elem.id in data) {
+              return { ...elem, text: data[elem.id].toString() };
+            }
+            return elem;
+          });
+
+          setProfileElems(updatedProfileElems);
+        }
+      })
+  };
+
+  console.log('Info outside the promise:', info);
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  console.log("ELEMS " + profileElems)
 
   // Define a function to update a data item by ID
   function updateDataItem(id, newText) {
@@ -29,7 +61,7 @@ function Profile (props) {
 
   function saveProfile(profileElems) {
     // NOTE: Name is not technically unique, change in final product
-    const newReference = database().ref('user/' + profileElems[0].text);
+    const newReference = database().ref('user/' + props.user.uid);
 
     console.log('newReference key: ', newReference.key);
 
@@ -109,7 +141,10 @@ function Profile (props) {
       </Modal>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => {
+          setModalVisible(true)
+          loadProfileData()
+        }}>
         <Text style={styles.textStyle}>Profile</Text>
       </Pressable>
     </View>
