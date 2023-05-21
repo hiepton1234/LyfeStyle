@@ -54,31 +54,105 @@ function Personicle() {
                 }}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
+                    <View style={styles.appContainer}>
                         <Text style={styles.title}>Personicle</Text>
 
                         <ScrollView contentContainerStyle={styles.scrollView}>
                             <Text style={styles.subtitle}>Sleep</Text>
-                            <BarChart
-                                data={sleep_chart_data}
-                                width={screenWidth}
-                                height={250}
-                                yAxisSuffix=" Hrs"
-                                chartConfig={{
-                                    backgroundGradientFrom: '#f0f0f0',
-                                    backgroundGradientTo: '#e0e0e0',
-                                    decimalPlaces: 1,
-                                    barPercentage: 0.6,
-                                    color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                style={{ paddingBottom: 30 }}
-                            />
+                            <ScrollView horizontal>
+                                <BarChart
+                                    data={sleep_chart_data}
+                                    width={screenWidth}
+                                    height={250}
+                                    yAxisSuffix=" Hrs"
+                                    chartConfig={{
+                                        backgroundGradientFrom: '#f0f0f0',
+                                        backgroundGradientTo: '#e0e0e0',
+                                        decimalPlaces: 1,
+                                        barPercentage: 0.6,
+                                        color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
+                                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                    }}
+                                    style={{ paddingBottom: 30 }}
+                                />
+                            </ScrollView>
+
+                            <Text style={styles.subtitle}>Caloric Intake</Text>
+                            <ScrollView horizontal>
+                                <LineChart
+                                    data={caloric_chart_data}
+                                    width={screenWidth}
+                                    height={250}
+                                    chartConfig={{
+                                        backgroundGradientFrom: '#f0f0f0',
+                                        backgroundGradientTo: '#e0e0e0',
+                                        decimalPlaces: 1,
+                                        barPercentage: 0.6,
+                                        color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+                                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                    }}
+                                    style={{ paddingBottom: 20}}
+                                />
+                            </ScrollView>
+
+                            <Text style={styles.subtitle}>Calories Burned</Text>
+                            <ScrollView horizontal>
+                                <LineChart
+                                    data={caloric_lost_chart_data}
+                                    width={screenWidth}
+                                    height={250}
+                                    chartConfig={{
+                                        backgroundGradientFrom: '#f0f0f0',
+                                        backgroundGradientTo: '#e0e0e0',
+                                        decimalPlaces: 1,
+                                        barPercentage: 0.6,
+                                        color: (opacity = 1) => `rgba(255, 0, 56, ${opacity})`,
+                                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                    }}
+                                    style={{ paddingBottom: 20 }}
+                                />
+                            </ScrollView>
+
+                            <Text style={styles.subtitle}>Workout Hours</Text>
+                            <ScrollView horizontal>
+                                <BarChart
+                                    data={workout_hours_chart_data}
+                                    width={screenWidth}
+                                    height={250}
+                                    chartConfig={{
+                                        backgroundGradientFrom: '#f0f0f0',
+                                        backgroundGradientTo: '#e0e0e0',
+                                        decimalPlaces: 1,
+                                        barPercentage: 0.6,
+                                        color: (opacity = 1) => `rgba(150, 60, 170, ${opacity})`,
+                                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                    }}
+                                    style={{ paddingBottom: 30 }}
+                                />
+                            </ScrollView>
+
+                            <Text style={styles.subtitle}>Daily Activities</Text>
+                            <ScrollView horizontal={true}>
+                                <ContributionGraph
+                                    values={commitsData}
+                                    endDate={new Date("2017-04-01")}
+                                    width={screenWidth + 280}
+                                    height={220}
+                                    showMonthLabels={true}
+                                    chartConfig={{
+                                        backgroundGradientFrom: "#f0f0f0",
+                                        backgroundGradientTo: "#e0e0e0",
+                                        color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
+                                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                    }}
+                                    style={{ paddingBottom: 50 }}
+                                />
+                            </ScrollView>
                         </ScrollView>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
                             onPress={() => setModalVisible(!modalVisible)}>
-                            <Text style={{ fontFamily: 'American Typewriter' }}>Back</Text>
+                            <Text style={styles.textStyle}>Back</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -86,7 +160,7 @@ function Personicle() {
             <Pressable
                 style={[styles.button, styles.buttonOpen]}
                 onPress={() => setModalVisible(!modalVisible)}>
-                <Text style={{ fontFamily: 'American Typewriter' }}>Show Personicle</Text>
+                <Text style={styles.textStyle}>Show Personicle</Text>
             </Pressable>
         </View>
     );
@@ -100,9 +174,15 @@ const styles = StyleSheet.create({
         marginTop: 22,
     },
 
+    appContainer: {
+        backgroundColor: '#ffff',
+        flex: 1,
+        paddingTop: 50,
+        padding: 25,
+    },
+
     title: {
         fontSize: 24,
-        paddingTop: 50,
         marginBottom: 10,
         fontWeight: 'bold',
         textAlign: 'center',
@@ -147,6 +227,11 @@ const styles = StyleSheet.create({
     buttonClose: {
         backgroundColor: '#64D2FF',
     },
+
+    textStyle: {
+        fontFamily: 'American Typewriter',
+        textAlign: 'center',
+    }
 });
 
 export {Personicle};
