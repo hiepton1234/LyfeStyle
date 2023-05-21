@@ -173,22 +173,22 @@ export default function App() {
     <View style={styles.centeredView}>
         <Text style={styles.textStyle}>Lyfestyle</Text>
 
-      <Profile
-        age={age}
-        dob={dob}
-        bio_sex={bio_sex}
-        height={height}
-      />
+        <Profile
+            age={age}
+            dob={dob}
+            bio_sex={bio_sex}
+            height={height}
+        />
 
-      <HealthGoals
-        age={age}
-        dob={dob}
-        bio_sex={bio_sex}
-        height={height}
-      />
+        <HealthGoals
+            age={age}
+            dob={dob}
+            bio_sex={bio_sex}
+            height={height}
+        />
 
-      <Personicle
-      />
+        <Personicle
+        />
     </View>
   );
 }
