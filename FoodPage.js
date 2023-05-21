@@ -1,29 +1,35 @@
 import {useState} from "react";
-import {Alert, StyleSheet, Modal, Text, View, SectionList, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
+import {Alert, StyleSheet, Modal, Text, View, Button, SectionList, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import database from "@react-native-firebase/database";
 import {AddNewFoodItem} from "./AddNewFoodItem";
 
 function FoodPage(props) {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const MEALS = [
+  const [mealList, setMealList] = useState([
     {
       meal: 'Breakfast',
-      data: ["eggs", AddNewFoodItem()],
+      data: []
     },
     {
       meal: 'Lunch',
-      data: ["sandwich", AddNewFoodItem()],
+      data: [],
     },
     {
       meal: 'Dinner',
-      data: ["chicken", AddNewFoodItem()],
+      data: [],
     },
     {
       meal: 'Snacks',
-      data: ["granola bar", AddNewFoodItem()],
+      data: [],
     },
-    ]
+    ])
+
+  const addNewFoodItem = (index, enteredText) => {
+    const newMealList = [...mealList];
+    newMealList[index].data.push(enteredText);
+    setMealList(newMealList);
+  };
 
   return (
     <View style={styles.centeredView}>
@@ -44,18 +50,34 @@ function FoodPage(props) {
           <Text style={styles.sectionHeading}>
             Food Tracking
           </Text>
-          <SectionList
-            sections={MEALS}
-            keyExtractor={(item, index) => item + index}
-            renderItem={({item}) => (
-              <View style={styles.item}>
-                <Text style={styles.title}>{item}</Text>
+          {/*<SectionList*/}
+          {/*  sections={meals}*/}
+          {/*  keyExtractor={(item, index) => item + index}*/}
+          {/*  renderItem={({item}) => (*/}
+          {/*    <View style={styles.item}>*/}
+          {/*      <Text style={styles.title}>{item}</Text>*/}
+          {/*    </View>*/}
+          {/*  )}*/}
+          {/*  renderSectionHeader={({section: {meal}}) => (*/}
+          {/*    <Text style={styles.mealSection}>{meal}</Text>*/}
+          {/*  )}*/}
+          {/*  renderSectionFooter={({section: {meal}}) => (*/}
+          {/*    <AddNewFoodItem data={meals[0].data}/>*/}
+          {/*    )}*/}
+          {/*/>*/}
+          <View>
+            {mealList.map((meal, index) => (
+              <View key={index}>
+                <Text style={styles.modalText}>{meal.meal}</Text>
+                <View>
+                  {meal.data.map((food, foodIndex) => (
+                    <Text style={styles.baseText} key={foodIndex}>{food}</Text>
+                  ))}
+                </View>
+                <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>
-            )}
-            renderSectionHeader={({section: {meal}}) => (
-              <Text style={styles.mealSection}>{meal}</Text>
-            )}
-          />
+            ))}
+          </View>
         </View>
       </Modal>
       <Pressable
@@ -135,7 +157,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 20,
     marginBottom: 5,
-    textAlign: 'center',
   },
   buttonOpen: {
     backgroundColor: '#2196F3',

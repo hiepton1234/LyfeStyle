@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {StyleSheet, Text, View, Modal, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
@@ -7,6 +7,35 @@ import {FoodPage} from "./FoodPage";
 import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
+
+import auth from '@react-native-firebase/auth'
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  webClientId: '',
+});
+
+function GoogleSignIn() {
+  return (
+    <Button
+      title="Google Sign-In"
+      onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
+    />
+  );
+}
+
+async function onGoogleButtonPress() {
+  // Check if your device supports Google Play
+  await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  // Get the users ID token
+  const { idToken } = await GoogleSignin.signIn();
+
+  // Create a Google credential with the token
+  const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+  // Sign-in the user with the credential
+  return auth().signInWithCredential(googleCredential);
+}
 
 import AppleHealthKit, {
   HealthValue,
@@ -165,12 +194,53 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
     // )
 })
 
-export default function App() {
+auth()
+  .createUserWithEmailAndPassword('jane.doe@example.com', 'SuperSecretPassword!')
+  .then(() => {
+    console.log('User account created & signed in!');
+  })
+  .catch(error => {
+    if (error.code === 'auth/email-already-in-use') {
+      console.log('That email address is already in use!');
+    }
 
+    if (error.code === 'auth/invalid-email') {
+      console.log('That email address is invalid!');
+    }
+
+    console.error(error);
+  });
+
+export default function App() {
   RNFirebase()
+  // Set an initializing state whilst Firebase connects
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState();
+
+  // Handle user state changes
+  function onAuthStateChanged(user) {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
+
+  if (initializing) return null;
+
+  if (!user) {
+    return (
+      <View style={styles.centeredView}>
+        <Text>Login</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.centeredView}>
+      <Text>Welcome {user.email}</Text>
       <Profile
         age={age}
         dob={dob}

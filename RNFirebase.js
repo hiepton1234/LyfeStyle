@@ -1,5 +1,6 @@
 import {initializeApp} from "firebase/app";
 import database from '@react-native-firebase/database';
+import auth from '@react-native-firebase/auth'
 
 function RNFirebase() {
   // Initialize Firebase

@@ -11,12 +11,26 @@ class FoodItem {
     this.calories = calories
   }
 }
-function AddNewFoodItem() {
+function AddNewFoodItem(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedServings, setSelectedServings] = useState();
   const possible_num_servings = ['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75', '2']
   const [selectedLike, setSelectedLike] = useState();
   const like_scale = ['1', '2', '3', '4', '5']
+  const [enteredFood, setEnteredFood] = useState('');
+
+  const foodInputHandler = (enteredText) => {
+    setEnteredFood(enteredText);
+  };
+
+  const addFoodHandler = () => {
+    if (enteredFood.trim() === '') {
+      return;
+    }
+    props.addNewFoodItem(props.index, enteredFood)
+
+    setEnteredFood('');
+  };
 
   return (
     <View>
@@ -34,8 +48,8 @@ function AddNewFoodItem() {
               <TextInput
                 style={styles.input}
                 placeholder={"Food name here"}
-                // onChangeText={foodInputHandler}
-                // value={enteredFood}
+                onChangeText={foodInputHandler}
+                value={enteredFood}
               />
             </View>
             <View style={styles.pickerSection}>
@@ -72,7 +86,7 @@ function AddNewFoodItem() {
               style={[styles.button, styles.buttonClose]}
               onPress={() => {
                 setModalVisible(!modalVisible)
-                // addFoodHandler()
+                addFoodHandler()
               }
               }>
                 <Text style={styles.modalText}>Add Food Entry</Text>
