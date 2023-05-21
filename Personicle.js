@@ -4,7 +4,7 @@ import {StyleSheet, Text, View, ScrollView, Dimensions, Alert, Pressable, Modal}
 
 const screenWidth = Dimensions.get('window').width;
 
-function Personicle() {
+function Personicle(props) {
     const [modalVisible, setModalVisible] = useState(false);
 
     const sleep_chart_data = useMemo(() => ({

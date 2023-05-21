@@ -89,16 +89,16 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
           })
     }
   )
-    AppleHealthKit.getDailyStepCountSamples(
+  AppleHealthKit.getDailyStepCountSamples(
       options,
       (callBackError, result) => {
-        console.log(result[0])
-        newReference.child("Health Info/Step Counts")
-          .set(
-            result.slice(0, 90)
-          )
+          console.log(result[0])
+          newReference.child("Health Info/Step Counts")
+              .set(
+                  result.slice(0, 90)
+              )
       }
-    )
+  )
   AppleHealthKit.getLatestWeight(
     options,
     (callBackError, result) => {
@@ -171,6 +171,8 @@ export default function App() {
 
   return (
     <View style={styles.centeredView}>
+        <Text style={styles.textStyle}>Lyfestyle</Text>
+
       <Profile
         age={age}
         dob={dob}
@@ -192,17 +194,25 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  baseText: {
-    fontFamily: 'Avenir-Book',
-    fontSize: 20,
-    lineHeight: 40,
-    marginRight: 10,
-  },
-
   centeredView: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 22,
+  },
+
+  textStyle: {
+      fontFamily: 'American Typewriter',
+      paddingTop: 50,
+      fontSize: 35,
+      fontWeight: 'bold',
+      textAlign: 'center',
+  },
+
+  baseText: {
+      fontFamily: 'Avenir-Book',
+      fontSize: 20,
+      lineHeight: 40,
+      marginRight: 10,
   },
 });
