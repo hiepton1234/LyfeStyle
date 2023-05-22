@@ -243,6 +243,7 @@ export default function App() {
         height={height}
       />
       <HealthGoals
+        user = {user}
         age={age}
         dob={dob}
         bio_sex={bio_sex}

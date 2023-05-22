@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
   Alert,
   StyleSheet,
@@ -17,25 +17,38 @@ import database from "@react-native-firebase/database";
 function HealthGoals (props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [goalList, setGoalList] = useState([]);
+  const [info, setInfo] = useState("");
+
+  useEffect(() => {
+    loadHealthGoals();
+  }, []);
+
+  const loadHealthGoals = () => {
+    database()
+      .ref('user/' + props.user.uid + '/goals/')
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          let updatedGoalList = []
+
+          // Update the GoalList array with the respective data from info
+          snapshot.forEach((childSnapshot) => {
+            // const goalKey = childSnapshot.key;
+            const goalValue = childSnapshot.val();
+            updatedGoalList.push(goalValue)
+          });
+
+          setGoalList(updatedGoalList);
+        }
+      })
+  };
 
   const saveGoals = () => {
-    const newReference = database().ref('user/Goals');
+    const newReference = database().ref('user/' + props.user.uid + '/goals');
 
     console.log(goalList)
     newReference.set(goalList).then(() => console.log("Saved Goals"))
   }
-  // Define some example data for the ScrollView
-  const [profileElems, setProfileElems] = useState([
-    { id: 'Name:', text: '' },
-    { id: 'Age:', text: props.age.toString() },
-    { id: 'Date of Birth:', text: props.dob.toString()},
-    { id: 'Gender:', text: props.bio_sex.toString()},
-    { id: 'Height:', text: props.height.toString() },
-    { id: 'Home Address:', text: ''},
-    { id: 'Work Address:', text: ''},
-    { id: 'Favorite Place 1:', text: ''},
-    { id: 'Favorite Place 2:', text: ''},
-  ]);
 
   return (
     <View style={styles.centeredView}>
@@ -81,7 +94,10 @@ function HealthGoals (props) {
       </Modal>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => {
+          setModalVisible(true)
+          loadHealthGoals()
+        }}>
         <Text style={styles.textStyle}>Health Goals</Text>
       </Pressable>
     </View>

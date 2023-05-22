@@ -43,11 +43,7 @@ function Profile (props) {
       })
   };
 
-  console.log('Info outside the promise:', info);
-
   const [modalVisible, setModalVisible] = useState(false);
-
-  console.log("ELEMS " + profileElems)
 
   // Define a function to update a data item by ID
   function updateDataItem(id, newText) {
