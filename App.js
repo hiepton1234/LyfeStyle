@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
 import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
 import {StyleSheet, Text, View, ScrollView, Dimensions, Modal, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
@@ -220,7 +221,7 @@ export default function App() {
             <ScrollView contentContainerStyle={styles.scrollView}>
                 <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
                 <Text style={styles.subtitle}>This Week's Lifestyle Scores</Text>
-                {/*<StatusBar style="auto" />*/}
+                <StatusBar style="auto" />
 
                 <LineChart
                     data={{
