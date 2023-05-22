@@ -158,15 +158,19 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 5,
   },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
   buttonOpen: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#64D2FF',
   },
   buttonClose: {
-    backgroundColor: '#F194FF',
+    backgroundColor: '#64D2FF',
   },
   textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
+    fontFamily: 'American Typewriter',
     textAlign: 'center',
   },
   mealSection: {
