@@ -288,77 +288,69 @@ export default function App() {
 
                     {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
                         <Text style={styles.subtitle}>Sleep</Text>
-                        <ScrollView horizontal>
-                            <BarChart
-                                data={sleep_chart_data}
-                                width={screenWidth}
-                                height={250}
-                                yAxisSuffix=" Hrs"
-                                chartConfig={{
-                                    backgroundGradientFrom: '#f0f0f0',
-                                    backgroundGradientTo: '#e0e0e0',
-                                    decimalPlaces: 1,
-                                    barPercentage: 0.6,
-                                    color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                style={{ paddingBottom: 30 }}
-                            />
-                        </ScrollView>
+                        <BarChart
+                            data={sleep_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            yAxisSuffix=" Hrs"
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 30 }}
+                        />
 
                         <Text style={styles.subtitle}>Caloric Intake</Text>
-                        <ScrollView horizontal>
-                            <LineChart
-                                data={caloric_chart_data}
-                                width={screenWidth}
-                                height={250}
-                                chartConfig={{
-                                    backgroundGradientFrom: '#f0f0f0',
-                                    backgroundGradientTo: '#e0e0e0',
-                                    decimalPlaces: 1,
-                                    barPercentage: 0.6,
-                                    color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                style={{ paddingBottom: 20}}
-                            />
-                        </ScrollView>
+                        <LineChart
+                            data={caloric_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 20}}
+                        />
 
                         <Text style={styles.subtitle}>Calories Burned</Text>
-                        <ScrollView horizontal>
-                            <LineChart
-                                data={caloric_lost_chart_data}
-                                width={screenWidth}
-                                height={250}
-                                chartConfig={{
-                                    backgroundGradientFrom: '#f0f0f0',
-                                    backgroundGradientTo: '#e0e0e0',
-                                    decimalPlaces: 1,
-                                    barPercentage: 0.6,
-                                    color: (opacity = 1) => `rgba(255, 0, 56, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                style={{ paddingBottom: 20 }}
-                            />
-                        </ScrollView>
+                        <LineChart
+                            data={caloric_lost_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(255, 0, 56, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 20 }}
+                        />
 
                         <Text style={styles.subtitle}>Workout Hours</Text>
-                        <ScrollView horizontal>
-                            <BarChart
-                                data={workout_hours_chart_data}
-                                width={screenWidth}
-                                height={250}
-                                chartConfig={{
-                                    backgroundGradientFrom: '#f0f0f0',
-                                    backgroundGradientTo: '#e0e0e0',
-                                    decimalPlaces: 1,
-                                    barPercentage: 0.6,
-                                    color: (opacity = 1) => `rgba(150, 60, 170, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                style={{ paddingBottom: 40 }}
-                            />
-                        </ScrollView>
+                        <BarChart
+                            data={workout_hours_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(150, 60, 170, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 40 }}
+                        />
 
                         <Text style={styles.subtitle}>Daily Activities</Text>
                         <ScrollView horizontal={true}>
