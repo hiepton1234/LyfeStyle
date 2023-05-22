@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
-import {useState, useEffect} from "react";
+import {useState, useMemo, useEffect} from "react";
 import {StyleSheet, Text, View, Modal, Button, Dimensions, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
@@ -10,6 +10,7 @@ import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 
 const screenWidth = Dimensions.get('window').width;
+
 import auth from '@react-native-firebase/auth'
 import {
   GoogleSignin,
@@ -61,8 +62,58 @@ let dob = "";
 let age = 0;
 let bio_sex = "";
 
+
+
+
+export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
+    var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
+    var s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
+    var i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
+
+    return 100 - a_dev - s_dev - i_dev;
+}
+
+// auth()
+//   .signOut()
+//   .then(() => console.log('User signed out!'));
+
 export default function App() {
-  RNFirebase()
+    const sleep_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
+    }), []);
+
+    const caloric_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
+    }), []);
+
+    const caloric_lost_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
+    }), []);
+
+    const workout_hours_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [2.45, 5.34, 6.87, 0.72, 3.12, 1.89, 6.57] }],
+    }), []);
+
+    const commitsData = [
+        { date: "2017-01-02", count: 1 },
+        { date: "2017-01-03", count: 2 },
+        { date: "2017-01-04", count: 3 },
+        { date: "2017-01-05", count: 4 },
+        { date: "2017-01-06", count: 5 },
+        { date: "2017-01-30", count: 2 },
+        { date: "2017-01-31", count: 3 },
+        { date: "2017-03-01", count: 2 },
+        { date: "2017-04-02", count: 4 },
+        { date: "2017-03-05", count: 2 },
+        { date: "2017-02-30", count: 4 }
+    ];
+
+    RNFirebase()
+
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -111,174 +162,129 @@ export default function App() {
   const newReference = database().ref('user/' + user.uid)
 
   AppleHealthKit.initHealthKit(permissions, (error) => {
-    /* Called after we receive a response from the system */
+      /* Called after we receive a response from the system */
 
-    if (error) {
-      console.log('[ERROR] Cannot grant permissions!')
-    }
-
-    /* Can now read or write to HealthKit */
-
-    const options = {
-      startDate: new Date(2020, 1, 1).toISOString(),
-      endDate: new Date().toISOString(), // optional; default now
-      type: 'AllergyRecord',
-    }
-
-    AppleHealthKit.getSleepSamples(
-      options,
-      (callbackError, result) => {
-        /* Samples are now collected from HealthKit */
-        console.log(result[0])
-        newReference.child("Health Info/Sleep Samples")
-          .set(result)
-      },
-    )
-    AppleHealthKit.getBiologicalSex(
-      options,
-      (callBackError, result) => {
-        console.log(result)
-        bio_sex = result.value
-
-        newReference.child("Health Info")
-          .update({
-            bio_sex: bio_sex
-          })
+      if (error) {
+        console.log('[ERROR] Cannot grant permissions!')
       }
-    )
-    AppleHealthKit.getLatestHeight(
-      options,
-      (callBackError, result) => {
-        console.log(result)
-        height = result.value
 
-        newReference.child("Health Info")
-          .update({
-            height: height
-          })
+      /* Can now read or write to HealthKit */
+
+      const options = {
+        startDate: new Date(2020, 1, 1).toISOString(),
+        endDate: new Date().toISOString(), // optional; default now
+        type: 'AllergyRecord',
       }
-    )
-    AppleHealthKit.getDailyStepCountSamples(
-      options,
-      (callBackError, result) => {
+
+      AppleHealthKit.getSleepSamples(
+        options,
+        (callbackError, result) => {
+          /* Samples are now collected from HealthKit */
+          console.log(result[0])
+          newReference.child("Health Info/Sleep Samples")
+            .set(result)
+        },
+      )
+      AppleHealthKit.getBiologicalSex(
+        options,
+        (callBackError, result) => {
+          console.log(result)
+          bio_sex = result.value
+
+          newReference.child("Health Info")
+            .update({
+              bio_sex: bio_sex
+            })
+        }
+      )
+      AppleHealthKit.getLatestHeight(
+        options,
+        (callBackError, result) => {
+          console.log(result)
+          height = result.value
+
+          newReference.child("Health Info")
+            .update({
+              height: height
+            })
+        }
+      )
+      AppleHealthKit.getDailyStepCountSamples(
+        options,
+        (callBackError, result) => {
           console.log(result[0])
           newReference.child("Health Info/Step Counts")
-              .set(
-                  result.slice(0, 90)
-              )
-      }
-    )
-    AppleHealthKit.getLatestWeight(
-      options,
-      (callBackError, result) => {
-        console.log(result)
+            .set(
+              result.slice(0, 90)
+            )
+        }
+      )
+      AppleHealthKit.getLatestWeight(
+        options,
+        (callBackError, result) => {
+          console.log(result)
 
-        newReference.child("Health Info")
-          .update({
-            weight: result
-          })
-      }
-    )
-    AppleHealthKit.getDateOfBirth(
-      options,
-      (callbackError, result) => {
-        console.log(result)
-        dob = result.value.substring(0, 10)
-        age = result.age
-        newReference.child("Health Info")
-          .update({
-            dob: dob,
-            age: age
-          })
-      }
-    )
+          newReference.child("Health Info")
+            .update({
+              weight: result
+            })
+        }
+      )
+      AppleHealthKit.getDateOfBirth(
+        options,
+        (callbackError, result) => {
+          console.log(result)
+          dob = result.value.substring(0, 10)
+          age = result.age
+          newReference.child("Health Info")
+            .update({
+              dob: dob,
+              age: age
+            })
+        }
+      )
 
-    AppleHealthKit.getActiveEnergyBurned(
-      options,
-      (callbackError, result) => {
-        console.log(result[0])
-        newReference.child("Health Info/Active Energy Burned")
-          .set(
-            result
-          )
-      }
-    )
+      AppleHealthKit.getActiveEnergyBurned(
+        options,
+        (callbackError, result) => {
+          console.log(result[0])
+          newReference.child("Health Info/Active Energy Burned")
+            .set(
+              result
+            )
+        }
+      )
 
-    AppleHealthKit.getEnergyConsumedSamples(
-      options,
-      (callbackError, result) => {
-        console.log(result[0])
+      AppleHealthKit.getEnergyConsumedSamples(
+        options,
+        (callbackError, result) => {
+          console.log(result[0])
 
-        newReference.child("Health Info/Energy Consumed Samples")
-          .set(
-            result
-          )
-      }
-    )
-    AppleHealthKit.getProteinSamples(
-      options,
-      (callbackError, result) => {
-        console.log(result[0])
+          newReference.child("Health Info/Energy Consumed Samples")
+            .set(
+              result
+            )
+        }
+      )
+      AppleHealthKit.getProteinSamples(
+        options,
+        (callbackError, result) => {
+          console.log(result[0])
 
-        newReference.child("Health Info/Protein Samples")
-          .set(
-            result
-          )
-      }
-    )
-    // AppleHealthKit.getClinicalRecords(
-    //     options,
-    //     (callbackError, result) => {
-    //         console.log(result[0])
-    //     }
-    // )
-
-
-
-export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
-    var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
-    var s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
-    var i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
-
-    return 100 - a_dev - s_dev - i_dev;
-}
-
-export default function App() {
-    const sleep_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
-    }), []);
-
-    const caloric_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
-    }), []);
-
-    const caloric_lost_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
-    }), []);
-
-    const workout_hours_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [2.45, 5.34, 6.87, 0.72, 3.12, 1.89, 6.57] }],
-    }), []);
-
-    const commitsData = [
-        { date: "2017-01-02", count: 1 },
-        { date: "2017-01-03", count: 2 },
-        { date: "2017-01-04", count: 3 },
-        { date: "2017-01-05", count: 4 },
-        { date: "2017-01-06", count: 5 },
-        { date: "2017-01-30", count: 2 },
-        { date: "2017-01-31", count: 3 },
-        { date: "2017-03-01", count: 2 },
-        { date: "2017-04-02", count: 4 },
-        { date: "2017-03-05", count: 2 },
-        { date: "2017-02-30", count: 4 }
-    ];
-
-    RNFirebase()
+          newReference.child("Health Info/Protein Samples")
+            .set(
+              result
+            )
+        }
+      )
+    }
+  )
+  // AppleHealthKit.getClinicalRecords(
+  //     options,
+  //     (callbackError, result) => {
+  //         console.log(result[0])
+  //     }
+  // )
 
     return (
         <View style={styles.centeredView}>
