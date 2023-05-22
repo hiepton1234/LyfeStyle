@@ -1,13 +1,28 @@
 import React, {useState} from 'react';
-import {Alert, Modal, StyleSheet, Text, Pressable, View} from 'react-native';
+import {Alert, Modal, StyleSheet, Text, FlatList, Pressable, View, TextInput} from 'react-native';
+import database from "@react-native-firebase/database";
 
-function AddNewGoal() {
+function AddNewGoal(props) {
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [enteredGoal, setEnteredGoal] = useState('');
+
+  const goalInputHandler = (enteredText) => {
+    setEnteredGoal(enteredText);
+  };
+
+  const addGoalHandler = () => {
+    if (enteredGoal.trim() === '') {
+      return;
+    }
+    props.setGoalList((currentGoals) => [...currentGoals, enteredGoal]);
+    setEnteredGoal('');
+  };
 
   return(
     <View>
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
@@ -16,11 +31,23 @@ function AddNewGoal() {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Hello World!</Text>
+            <Text style={styles.modalText}>Enter New Goal</Text>
+            <View style={styles.item}>
+              <TextInput
+                style={styles.input}
+                placeholder={"Type here"}
+                onChangeText={goalInputHandler}
+                value={enteredGoal}
+              />
+            </View>
             <Pressable
               style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>Hide Modal</Text>
+              onPress={() => {
+                setModalVisible(!modalVisible)
+                addGoalHandler()
+              }
+            }>
+              <Text style={styles.textStyle}>Submit New Goal</Text>
             </Pressable>
           </View>
         </View>
@@ -41,13 +68,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     margin: 20,
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 35,
+    paddingTop: 35,
+    paddingBottom: 35,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -58,10 +86,20 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  input: {
+    fontFamily: 'Avenir-Book',
+    borderWidth: 1,
+    borderRadius: 5,
+    margin: 10,
+    padding: 10,
+    fontSize: 15,
+    flex: 1
+  },
   button: {
     borderRadius: 20,
     padding: 10,
     elevation: 2,
+    margin: 10,
   },
   buttonOpen: {
     margin: 10,
@@ -76,7 +114,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalText: {
-    marginBottom: 15,
+    fontFamily: 'Avenir-Book',
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginBottom: 5,
     textAlign: 'center',
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  goalItem: {
+    marginVertical: 10,
   },
 });

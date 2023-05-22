@@ -29,11 +29,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "d7f86632-722f-4187-b3fe-5650cfa98ea6"
-      }
-    },
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
@@ -42,7 +37,9 @@
     },
     "plugins": [
       "react-native-health",
+      "@react-native-google-signin/google-signin",
       "@react-native-firebase/app",
+      "@react-native-firebase/auth",
       [
         "expo-build-properties",
         {
@@ -51,6 +48,12 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7b20efa2-8b6e-47ce-a24e-ff1dfa68a69a"
+      }
+    },
+    "owner": "hiepton12345"
   }
 }

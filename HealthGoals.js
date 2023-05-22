@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
   Alert,
   StyleSheet,
@@ -9,33 +9,45 @@ import {
   TextInput,
   Pressable,
   KeyboardAvoidingView,
-  Button
+  Button, FlatList
 } from 'react-native';
 import {AddNewGoal} from './AddNewGoal'
+import database from "@react-native-firebase/database";
 
 function HealthGoals (props) {
   const [modalVisible, setModalVisible] = useState(false);
-  // Define some example data for the ScrollView
-  const [profileElems, setProfileElems] = useState([
-    { id: 'Name:', text: '' },
-    { id: 'Age:', text: props.age.toString() },
-    { id: 'Date of Birth:', text: props.dob.toString()},
-    { id: 'Gender:', text: props.bio_sex.toString()},
-    { id: 'Height:', text: props.height.toString() },
-    { id: 'Home Address:', text: ''},
-    { id: 'Work Address:', text: ''},
-    { id: 'Favorite Place 1:', text: ''},
-    { id: 'Favorite Place 2:', text: ''},
-  ]);
+  const [goalList, setGoalList] = useState([]);
+  const [info, setInfo] = useState("");
 
-  // Define a function to update a data item by ID
-  function updateDataItem(id, newText) {
-    setProfileElems(previousData => {
-      const newData = [...previousData];
-      const index = newData.findIndex(item => item.id === id);
-      newData[index] = { ...newData[index], text: newText };
-      return newData;
-    });
+  useEffect(() => {
+    loadHealthGoals();
+  }, []);
+
+  const loadHealthGoals = () => {
+    database()
+      .ref('user/' + props.user.uid + '/goals/')
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          let updatedGoalList = []
+
+          // Update the GoalList array with the respective data from info
+          snapshot.forEach((childSnapshot) => {
+            // const goalKey = childSnapshot.key;
+            const goalValue = childSnapshot.val();
+            updatedGoalList.push(goalValue)
+          });
+
+          setGoalList(updatedGoalList);
+        }
+      })
+  };
+
+  const saveGoals = () => {
+    const newReference = database().ref('user/' + props.user.uid + '/goals');
+
+    console.log(goalList)
+    newReference.set(goalList).then(() => console.log("Saved Goals"))
   }
 
   return (
@@ -50,15 +62,42 @@ function HealthGoals (props) {
           setModalVisible(!modalVisible);
         }}>
         <View style={styles.appContainer}>
+          <Pressable
+            onPress={() => {
+              setModalVisible(!setModalVisible)
+              saveGoals()
+            }
+          }
+            style={({pressed}) => [
+              {
+                opacity : pressed ? 0.3 : 1
+              }
+            ]}>
+            <Text style={styles.customButton}>❌</Text>
+          </Pressable>
           <Text style={styles.sectionHeading}>
             My Health Goals
           </Text>
-          <AddNewGoal/>
+          <AddNewGoal
+            goalList = {goalList}
+            setGoalList = {setGoalList}
+          />
+          <FlatList
+            data={goalList}
+            renderItem={(itemData) => (
+              <View style={styles.goalItem}>
+                <Text style={styles.modalText}>{itemData.item}</Text>
+              </View>
+            )}
+          />
         </View>
       </Modal>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => {
+          setModalVisible(true)
+          loadHealthGoals()
+        }}>
         <Text style={styles.textStyle}>Health Goals</Text>
       </Pressable>
     </View>
@@ -82,8 +121,9 @@ const styles = StyleSheet.create({
   },
   customButton: {
     fontFamily: 'Avenir-Book',
-    fontSize: 50,
-    fontWeight: "600"
+    fontSize: 35,
+    fontWeight: "600",
+    textAlign: "right",
   },
   appContainer: {
     backgroundColor: '#ffff',
@@ -129,6 +169,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 2,
+  },
+  modalText: {
+    fontFamily: 'Avenir-Book',
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginBottom: 5,
+    textAlign: 'center',
   },
   buttonOpen: {
     backgroundColor: '#64D2FF',
