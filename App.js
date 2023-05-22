@@ -218,6 +218,55 @@ export default function App() {
             <Text style={styles.textStyle}>Lyfestyle</Text>
 
             <ScrollView contentContainerStyle={styles.scrollView}>
+                <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
+                <Text style={styles.subtitle}>This Week's Lifestyle Scores</Text>
+                {/*<StatusBar style="auto" />*/}
+
+                <LineChart
+                    data={{
+                        labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+
+                        datasets: [
+                            {
+                                data: [score(100,100,100,100,100,100),
+                                    score(50,100,75,100,90,100),
+                                    score(60,100,85,100,120,100),
+                                    score(100,100,75,100,90,100),
+                                    score(90,100,105,100,110,100),
+                                    score(50,100,75,100,100,100),
+                                    score(150,100,90,100,90,100),]
+                            }
+                        ]
+                    }}
+                    // width={650} // from react-native
+                    width={screenWidth} // from react-native
+                    height={400}
+                    yAxisLabel=""
+                    yAxisSuffix=""
+                    yAxisInterval={1} // optional, defaults to 1
+                    chartConfig={{
+                        backgroundColor: "#e26a00",
+                        backgroundGradientFrom: "#2A4858",
+                        backgroundGradientTo: "#2A4858",
+                        decimalPlaces: 0, // optional, defaults to 2dp
+                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        style: {
+                            borderRadius: 16
+                        },
+                        propsForDots: {
+                            r: "6",
+                            strokeWidth: "2",
+                            stroke: "#A6B3BA"
+                        }
+                    }}
+                    bezier
+                    style={{
+                        marginVertical: 8,
+                        borderRadius: 16
+                    }}
+                />
+
                 <Profile
                     age={age}
                     dob={dob}
@@ -343,7 +392,8 @@ const styles = StyleSheet.create({
 
     textStyle: {
         fontFamily: 'American Typewriter',
-        paddingTop: 50,
+        paddingTop: 20,
+        paddingBottom: 20,
         fontSize: 35,
         fontWeight: 'bold',
         textAlign: 'center',
