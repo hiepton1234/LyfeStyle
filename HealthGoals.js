@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   appContainer: {
-    backgroundColor: '#edf7f5',
+    backgroundColor: '#ffff',
     flex: 1,
     paddingTop: 50,
     padding: 25,
@@ -165,6 +165,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 22,
   },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
   modalText: {
     fontFamily: 'Avenir-Book',
     fontWeight: 'bold',
@@ -173,14 +178,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonOpen: {
-    backgroundColor: '#F194FF',
+    backgroundColor: '#64D2FF',
   },
   buttonClose: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#64D2FF',
   },
   textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
+    fontFamily: 'American Typewriter',
     textAlign: 'center',
   }
 });

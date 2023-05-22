@@ -141,7 +141,7 @@ function Profile (props) {
           setModalVisible(true)
           loadProfileData()
         }}>
-        <Text style={styles.textStyle}>Profile</Text>
+        <Text style={styles.textStyle}>Show Profile</Text>
       </Pressable>
     </View>
   );
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   appContainer: {
-    backgroundColor: '#edf7f5',
+    backgroundColor: '#ffff',
     flex: 1,
     paddingTop: 50,
     padding: 25,
@@ -207,15 +207,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 22,
   },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
   buttonOpen: {
-    backgroundColor: '#F194FF',
+    backgroundColor: '#64D2FF',
   },
   buttonClose: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#64D2FF',
   },
   textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
+    fontFamily: 'American Typewriter',
     textAlign: 'center',
   }
 });
