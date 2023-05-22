@@ -1,12 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
-import {useState} from "react";
-import {StyleSheet, Text, View, Modal, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
+import React, {useMemo, useState} from 'react';
+import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
+import {StyleSheet, Text, View, ScrollView, Dimensions, Modal, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
-import {Personicle} from "./Personicle";
 import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
+
+const screenWidth = Dimensions.get('window').width;
 
 import AppleHealthKit, {
   HealthValue,
@@ -165,54 +166,211 @@ AppleHealthKit.initHealthKit(permissions, (error) => {
     // )
 })
 
+
+
+export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
+    var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
+    var s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
+    var i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
+
+    return 100 - a_dev - s_dev - i_dev;
+}
+
 export default function App() {
+    const sleep_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
+    }), []);
 
-  RNFirebase()
+    const caloric_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
+    }), []);
 
-  return (
-    <View style={styles.centeredView}>
-        <Text style={styles.textStyle}>Lyfestyle</Text>
+    const caloric_lost_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
+    }), []);
 
-        <Profile
-            age={age}
-            dob={dob}
-            bio_sex={bio_sex}
-            height={height}
-        />
+    const workout_hours_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [2.45, 5.34, 6.87, 0.72, 3.12, 1.89, 6.57] }],
+    }), []);
 
-        <HealthGoals
-            age={age}
-            dob={dob}
-            bio_sex={bio_sex}
-            height={height}
-        />
+    const commitsData = [
+        { date: "2017-01-02", count: 1 },
+        { date: "2017-01-03", count: 2 },
+        { date: "2017-01-04", count: 3 },
+        { date: "2017-01-05", count: 4 },
+        { date: "2017-01-06", count: 5 },
+        { date: "2017-01-30", count: 2 },
+        { date: "2017-01-31", count: 3 },
+        { date: "2017-03-01", count: 2 },
+        { date: "2017-04-02", count: 4 },
+        { date: "2017-03-05", count: 2 },
+        { date: "2017-02-30", count: 4 }
+    ];
 
-        <Personicle
-        />
-    </View>
+    RNFirebase()
+
+    return (
+        <View style={styles.centeredView}>
+            <Text style={styles.textStyle}>Lyfestyle</Text>
+
+            <ScrollView contentContainerStyle={styles.scrollView}>
+                <Profile
+                    age={age}
+                    dob={dob}
+                    bio_sex={bio_sex}
+                    height={height}
+                />
+
+                <HealthGoals
+                    age={age}
+                    dob={dob}
+                    bio_sex={bio_sex}
+                    height={height}
+                />
+
+                {/*Personicle*/}
+                <View style={styles.centeredView}>
+                    <Text style={styles.title}>Personicle</Text>
+
+                    {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
+                        <Text style={styles.subtitle}>Sleep</Text>
+                        <ScrollView horizontal>
+                            <BarChart
+                                data={sleep_chart_data}
+                                width={screenWidth}
+                                height={250}
+                                yAxisSuffix=" Hrs"
+                                chartConfig={{
+                                    backgroundGradientFrom: '#f0f0f0',
+                                    backgroundGradientTo: '#e0e0e0',
+                                    decimalPlaces: 1,
+                                    barPercentage: 0.6,
+                                    color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                }}
+                                style={{ paddingBottom: 30 }}
+                            />
+                        </ScrollView>
+
+                        <Text style={styles.subtitle}>Caloric Intake</Text>
+                        <ScrollView horizontal>
+                            <LineChart
+                                data={caloric_chart_data}
+                                width={screenWidth}
+                                height={250}
+                                chartConfig={{
+                                    backgroundGradientFrom: '#f0f0f0',
+                                    backgroundGradientTo: '#e0e0e0',
+                                    decimalPlaces: 1,
+                                    barPercentage: 0.6,
+                                    color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                }}
+                                style={{ paddingBottom: 20}}
+                            />
+                        </ScrollView>
+
+                        <Text style={styles.subtitle}>Calories Burned</Text>
+                        <ScrollView horizontal>
+                            <LineChart
+                                data={caloric_lost_chart_data}
+                                width={screenWidth}
+                                height={250}
+                                chartConfig={{
+                                    backgroundGradientFrom: '#f0f0f0',
+                                    backgroundGradientTo: '#e0e0e0',
+                                    decimalPlaces: 1,
+                                    barPercentage: 0.6,
+                                    color: (opacity = 1) => `rgba(255, 0, 56, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                }}
+                                style={{ paddingBottom: 20 }}
+                            />
+                        </ScrollView>
+
+                        <Text style={styles.subtitle}>Workout Hours</Text>
+                        <ScrollView horizontal>
+                            <BarChart
+                                data={workout_hours_chart_data}
+                                width={screenWidth}
+                                height={250}
+                                chartConfig={{
+                                    backgroundGradientFrom: '#f0f0f0',
+                                    backgroundGradientTo: '#e0e0e0',
+                                    decimalPlaces: 1,
+                                    barPercentage: 0.6,
+                                    color: (opacity = 1) => `rgba(150, 60, 170, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                }}
+                                style={{ paddingBottom: 40 }}
+                            />
+                        </ScrollView>
+
+                        <Text style={styles.subtitle}>Daily Activities</Text>
+                        <ScrollView horizontal={true}>
+                            <ContributionGraph
+                                values={commitsData}
+                                endDate={new Date("2017-04-01")}
+                                width={screenWidth + 280}
+                                height={220}
+                                showMonthLabels={true}
+                                chartConfig={{
+                                    backgroundGradientFrom: "#f0f0f0",
+                                    backgroundGradientTo: "#e0e0e0",
+                                    color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                }}
+                                style={{ paddingBottom: 50 }}
+                            />
+                        </ScrollView>
+                </View>
+            </ScrollView>
+        </View>
   );
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
 
-  textStyle: {
-      fontFamily: 'American Typewriter',
-      paddingTop: 50,
-      fontSize: 35,
-      fontWeight: 'bold',
-      textAlign: 'center',
-  },
+    textStyle: {
+        fontFamily: 'American Typewriter',
+        paddingTop: 50,
+        fontSize: 35,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
 
-  baseText: {
-      fontFamily: 'Avenir-Book',
-      fontSize: 20,
-      lineHeight: 40,
-      marginRight: 10,
-  },
+    baseText: {
+        fontFamily: 'Avenir-Book',
+        fontSize: 20,
+        lineHeight: 40,
+        marginRight: 10,
+    },
+
+    title: {
+        fontSize: 24,
+        marginBottom: 10,
+        color: '#000000',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        fontFamily: 'American Typewriter',
+    },
+
+    subtitle: {
+        fontSize: 16,
+        marginTop: 10,
+        marginBottom: 10,
+        color: '#000000',
+        textAlign: 'center',
+        fontFamily: 'American Typewriter',
+    }
 });
