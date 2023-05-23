@@ -7,6 +7,7 @@ import {FoodPage} from "./FoodPage";
 import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
+// import { getDatabase, ref, onValue} from "firebase/database";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -78,7 +79,7 @@ export function score(activity, activity_goal, sleep, sleep_goal, intake, intake
 
 export default function App() {
     const lifescore_data = useMemo(() => ({
-        labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{
             data: [score(100, 100, 100, 100, 100, 100),
                 score(50, 100, 75, 100, 90, 100),
@@ -91,22 +92,22 @@ export default function App() {
     }), []);
 
     const sleep_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
     }), []);
 
     const caloric_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
     }), []);
 
     const caloric_lost_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
     }), []);
 
     const workout_hours_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: [2.45, 5.34, 6.87, 0.72, 3.12, 1.89, 6.57] }],
     }), []);
 
@@ -126,9 +127,9 @@ export default function App() {
 
     RNFirebase()
 
-  // Set an initializing state whilst Firebase connects
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
+    // Set an initializing state whilst Firebase connects
+    const [initializing, setInitializing] = useState(true);
+    const [user, setUser] = useState();
 
   async function onGoogleButtonPress() {
     // Check if your device supports Google Play
@@ -297,6 +298,42 @@ export default function App() {
   //         console.log(result[0])
   //     }
   // )
+
+    // const getData = () => {
+    //     const db = getDatabase();
+    //     const sleepRef = ref(db, 'user/2UQDWONj5defTieIkOJCLkKzlKp1/Health Info/Sleep Samples/0');
+    //     onValue(sleepRef, (snapshot) => {
+    //         // Step 1: Parse the timestamp into a Date object
+    //         const start = new Date(snapshot.val().startDate);
+    //         const end = new Date(snapshot.val().endDate);
+    //
+    //         // Step 2: Calculate hours
+    //         const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+    //         console.log("Hours: ", hours);
+    //     });
+    // }
+
+    const getData = () => {
+        //Array for sleep hours
+        let array = new Array(7).fill(0); // creates an array with length 7, filled with 0
+        console.log(array)
+
+        const ref = database().ref('user/');
+        ref.once("value")
+            .then(function(snapshot) {
+                console.log("Data: ", snapshot.val())
+            });
+
+        // ref.once('value').then((snapshot) => {
+        //     this.setState({ categories: snapshot.val() });
+        //     // console.log(snapshot.val());
+        // });
+
+
+    }
+
+    // getData();
+    getData();
 
     return (
       <View style={styles.centeredView}>
