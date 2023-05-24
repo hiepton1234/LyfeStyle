@@ -321,7 +321,11 @@ export default function App() {
         const ref = database().ref('user/');
         ref.once("value")
             .then(function(snapshot) {
-                console.log("Data: ", snapshot.val())
+                var a = snapshot.numChildren(); // 1 ("name")
+                // var b = snapshot.child("name").numChildren(); // 2 ("first", "last")
+                // var c = snapshot.child("name/first").numChildren(); // 0
+
+                console.log(a);
             });
 
         // ref.once('value').then((snapshot) => {
