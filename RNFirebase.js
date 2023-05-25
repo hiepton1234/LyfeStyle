@@ -15,7 +15,7 @@ function RNFirebase() {
       measurementId: "G-X80PP1VQJ6"
     };
 
-    const app = initializeApp(firebaseConfig);
+    initializeApp(firebaseConfig);
 }
 
 export { RNFirebase };
