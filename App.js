@@ -334,6 +334,7 @@ export default function App() {
             bio_sex={bio_sex}
             height={height}/>
           <FoodPage
+            user = {user}
             // personalModel = {personalModel} replace when we have one
           />
 

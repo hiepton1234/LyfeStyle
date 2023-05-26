@@ -26,10 +26,25 @@ function FoodPage(props) {
     ])
 
   const addNewFoodItem = (index, enteredText) => {
+    console.log(index + enteredText)
     const newMealList = [...mealList];
     newMealList[index].data.push(enteredText);
+    console.log("NEW" + newMealList)
     setMealList(newMealList);
   };
+
+  const foodReference = database().ref('user/' + props.user.uid);
+  console.log('foodReference key: ', foodReference.key);
+  const saveFoods = () => {
+    // store contents of profile page user inputs to firebase
+    for (let i = 0; i < mealList.length; i++){
+      foodReference.child("Food Entries/")
+        .update({
+          [mealList[i].meal] : mealList[i].data,
+        })
+        .then(() => console.log('Food updated.'));
+    }
+  }
 
   return (
     <View style={styles.centeredView}>
@@ -50,21 +65,6 @@ function FoodPage(props) {
           <Text style={styles.sectionHeading}>
             Food Tracking
           </Text>
-          {/*<SectionList*/}
-          {/*  sections={meals}*/}
-          {/*  keyExtractor={(item, index) => item + index}*/}
-          {/*  renderItem={({item}) => (*/}
-          {/*    <View style={styles.item}>*/}
-          {/*      <Text style={styles.title}>{item}</Text>*/}
-          {/*    </View>*/}
-          {/*  )}*/}
-          {/*  renderSectionHeader={({section: {meal}}) => (*/}
-          {/*    <Text style={styles.mealSection}>{meal}</Text>*/}
-          {/*  )}*/}
-          {/*  renderSectionFooter={({section: {meal}}) => (*/}
-          {/*    <AddNewFoodItem data={meals[0].data}/>*/}
-          {/*    )}*/}
-          {/*/>*/}
           <View>
             {mealList.map((meal, index) => (
               <View key={index}>
@@ -74,7 +74,7 @@ function FoodPage(props) {
                     <Text style={styles.baseText} key={foodIndex}>{food}</Text>
                   ))}
                 </View>
-                <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
+                <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem} saveFoods={saveFoods}/>
               </View>
             ))}
           </View>
