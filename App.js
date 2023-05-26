@@ -75,7 +75,7 @@ export function score(activity, activity_goal, sleep, sleep_goal, intake, intake
 
 // auth()
 //   .signOut()
-//   .then(() => console.log('User signed out!'));
+//   .then(() => // console.log('User signed out!'));
 
 export default function App() {
     const lifescore_data = useMemo(() => ({
@@ -91,9 +91,14 @@ export default function App() {
         }]
     }), []);
 
+    // const sleep_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
+    // }), []);
+
     const sleep_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
+        datasets: [{ data: getData() }],
     }), []);
 
     const caloric_chart_data = useMemo(() => ({
@@ -178,7 +183,7 @@ export default function App() {
     /* Called after we receive a response from the system */
 
     if (error) {
-      console.log('[ERROR] Cannot grant permissions!')
+      // console.log('[ERROR] Cannot grant permissions!')
     }
 
     /* Can now read or write to HealthKit */
@@ -193,7 +198,7 @@ export default function App() {
       options,
       (callbackError, result) => {
         /* Samples are now collected from HealthKit */
-        console.log(result[0])
+        // console.log(result[0])
         newReference.child("Health Info/Sleep Samples")
           .set(result)
       },
@@ -201,7 +206,7 @@ export default function App() {
     AppleHealthKit.getBiologicalSex(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
         bio_sex = result.value
 
         newReference.child("Health Info")
@@ -213,7 +218,7 @@ export default function App() {
     AppleHealthKit.getLatestHeight(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
         height = result.value
 
         newReference.child("Health Info")
@@ -225,7 +230,7 @@ export default function App() {
     AppleHealthKit.getDailyStepCountSamples(
       options,
       (callBackError, result) => {
-        console.log(result[0])
+        // console.log(result[0])
         newReference.child("Health Info/Step Counts")
           .set(
             result.slice(0, 90)
@@ -235,7 +240,7 @@ export default function App() {
     AppleHealthKit.getLatestWeight(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
 
         newReference.child("Health Info")
           .update({
@@ -246,7 +251,7 @@ export default function App() {
     AppleHealthKit.getDateOfBirth(
       options,
       (callbackError, result) => {
-        console.log(result)
+        // console.log(result)
         dob = result.value.substring(0, 10)
         age = result.age
         newReference.child("Health Info")
@@ -260,7 +265,7 @@ export default function App() {
     AppleHealthKit.getActiveEnergyBurned(
       options,
       (callbackError, result) => {
-        console.log(result[0])
+        // console.log(result[0])
         newReference.child("Health Info/Active Energy Burned")
           .set(
             result
@@ -271,7 +276,7 @@ export default function App() {
     AppleHealthKit.getEnergyConsumedSamples(
       options,
       (callbackError, result) => {
-        console.log(result[0])
+        // console.log(result[0])
 
         newReference.child("Health Info/Energy Consumed Samples")
           .set(
@@ -282,7 +287,7 @@ export default function App() {
     AppleHealthKit.getProteinSamples(
       options,
       (callbackError, result) => {
-        console.log(result[0])
+        // console.log(result[0])
 
         newReference.child("Health Info/Protein Samples")
           .set(
@@ -295,44 +300,71 @@ export default function App() {
   // AppleHealthKit.getClinicalRecords(
   //     options,
   //     (callbackError, result) => {
-  //         console.log(result[0])
+  //         // console.log(result[0])
   //     }
   // )
 
-    // const getData = () => {
-    //     const db = getDatabase();
-    //     const sleepRef = ref(db, 'user/2UQDWONj5defTieIkOJCLkKzlKp1/Health Info/Sleep Samples/0');
-    //     onValue(sleepRef, (snapshot) => {
-    //         // Step 1: Parse the timestamp into a Date object
-    //         const start = new Date(snapshot.val().startDate);
-    //         const end = new Date(snapshot.val().endDate);
-    //
-    //         // Step 2: Calculate hours
-    //         const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
-    //         console.log("Hours: ", hours);
-    //     });
-    // }
+    // Function to get the ISO week number for a given date
+    function getISOWeek(date) {
+        const target = new Date(date.valueOf());
+        const dayNr = (date.getDay() + 6) % 7;
+        target.setDate(target.getDate() - dayNr + 3);
+        const firstThursday = target.valueOf();
+        target.setMonth(0, 1);
+        if (target.getDay() !== 4) {
+            target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+        }
+        return 1 + Math.ceil((firstThursday - target) / 604800000);
+    }
 
     const getData = () => {
         //Array for sleep hours
-        let array = new Array(7).fill(0); // creates an array with length 7, filled with 0
-        console.log(array)
+        let daysOfWeek = Array(7).fill(0);
 
-        const ref = database().ref('user/');
-        ref.once('value').then((snapshot) => {
-          const numberOfChildren = snapshot.numChildren();
-          console.log('Number of children:', numberOfChildren);
+        var daysDict = {
+            Sunday: 0,
+            Monday: 1,
+            Tuesday: 2,
+            Wednesday: 3,
+            Thursday: 4,
+            Friday: 5,
+            Saturday: 6
+        };
+
+        const options = { weekday: 'long' };
+
+        newReference.once('value').then((snapshot) => {
+            snapshot.child("Health Info/Sleep Samples").forEach((childSnapshot) => {
+                // Step 1: Parse the timestamp into a Date object
+                const start = new Date(childSnapshot.val().startDate);
+                const end = new Date(childSnapshot.val().endDate);
+                const currentWeek = getISOWeek(new Date()); // holds the number of the current week of the year
+
+                // Determining if the day is on the same week
+                if (getISOWeek(start) === currentWeek) {
+                    // Step 2: Get the day from the start date
+                    const day = new Intl.DateTimeFormat('en-US', options).format(start);
+                    // console.log("Day: " + day);
+
+                    // Step 3: Calculate hours
+                    const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                    // console.log("Hours: " + hours);
+
+                    // Adding hours to respective day
+                    daysOfWeek[daysDict[day]] += hours;
+                    // console.log("Day Hours: " + daysOfWeek[daysDict[day]]);
+                    // console.log("DayDict: " + daysDict[day]);
+                }
+            });
         })
-
-        // ref.once('value').then((snapshot) => {
-        //     this.setState({ categories: snapshot.val() });
-        //     // console.log(snapshot.val());
-        // });
-
-
+        console.log(daysOfWeek)
+        return daysOfWeek;
     }
 
-    getData();
+    // const sleep_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: getData() }],
+    // }), []);
 
     return (
       <View style={styles.centeredView}>
