@@ -1,13 +1,11 @@
 import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
 import {useState, useMemo, useEffect} from "react";
-import {StyleSheet, Text, View, Modal, Button, Dimensions, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
+import {StyleSheet, Text, View, Dimensions, ScrollView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
-import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
-// import { getDatabase, ref, onValue} from "firebase/database";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -91,20 +89,25 @@ export default function App() {
         }]
     }), []);
 
-    // const sleep_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
-    // }), []);
-
     const sleep_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: getData() }],
+        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
     }), []);
+
+    // const sleep_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: getSleepData() }],
+    // }), []);
 
     const caloric_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
     }), []);
+
+    // const caloric_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: getCalorieData() }],
+    // }), []);
 
     const caloric_lost_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -304,6 +307,7 @@ export default function App() {
   //     }
   // )
 
+    // ===============================================================================================================
     // Function to get the ISO week number for a given date
     function getISOWeek(date) {
         const target = new Date(date.valueOf());
@@ -317,31 +321,30 @@ export default function App() {
         return 1 + Math.ceil((firstThursday - target) / 604800000);
     }
 
-    const getData = () => {
+    // ===============================================================================================================
+    const options = { weekday: 'long' };
+    const daysDict = {
+        Sunday: 0,
+        Monday: 1,
+        Tuesday: 2,
+        Wednesday: 3,
+        Thursday: 4,
+        Friday: 5,
+        Saturday: 6
+    };
+
+  const getSleepData = () => {
         //Array for sleep hours
         let daysOfWeek = Array(7).fill(0);
-
-        var daysDict = {
-            Sunday: 0,
-            Monday: 1,
-            Tuesday: 2,
-            Wednesday: 3,
-            Thursday: 4,
-            Friday: 5,
-            Saturday: 6
-        };
-
-        const options = { weekday: 'long' };
 
         newReference.once('value').then((snapshot) => {
             snapshot.child("Health Info/Sleep Samples").forEach((childSnapshot) => {
                 // Step 1: Parse the timestamp into a Date object
                 const start = new Date(childSnapshot.val().startDate);
                 const end = new Date(childSnapshot.val().endDate);
-                const currentWeek = getISOWeek(new Date()); // holds the number of the current week of the year
 
                 // Determining if the day is on the same week
-                if (getISOWeek(start) === currentWeek) {
+                if (getISOWeek(start) === getISOWeek(new Date())) {
                     // Step 2: Get the day from the start date
                     const day = new Intl.DateTimeFormat('en-US', options).format(start);
                     // console.log("Day: " + day);
@@ -354,6 +357,7 @@ export default function App() {
                     daysOfWeek[daysDict[day]] += hours;
                     // console.log("Day Hours: " + daysOfWeek[daysDict[day]]);
                     // console.log("DayDict: " + daysDict[day]);
+                    // console.log("Hours: " + hours);
                 }
             });
         })
@@ -361,10 +365,34 @@ export default function App() {
         return daysOfWeek;
     }
 
-    // const sleep_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: getData() }],
-    // }), []);
+    // ===============================================================================================================
+
+    const getCalorieData = () => {
+        //Array for sleep hours
+        let daysOfWeek = Array(7).fill(0);
+
+        newReference.once('value').then((snapshot) => {
+            snapshot.child("Health Info/Energy Consumed Samples").forEach((childSnapshot) => {
+                // Step 1: Parse the timestamp into a Date object
+                const start = new Date(childSnapshot.val().startDate);
+
+                // Determining if the day is on the same week
+                if (getISOWeek(start) === getISOWeek(new Date())) {
+                    // Step 2: Get the day from the start date
+                    const day = new Intl.DateTimeFormat('en-US', options).format(start);
+                    // console.log("Day: " + day);
+
+                    // Adding calories to respective day
+                    daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+                    // console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
+                    // console.log("DayDict: " + daysDict[day]);
+                    // console.log("Calories: " + childSnapshot.val().value);
+                }
+            });
+        })
+        console.log(daysOfWeek)
+        return daysOfWeek;
+    }
 
     return (
       <View style={styles.centeredView}>
