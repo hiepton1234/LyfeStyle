@@ -198,7 +198,7 @@ export default function App() {
 
         setSleepChartData(daysOfWeek);
       } catch (error) {
-        // console.log("ERROR DETECTED FETCHING SLEEP SAMPLES" + error)
+        console.log("ERROR DETECTED FETCHING SLEEP SAMPLES" + error)
       }
     };
 
