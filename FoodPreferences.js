@@ -47,16 +47,6 @@ export function FoodPreferences(props) {
   });
 
   const prefRef = database().ref('user/' + props.user.uid);
-  const saveFoodPreferences = () => {
-    // store contents of profile page user inputs to firebase
-    for (let i = 0; i < preferences.length; i++){
-      prefRef.child("Food Preferences/")
-        .update({
-          [preferences[i]] : preferences[i],
-        })
-        .then(() => console.log('Food updated.'));
-    }
-  }
 
   const [modalVisible, setModalVisible] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
@@ -79,9 +69,22 @@ export function FoodPreferences(props) {
     }
   };
 
+  const loadFoodPreferences = () => {
+    database()
+      .ref('user/' + props.user.uid + '/Food Preferences/')
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const prefFromDB = snapshot.val();
+          setPreferences(prefFromDB);
+          console.log("LOADED PREFERENCES FROM DB");
+        }
+      });
+  };
+
   useEffect(() => {
-    savePreferences();
-  }, [preferences]);
+    loadFoodPreferences();
+  }, []);
 
   return (
     <View>
@@ -97,6 +100,7 @@ export function FoodPreferences(props) {
           <Pressable
             onPress={() => {
               setModalVisible(!modalVisible)
+              savePreferences()
             }}
             style={({pressed}) => [{opacity : pressed ? 0.3 : 1}]}>
             <Text style={styles.customButton}>❌</Text>
@@ -123,7 +127,10 @@ export function FoodPreferences(props) {
       </Modal>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => {
+          setModalVisible(true)
+          loadFoodPreferences()
+        }}>
         <Text style={styles.textStyle}>Edit Food Preferences</Text>
       </Pressable>
     </View>
