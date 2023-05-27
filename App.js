@@ -73,7 +73,7 @@ export function score(activity, activity_goal, sleep, sleep_goal, intake, intake
 
 // auth()
 //   .signOut()
-//   .then(() => // console.log('User signed out!'));
+//   .then(() => console.log('User signed out!'));
 
 export default function App() {
     const lifescore_data = useMemo(() => ({
@@ -89,14 +89,9 @@ export default function App() {
         }]
     }), []);
 
-    const sleep_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
-    }), []);
-
     // const sleep_chart_data = useMemo(() => ({
     //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: getSleepData() }],
+    //     datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
     // }), []);
 
     const caloric_chart_data = useMemo(() => ({
@@ -138,6 +133,12 @@ export default function App() {
     // Set an initializing state whilst Firebase connects
     const [initializing, setInitializing] = useState(true);
     const [user, setUser] = useState();
+    const [sleepChartData, setSleepChartData] = useState([]);
+
+  const sleep_chart_data = useMemo(() => ({
+    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    datasets: [{ data: sleepChartData }],
+  }), []);
 
   async function onGoogleButtonPress() {
     // Check if your device supports Google Play
@@ -159,8 +160,57 @@ export default function App() {
   }
 
   useEffect(() => {
+
+    const fetchData = async (currentUser) => {
+      try {
+        const newReference = database().ref('user/' + currentUser.uid);
+        const snapshot = await newReference.once('value');
+        // console.log(currentUser)
+
+        // Array for sleep hours
+        let daysOfWeek = Array(7).fill(0);
+
+        snapshot.child("Health Info/Sleep Samples").forEach((childSnapshot) => {
+          // Step 1: Parse the timestamp into a Date object
+          const start = new Date(childSnapshot.val().startDate);
+          const end = new Date(childSnapshot.val().endDate);
+
+          console.log("START DATE" + start)
+          console.log("END DATE" + end)
+
+          // Determining if the day is on the same week
+          if (getISOWeek(start) === getISOWeek(new Date())) {
+            // Step 2: Get the day from the start date
+            const day = new Intl.DateTimeFormat('en-US', options).format(start);
+
+            // Step 3: Calculate hours
+            const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+
+            // Adding hours to respective day
+            daysOfWeek[daysDict[day]] += hours;
+          }
+        });
+
+        setSleepChartData(daysOfWeek);
+      } catch (error) {
+        // console.log("ERROR DETECTED FETCHING SLEEP SAMPLES" + error)
+      }
+    };
+
+    const onAuthStateChanged = (user) => {
+      setUser(user);
+      if (initializing) setInitializing(false);
+      fetchData(user)
+    };
+
+    GoogleSignin.getCurrentUser();
+
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    fetchData();
+
+    return () => {
+      subscriber(); // unsubscribe on unmount
+    };
   }, []);
 
   if (initializing) return null;
@@ -332,38 +382,6 @@ export default function App() {
         Friday: 5,
         Saturday: 6
     };
-
-  const getSleepData = () => {
-        //Array for sleep hours
-        let daysOfWeek = Array(7).fill(0);
-
-        newReference.once('value').then((snapshot) => {
-            snapshot.child("Health Info/Sleep Samples").forEach((childSnapshot) => {
-                // Step 1: Parse the timestamp into a Date object
-                const start = new Date(childSnapshot.val().startDate);
-                const end = new Date(childSnapshot.val().endDate);
-
-                // Determining if the day is on the same week
-                if (getISOWeek(start) === getISOWeek(new Date())) {
-                    // Step 2: Get the day from the start date
-                    const day = new Intl.DateTimeFormat('en-US', options).format(start);
-                    // console.log("Day: " + day);
-
-                    // Step 3: Calculate hours
-                    const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
-                    // console.log("Hours: " + hours);
-
-                    // Adding hours to respective day
-                    daysOfWeek[daysDict[day]] += hours;
-                    // console.log("Day Hours: " + daysOfWeek[daysDict[day]]);
-                    // console.log("DayDict: " + daysDict[day]);
-                    // console.log("Hours: " + hours);
-                }
-            });
-        })
-        console.log(daysOfWeek)
-        return daysOfWeek;
-    }
 
     // ===============================================================================================================
 
