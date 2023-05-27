@@ -1,11 +1,11 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Alert, StyleSheet, Modal, Text, View, Button, SectionList, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import database from "@react-native-firebase/database";
 import {AddNewFoodItem} from "./AddNewFoodItem";
 
 function FoodPage(props) {
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [info, setInfo] = useState("");
   const [mealList, setMealList] = useState([
     {
       meal: 'Breakfast',
@@ -46,6 +46,32 @@ function FoodPage(props) {
     }
   }
 
+  useEffect(() => {
+    loadFoodEntries();
+  }, []);
+
+  const loadFoodEntries = () => {
+    database()
+      .ref('user/' + props.user.uid + '/Food Entries/')
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          setInfo(data);
+
+          // Update the profileElems array with the respective data from info
+          const updatedMealList = mealList.map((elem) => {
+            if (elem.meal in data) {
+              return { ...elem, data: data[elem.meal] };
+            }
+            return elem;
+          });
+
+          setMealList(updatedMealList);
+        }
+      })
+  };
+
   return (
     <View style={styles.centeredView}>
       <Modal
@@ -59,7 +85,7 @@ function FoodPage(props) {
         <View style={styles.appContainer}>
           <Pressable
             onPress={() => {
-              setModalVisible(!setModalVisible)
+              setModalVisible(!modalVisible)
               saveFoods()
             }}
             style={({pressed}) => [{opacity : pressed ? 0.3 : 1}]}>
@@ -85,7 +111,10 @@ function FoodPage(props) {
       </Modal>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => {
+          setModalVisible(true)
+          loadFoodEntries()
+        }}>
         <Text style={styles.textStyle}>Food Tracking</Text>
       </Pressable>
     </View>
