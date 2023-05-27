@@ -28,7 +28,6 @@ function AddNewFoodItem(props) {
       return;
     }
     props.addNewFoodItem(props.index, enteredFood)
-    props.saveFoods()
 
     setEnteredFood('');
   };

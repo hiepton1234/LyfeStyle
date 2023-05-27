@@ -58,7 +58,10 @@ function FoodPage(props) {
         }}>
         <View style={styles.appContainer}>
           <Pressable
-            onPress={() => {setModalVisible(!setModalVisible)}}
+            onPress={() => {
+              setModalVisible(!setModalVisible)
+              saveFoods()
+            }}
             style={({pressed}) => [{opacity : pressed ? 0.3 : 1}]}>
             <Text style={styles.customButton}>❌</Text>
           </Pressable>
@@ -74,7 +77,7 @@ function FoodPage(props) {
                     <Text style={styles.baseText} key={foodIndex}>{food}</Text>
                   ))}
                 </View>
-                <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem} saveFoods={saveFoods}/>
+                <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>
             ))}
           </View>
