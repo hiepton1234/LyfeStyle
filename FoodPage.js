@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {Alert, StyleSheet, Modal, Text, View, Button, SectionList, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import database from "@react-native-firebase/database";
 import {AddNewFoodItem} from "./AddNewFoodItem";
+import {FoodPreferences} from "./FoodPreferences"
 
 function FoodPage(props) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -29,7 +30,6 @@ function FoodPage(props) {
     console.log(index + enteredText)
     const newMealList = [...mealList];
     newMealList[index].data.push(enteredText);
-    console.log("NEW" + newMealList)
     setMealList(newMealList);
   };
 
@@ -94,6 +94,7 @@ function FoodPage(props) {
           <Text style={styles.sectionHeading}>
             Food Tracking
           </Text>
+          <FoodPreferences user={props.user}/>
           <View>
             {mealList.map((meal, index) => (
               <View key={index}>
