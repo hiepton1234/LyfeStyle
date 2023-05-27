@@ -109,6 +109,11 @@ export default function App() {
         datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
     }), []);
 
+    // const caloric_lost_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: getCalorieLostData() }],
+    // }), []);
+
     const workout_hours_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: [2.45, 5.34, 6.87, 0.72, 3.12, 1.89, 6.57] }],
@@ -391,6 +396,35 @@ export default function App() {
 
         newReference.once('value').then((snapshot) => {
             snapshot.child("Health Info/Energy Consumed Samples").forEach((childSnapshot) => {
+                // Step 1: Parse the timestamp into a Date object
+                const start = new Date(childSnapshot.val().startDate);
+
+                // Determining if the day is on the same week
+                if (getISOWeek(start) === getISOWeek(new Date())) {
+                    // Step 2: Get the day from the start date
+                    const day = new Intl.DateTimeFormat('en-US', options).format(start);
+                    // console.log("Day: " + day);
+
+                    // Adding calories to respective day
+                    daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+                    // console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
+                    // console.log("DayDict: " + daysDict[day]);
+                    // console.log("Calories: " + childSnapshot.val().value);
+                }
+            });
+        })
+        console.log(daysOfWeek)
+        return daysOfWeek;
+    }
+
+    // ===============================================================================================================
+
+    const getCalorieLostData = () => {
+        //Array for sleep hours
+        let daysOfWeek = Array(7).fill(0);
+
+        newReference.once('value').then((snapshot) => {
+            snapshot.child("Health Info/Active Energy Burned").forEach((childSnapshot) => {
                 // Step 1: Parse the timestamp into a Date object
                 const start = new Date(childSnapshot.val().startDate);
 
