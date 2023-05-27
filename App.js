@@ -165,40 +165,53 @@ export default function App() {
   }
 
   useEffect(() => {
-
-    const fetchData = async (currentUser) => {
+      const daysDict = {
+          "Sunday": 0,
+          "Monday": 1,
+          "Tuesday": 2,
+          "Wednesday": 3,
+          "Thursday": 4,
+          "Friday": 5,
+          "Saturday": 6
+      };
+      const fetchData = async (currentUser) => {
       try {
         const newReference = database().ref('user/' + currentUser.uid);
         const snapshot = await newReference.once('value');
-        // console.log(currentUser)
+        console.log(currentUser)
 
         // Array for sleep hours
         let daysOfWeek = Array(7).fill(0);
+          console.log(daysOfWeek)
 
         snapshot.child("Health Info/Sleep Samples").forEach((childSnapshot) => {
           // Step 1: Parse the timestamp into a Date object
           const start = new Date(childSnapshot.val().startDate);
           const end = new Date(childSnapshot.val().endDate);
 
-          console.log("START DATE" + start)
-          console.log("END DATE" + end)
+          // console.log("START DATE: " + start)
+          // console.log("END DATE: " + end)
 
           // Determining if the day is on the same week
           if (getISOWeek(start) === getISOWeek(new Date())) {
             // Step 2: Get the day from the start date
-            const day = new Intl.DateTimeFormat('en-US', options).format(start);
+              const options = { weekday: 'long' };
+              const day = start.toLocaleDateString('en-US', options).split(',')[0];
+              console.log("DAY: " + day)
 
             // Step 3: Calculate hours
             const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+              console.log("HOURS: " + hours)
 
             // Adding hours to respective day
             daysOfWeek[daysDict[day]] += hours;
+              console.log(daysOfWeek)
           }
         });
 
         setSleepChartData(daysOfWeek);
       } catch (error) {
-        console.log("ERROR DETECTED FETCHING SLEEP SAMPLES" + error)
+        console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
       }
     };
 
@@ -377,15 +390,14 @@ export default function App() {
     }
 
     // ===============================================================================================================
-    const options = { weekday: 'long' };
     const daysDict = {
-        Sunday: 0,
-        Monday: 1,
-        Tuesday: 2,
-        Wednesday: 3,
-        Thursday: 4,
-        Friday: 5,
-        Saturday: 6
+        "Sunday": 0,
+        "Monday": 1,
+        "Tuesday": 2,
+        "Wednesday": 3,
+        "Thursday": 4,
+        "Friday": 5,
+        "Saturday": 6
     };
 
     // ===============================================================================================================
@@ -445,6 +457,16 @@ export default function App() {
         console.log(daysOfWeek)
         return daysOfWeek;
     }
+
+    const test = () => {
+        const date = new Date("Sat May 27 2023 00:00:00 GMT-0700");
+        const options = { weekday: 'long' };
+        const dayOfWeek = date.toLocaleDateString('en-US', options).split(',')[0];
+
+        console.log(dayOfWeek); // Output: Saturday
+    }
+
+    // test();
 
     return (
       <View style={styles.centeredView}>
