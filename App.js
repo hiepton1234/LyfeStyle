@@ -6,7 +6,7 @@ import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
-import { isSameWeek } from 'date-fns';
+import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -95,10 +95,10 @@ export default function App() {
     //     datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
     // }), []);
 
-    // const caloric_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
-    // }), []);
+    const caloric_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
+    }), []);
 
     const caloric_lost_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -138,14 +138,14 @@ export default function App() {
     const [caloricChartData, setCaloricChartData] = useState([]);
 
     const sleep_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: sleepChartData }],
     }), [sleepChartData]);
 
-    const caloric_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: caloricChartData }],
-    }), [caloricChartData]);
+    // const caloric_chart_data = useMemo(() => ({
+    //     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    //     datasets: [{ data: caloricChartData }],
+    // }), [caloricChartData]);
 
     async function onGoogleButtonPress() {
     // Check if your device supports Google Play
@@ -168,14 +168,15 @@ export default function App() {
 
   useEffect(() => {
       const daysDict = {
-          "Monday": 0,
-          "Tuesday": 1,
-          "Wednesday": 2,
-          "Thursday": 3,
-          "Friday": 4,
-          "Saturday": 5,
-          "Sunday": 6
+          "Sunday": 0,
+          "Monday": 1,
+          "Tuesday": 2,
+          "Wednesday": 3,
+          "Thursday": 4,
+          "Friday": 5,
+          "Saturday": 6
       };
+
       const fetchSleepData = async (currentUser) => {
           try {
               const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Sleep Samples');
@@ -191,9 +192,10 @@ export default function App() {
                   const end = new Date(childSnapshot.val().endDate);
                   // console.log("START DATE: " + start)
                   // console.log("END DATE: " + end)
+                  // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
 
                   // Determining if the day is on the same week
-                  if (isSameWeek(start, new Date())) {
+                  if (inSameWeek(start, new Date())) {
                       // Step 2: Get the day from the start date
                       const options = { weekday: 'long' };
                       const day = start.toLocaleDateString('en-US', options).split(',')[0];
@@ -205,12 +207,12 @@ export default function App() {
 
                       // Adding hours to respective day
                       daysOfWeek[daysDict[day]] += hours;
-                      // console.log(daysOfWeek)
                   } else { return true; }
 
                   // console.log("Sleep reading done!")
               });
 
+              console.log("Sleep reading done!")
               setSleepChartData(daysOfWeek);
           } catch (error) {
             console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
@@ -232,9 +234,9 @@ export default function App() {
                   console.log("START DATE: " + start)
                   console.log("TODAY: " + new Date())
 
-                  console.log(isSameWeek(start, new Date()))
+                  console.log(inSameWeek(start, new Date()))
                   // Determining if the day is on the same week
-                  if (isSameWeek(start, new Date())) {
+                  if (inSameWeek(start, new Date())) {
                       // Step 2: Get the day from the start date
                       const options = { weekday: 'long' };
                       const day = start.toLocaleDateString('en-US', options).split(',')[0];
@@ -246,10 +248,9 @@ export default function App() {
                       console.log("DayDict: " + daysDict[day]);
                       console.log("Calories: " + childSnapshot.val().value);
                   } else { return true; }
-
-                  console.log("Calorie reading done!")
               });
 
+              console.log("Calorie reading done!")
               setCaloricChartData(daysOfWeek);
           } catch (error) {
               console.log("ERROR DETECTED FETCHING CALORIC SAMPLES: " + error)
@@ -260,14 +261,14 @@ export default function App() {
       setUser(user);
       if (initializing) setInitializing(false);
       fetchSleepData(user)
-        fetchCaloricData(user)
+        // fetchCaloricData(user)
     };
 
     GoogleSignin.getCurrentUser();
 
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     fetchSleepData();
-    fetchCaloricData();
+    // fetchCaloricData();
 
     return () => {
       subscriber(); // unsubscribe on unmount
@@ -462,20 +463,26 @@ export default function App() {
     //     return daysOfWeek;
     // }
 
-  //   const test = () => {
-  //       const date1 = new Date("Wed May 10 2023 14:55:00 GMT-0700");
-  //       const date2 = new Date();
-  //
-  //       if (isSameWeek(date1, date2)) {
-  //           console.log("They are in the same week!")
-  //       } else {
-  //           console.log("They are NOT in the same week!")
-  //       }
-  //
-  //       console.log()
-  //   }
-  //
-  // test();
+    function inSameWeek(firstDay, secondDay) {
+        const firstMoment = moment(firstDay);
+        const secondMoment = moment(secondDay);
+
+        const startOfWeek = function (_moment, _offset) {
+            return _moment.clone().startOf('week').add(_offset, 'days');
+        };
+
+        return startOfWeek(firstMoment, -1).isSame(startOfWeek(secondMoment, -1), 'day');
+    }
+
+
+    const test = () => {
+        const date1 = new Date('2023-05-27');  // Sunday
+        const date2 = new Date();  // Thursday
+
+        console.log("TEST: " + inSameWeek(date1, date2));  // Output: true
+    }
+
+    // test();
 
     return (
       <View style={styles.centeredView}>
