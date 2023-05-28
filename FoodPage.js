@@ -130,7 +130,7 @@ function FoodPage(props) {
               setCurrentSelectedDate(decrementedDate);
               loadFoodEntries()
             }}>
-              <Text style={styles.baseText}>{'<'}</Text>
+              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇦'}</Text>
             </TouchableOpacity>
             <Text style={styles.baseText}>{isTodayOrYesterday(currentSelectedDate)}</Text>
 
@@ -144,7 +144,7 @@ function FoodPage(props) {
                   setCurrentSelectedDate(incrementedDate);
                 }}
               >
-                <Text style={[{opacity: 0}]}>{'>'}</Text>
+                <Text style={[{opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
               </TouchableOpacity>
             ) :
             (
@@ -155,7 +155,7 @@ function FoodPage(props) {
                 setCurrentSelectedDate(incrementedDate);
               }}
             >
-              <Text style={styles.baseText}>{'>'}</Text>
+              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇨'}</Text>
             </TouchableOpacity>
             )}
           </View>
@@ -225,6 +225,7 @@ const styles = StyleSheet.create({
     justifyContent: ''
   },
   date_selection_container: {
+    margin: 5,
     flexDirection: "row",
     justifyContent: 'space-evenly',
   },

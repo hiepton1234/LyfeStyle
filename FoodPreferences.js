@@ -126,7 +126,7 @@ export function FoodPreferences(props) {
         </ScrollView>
       </Modal>
       <Pressable
-        style={[styles.button, styles.buttonOpen]}
+        style={[styles.button, styles.buttonOpen, {margin: 5}]}
         onPress={() => {
           setModalVisible(true)
           loadFoodPreferences()
