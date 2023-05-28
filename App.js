@@ -95,10 +95,10 @@ export default function App() {
     //     datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
     // }), []);
 
-    const caloric_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
-    }), []);
+    // const caloric_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
+    // }), []);
 
     const caloric_lost_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -142,10 +142,10 @@ export default function App() {
         datasets: [{ data: sleepChartData }],
     }), [sleepChartData]);
 
-    // const caloric_chart_data = useMemo(() => ({
-    //     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    //     datasets: [{ data: caloricChartData }],
-    // }), [caloricChartData]);
+    const caloric_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: caloricChartData }],
+    }), [caloricChartData]);
 
     async function onGoogleButtonPress() {
     // Check if your device supports Google Play
