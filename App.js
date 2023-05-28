@@ -6,6 +6,7 @@ import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
+import { isSameWeek } from 'date-fns';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -140,12 +141,12 @@ export default function App() {
     const [user, setUser] = useState();
     const [sleepChartData, setSleepChartData] = useState([]);
 
-  const sleep_chart_data = useMemo(() => ({
-    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    datasets: [{ data: sleepChartData }],
-  }), []);
+    const sleep_chart_data = useMemo(() => ({
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: sleepChartData }],
+    }), [sleepChartData]);
 
-  async function onGoogleButtonPress() {
+    async function onGoogleButtonPress() {
     // Check if your device supports Google Play
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     // Get the users ID token
@@ -166,65 +167,64 @@ export default function App() {
 
   useEffect(() => {
       const daysDict = {
-          "Sunday": 0,
-          "Monday": 1,
-          "Tuesday": 2,
-          "Wednesday": 3,
-          "Thursday": 4,
-          "Friday": 5,
-          "Saturday": 6
+          "Monday": 0,
+          "Tuesday": 1,
+          "Wednesday": 2,
+          "Thursday": 3,
+          "Friday": 4,
+          "Saturday": 5,
+          "Sunday": 6
       };
-      const fetchData = async (currentUser) => {
-      try {
-        const newReference = database().ref('user/' + currentUser.uid);
-        const snapshot = await newReference.once('value');
-        console.log(currentUser)
+      const fetchSleepData = async (currentUser) => {
+          try {
+              const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Sleep Samples');
+              const snapshot = await newReference.limitToFirst(100).once('value');
+              // console.log(currentUser)
 
-        // Array for sleep hours
-        let daysOfWeek = Array(7).fill(0);
-          console.log(daysOfWeek)
+              // Array for sleep hours
+              let daysOfWeek = Array(7).fill(0);
 
-        snapshot.child("Health Info/Sleep Samples").forEach((childSnapshot) => {
-          // Step 1: Parse the timestamp into a Date object
-          const start = new Date(childSnapshot.val().startDate);
-          const end = new Date(childSnapshot.val().endDate);
+              snapshot.forEach((childSnapshot) => {
+                  // Step 1: Parse the timestamp into a Date object
+                  const start = new Date(childSnapshot.val().startDate);
+                  const end = new Date(childSnapshot.val().endDate);
+                  // console.log("START DATE: " + start)
+                  // console.log("END DATE: " + end)
 
-          // console.log("START DATE: " + start)
-          // console.log("END DATE: " + end)
+                  // Determining if the day is on the same week
+                  if (isSameWeek(start, new Date())) {
+                      // Step 2: Get the day from the start date
+                      const options = { weekday: 'long' };
+                      const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                      // console.log("DAY: " + day)
 
-          // Determining if the day is on the same week
-          if (getISOWeek(start) === getISOWeek(new Date())) {
-            // Step 2: Get the day from the start date
-              const options = { weekday: 'long' };
-              const day = start.toLocaleDateString('en-US', options).split(',')[0];
-              console.log("DAY: " + day)
+                      // Step 3: Calculate hours
+                      const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                      // console.log("HOURS: " + hours)
 
-            // Step 3: Calculate hours
-            const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
-              console.log("HOURS: " + hours)
+                      // Adding hours to respective day
+                      daysOfWeek[daysDict[day]] += hours;
+                      // console.log(daysOfWeek)
+                  }
+              });
 
-            // Adding hours to respective day
-            daysOfWeek[daysDict[day]] += hours;
-              console.log(daysOfWeek)
+              setSleepChartData(daysOfWeek);
+          } catch (error) {
+            console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
           }
-        });
-
-        setSleepChartData(daysOfWeek);
-      } catch (error) {
-        console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
-      }
+          console.log("Sleep reading done!")
     };
 
     const onAuthStateChanged = (user) => {
       setUser(user);
       if (initializing) setInitializing(false);
-      fetchData(user)
+      fetchSleepData(user)
     };
 
     GoogleSignin.getCurrentUser();
 
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    fetchData();
+    fetchSleepData();
 
     return () => {
       subscriber(); // unsubscribe on unmount
@@ -390,83 +390,73 @@ export default function App() {
     }
 
     // ===============================================================================================================
-    const daysDict = {
-        "Sunday": 0,
-        "Monday": 1,
-        "Tuesday": 2,
-        "Wednesday": 3,
-        "Thursday": 4,
-        "Friday": 5,
-        "Saturday": 6
-    };
+    // const daysDict = {
+    //     "Sunday": 0,
+    //     "Monday": 1,
+    //     "Tuesday": 2,
+    //     "Wednesday": 3,
+    //     "Thursday": 4,
+    //     "Friday": 5,
+    //     "Saturday": 6
+    // };
 
     // ===============================================================================================================
 
-    const getCalorieData = () => {
-        //Array for sleep hours
-        let daysOfWeek = Array(7).fill(0);
-
-        newReference.once('value').then((snapshot) => {
-            snapshot.child("Health Info/Energy Consumed Samples").forEach((childSnapshot) => {
-                // Step 1: Parse the timestamp into a Date object
-                const start = new Date(childSnapshot.val().startDate);
-
-                // Determining if the day is on the same week
-                if (getISOWeek(start) === getISOWeek(new Date())) {
-                    // Step 2: Get the day from the start date
-                    const day = new Intl.DateTimeFormat('en-US', options).format(start);
-                    // console.log("Day: " + day);
-
-                    // Adding calories to respective day
-                    daysOfWeek[daysDict[day]] += childSnapshot.val().value;
-                    // console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
-                    // console.log("DayDict: " + daysDict[day]);
-                    // console.log("Calories: " + childSnapshot.val().value);
-                }
-            });
-        })
-        console.log(daysOfWeek)
-        return daysOfWeek;
-    }
-
-    // ===============================================================================================================
-
-    const getCalorieLostData = () => {
-        //Array for sleep hours
-        let daysOfWeek = Array(7).fill(0);
-
-        newReference.once('value').then((snapshot) => {
-            snapshot.child("Health Info/Active Energy Burned").forEach((childSnapshot) => {
-                // Step 1: Parse the timestamp into a Date object
-                const start = new Date(childSnapshot.val().startDate);
-
-                // Determining if the day is on the same week
-                if (getISOWeek(start) === getISOWeek(new Date())) {
-                    // Step 2: Get the day from the start date
-                    const day = new Intl.DateTimeFormat('en-US', options).format(start);
-                    // console.log("Day: " + day);
-
-                    // Adding calories to respective day
-                    daysOfWeek[daysDict[day]] += childSnapshot.val().value;
-                    // console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
-                    // console.log("DayDict: " + daysDict[day]);
-                    // console.log("Calories: " + childSnapshot.val().value);
-                }
-            });
-        })
-        console.log(daysOfWeek)
-        return daysOfWeek;
-    }
-
-    const test = () => {
-        const date = new Date("Sat May 27 2023 00:00:00 GMT-0700");
-        const options = { weekday: 'long' };
-        const dayOfWeek = date.toLocaleDateString('en-US', options).split(',')[0];
-
-        console.log(dayOfWeek); // Output: Saturday
-    }
-
-    // test();
+    // const getCalorieData = () => {
+    //     //Array for sleep hours
+    //     let daysOfWeek = Array(7).fill(0);
+    //
+    //     newReference.once('value').then((snapshot) => {
+    //         snapshot.child("Health Info/Energy Consumed Samples").forEach((childSnapshot) => {
+    //             // Step 1: Parse the timestamp into a Date object
+    //             const start = new Date(childSnapshot.val().startDate);
+    //
+    //             // Determining if the day is on the same week
+    //             if (getISOWeek(start) === getISOWeek(new Date())) {
+    //                 // Step 2: Get the day from the start date
+    //                 const day = new Intl.DateTimeFormat('en-US', options).format(start);
+    //                 // console.log("Day: " + day);
+    //
+    //                 // Adding calories to respective day
+    //                 daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+    //                 // console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
+    //                 // console.log("DayDict: " + daysDict[day]);
+    //                 // console.log("Calories: " + childSnapshot.val().value);
+    //             }
+    //         });
+    //     })
+    //     console.log(daysOfWeek)
+    //     return daysOfWeek;
+    // }
+    //
+    // // ===============================================================================================================
+    //
+    // const getCalorieLostData = () => {
+    //     //Array for sleep hours
+    //     let daysOfWeek = Array(7).fill(0);
+    //
+    //     newReference.once('value').then((snapshot) => {
+    //         snapshot.child("Health Info/Active Energy Burned").forEach((childSnapshot) => {
+    //             // Step 1: Parse the timestamp into a Date object
+    //             const start = new Date(childSnapshot.val().startDate);
+    //
+    //             // Determining if the day is on the same week
+    //             if (getISOWeek(start) === getISOWeek(new Date())) {
+    //                 // Step 2: Get the day from the start date
+    //                 const day = new Intl.DateTimeFormat('en-US', options).format(start);
+    //                 // console.log("Day: " + day);
+    //
+    //                 // Adding calories to respective day
+    //                 daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+    //                 // console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
+    //                 // console.log("DayDict: " + daysDict[day]);
+    //                 // console.log("Calories: " + childSnapshot.val().value);
+    //             }
+    //         });
+    //     })
+    //     console.log(daysOfWeek)
+    //     return daysOfWeek;
+    // }
 
     return (
       <View style={styles.centeredView}>
