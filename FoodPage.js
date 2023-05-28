@@ -1,13 +1,17 @@
 import {useEffect, useState} from "react";
-import {Alert, StyleSheet, Modal, Text, View, Button, SectionList, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
+import {Alert, StyleSheet, Modal, Text, View, TouchableOpacity, SectionList, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import database from "@react-native-firebase/database";
 import {AddNewFoodItem} from "./AddNewFoodItem";
 import {FoodPreferences} from "./FoodPreferences"
+import moment from 'moment'
 
 function FoodPage(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [info, setInfo] = useState("");
-  const [mealList, setMealList] = useState([
+  const [currentSelectedDate, setCurrentSelectedDate] = useState(new Date());
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  let emptyMealList = [
     {
       meal: 'Breakfast',
       data: []
@@ -24,7 +28,25 @@ function FoodPage(props) {
       meal: 'Snacks',
       data: [],
     },
-    ])
+  ]
+
+  const [mealList, setMealList] = useState(emptyMealList)
+
+  const formatDate = (date) => {
+    return date.getDate().toString() + " " + months[date.getMonth().toString()] + " " + date.getFullYear()
+  }
+
+  const isTodayOrYesterday = () => {
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    if (formatDate(today) === formatDate(currentSelectedDate))
+      return "Today"
+    else if (formatDate(yesterday) === formatDate(currentSelectedDate))
+      return "Yesterday"
+    return formatDate(currentSelectedDate)
+  }
 
   const addNewFoodItem = (index, enteredText) => {
     console.log(index + enteredText)
@@ -38,7 +60,7 @@ function FoodPage(props) {
   const saveFoods = () => {
     // store contents of profile page user inputs to firebase
     for (let i = 0; i < mealList.length; i++){
-      foodReference.child("Food Entries/")
+      foodReference.child("Food Entries/" + formatDate(currentSelectedDate))
         .update({
           [mealList[i].meal] : mealList[i].data,
         })
@@ -48,11 +70,12 @@ function FoodPage(props) {
 
   useEffect(() => {
     loadFoodEntries();
-  }, []);
+  }, [currentSelectedDate]);
 
   const loadFoodEntries = () => {
+    console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate)
     database()
-      .ref('user/' + props.user.uid + '/Food Entries/')
+      .ref('user/' + props.user.uid + '/Food Entries/' + formatDate(currentSelectedDate))
       .once('value')
       .then((snapshot) => {
         if (snapshot.exists()) {
@@ -68,6 +91,9 @@ function FoodPage(props) {
           });
 
           setMealList(updatedMealList);
+        } else {
+          setInfo("")
+          setMealList(emptyMealList)
         }
       })
   };
@@ -95,6 +121,45 @@ function FoodPage(props) {
             Food Tracking
           </Text>
           <FoodPreferences user={props.user}/>
+
+          {/* Change Date View */}
+          <View style={styles.date_selection_container}>
+            <TouchableOpacity onPress={() => {
+              const decrementedDate = new Date(currentSelectedDate);
+              decrementedDate.setDate(decrementedDate.getDate() - 1);
+              setCurrentSelectedDate(decrementedDate);
+              loadFoodEntries()
+            }}>
+              <Text style={styles.baseText}>{'<'}</Text>
+            </TouchableOpacity>
+            <Text style={styles.baseText}>{isTodayOrYesterday(currentSelectedDate)}</Text>
+
+            {/* if currentSelectedDate is today, disable next date button, still render or messes up View */}
+            {isTodayOrYesterday(currentSelectedDate) === 'Today' ? (
+              <TouchableOpacity
+                disabled={true}
+                onPress={() => {
+                  const incrementedDate = new Date(currentSelectedDate);
+                  incrementedDate.setDate(incrementedDate.getDate() + 1);
+                  setCurrentSelectedDate(incrementedDate);
+                }}
+              >
+                <Text style={[{opacity: 0}]}>{'>'}</Text>
+              </TouchableOpacity>
+            ) :
+            (
+            <TouchableOpacity
+              onPress={() => {
+                const incrementedDate = new Date(currentSelectedDate);
+                incrementedDate.setDate(incrementedDate.getDate() + 1);
+                setCurrentSelectedDate(incrementedDate);
+              }}
+            >
+              <Text style={styles.baseText}>{'>'}</Text>
+            </TouchableOpacity>
+            )}
+          </View>
+
           <View>
             {mealList.map((meal, index) => (
               <View key={index}>
@@ -159,7 +224,7 @@ const styles = StyleSheet.create({
     padding: 8,
     justifyContent: ''
   },
-  save_or_cancel: {
+  date_selection_container: {
     flexDirection: "row",
     justifyContent: 'space-evenly',
   },
