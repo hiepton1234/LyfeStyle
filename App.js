@@ -166,8 +166,8 @@ export default function App() {
     if (initializing) setInitializing(false);
   }
 
-  useEffect(() => {
-      const daysDict = {
+    useEffect(() => {
+        const daysDict = {
           "Sunday": 0,
           "Monday": 1,
           "Tuesday": 2,
@@ -175,87 +175,84 @@ export default function App() {
           "Thursday": 4,
           "Friday": 5,
           "Saturday": 6
-      };
+        };
+        const fetchSleepData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Sleep Samples');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
 
-      const fetchSleepData = async (currentUser) => {
-          try {
-              const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Sleep Samples');
-              const snapshot = await newReference.once('value');
-              // console.log(currentUser)
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
 
-              // Array for sleep hours
-              let daysOfWeek = Array(7).fill(0);
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    const end = new Date(childSnapshot.val().endDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("END DATE: " + end)
+                    // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
 
-              snapshot.forEach((childSnapshot) => {
-                  // Step 1: Parse the timestamp into a Date object
-                  const start = new Date(childSnapshot.val().startDate);
-                  const end = new Date(childSnapshot.val().endDate);
-                  // console.log("START DATE: " + start)
-                  // console.log("END DATE: " + end)
-                  // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
 
-                  // Determining if the day is on the same week
-                  if (inSameWeek(start, new Date())) {
-                      // Step 2: Get the day from the start date
-                      const options = { weekday: 'long' };
-                      const day = start.toLocaleDateString('en-US', options).split(',')[0];
-                      // console.log("DAY: " + day)
+                        // Step 3: Calculate hours
+                        const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                        // console.log("HOURS: " + hours)
 
-                      // Step 3: Calculate hours
-                      const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
-                      // console.log("HOURS: " + hours)
+                        // Adding hours to respective day
+                        daysOfWeek[daysDict[day]] += hours;
+                    } else { return true; }
+                });
 
-                      // Adding hours to respective day
-                      daysOfWeek[daysDict[day]] += hours;
-                  } else { return true; }
+                console.log("Sleep reading done!")
+                setSleepChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
+            }
+        };
 
-                  // console.log("Sleep reading done!")
-              });
+        const fetchCaloricData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Energy Consumed Samples');
+                const snapshot = await newReference.once('value');
+                console.log(currentUser)
 
-              console.log("Sleep reading done!")
-              setSleepChartData(daysOfWeek);
-          } catch (error) {
-            console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
-          }
-    };
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
 
-      const fetchCaloricData = async (currentUser) => {
-          try {
-              const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Energy Consumed Samples');
-              const snapshot = await newReference.once('value');
-              console.log(currentUser)
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    console.log("START DATE: " + start)
+                    console.log("TODAY: " + new Date())
 
-              // Array for sleep hours
-              let daysOfWeek = Array(7).fill(0);
+                    console.log(inSameWeek(start, new Date()))
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        console.log("DAY: " + day)
 
-              snapshot.forEach((childSnapshot) => {
-                  // Step 1: Parse the timestamp into a Date object
-                  const start = new Date(childSnapshot.val().startDate);
-                  console.log("START DATE: " + start)
-                  console.log("TODAY: " + new Date())
+                        // Adding calories to respective day
+                        daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+                        console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
+                        console.log("DayDict: " + daysDict[day]);
+                        console.log("Calories: " + childSnapshot.val().value);
+                    } else { return true; }
+                });
 
-                  console.log(inSameWeek(start, new Date()))
-                  // Determining if the day is on the same week
-                  if (inSameWeek(start, new Date())) {
-                      // Step 2: Get the day from the start date
-                      const options = { weekday: 'long' };
-                      const day = start.toLocaleDateString('en-US', options).split(',')[0];
-                      console.log("DAY: " + day)
-
-                      // Adding calories to respective day
-                      daysOfWeek[daysDict[day]] += childSnapshot.val().value;
-                      console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
-                      console.log("DayDict: " + daysDict[day]);
-                      console.log("Calories: " + childSnapshot.val().value);
-                  } else { return true; }
-              });
-
-              console.log("Calorie reading done!")
-              setCaloricChartData(daysOfWeek);
-          } catch (error) {
-              console.log("ERROR DETECTED FETCHING CALORIC SAMPLES: " + error)
-          }
-      };
+                console.log("Calorie reading done!")
+                setCaloricChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING CALORIC SAMPLES: " + error)
+            }
+        };
 
     const onAuthStateChanged = (user) => {
         setUser(user);
