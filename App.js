@@ -258,17 +258,17 @@ export default function App() {
       };
 
     const onAuthStateChanged = (user) => {
-      setUser(user);
-      if (initializing) setInitializing(false);
-      fetchSleepData(user)
-        // fetchCaloricData(user)
+        setUser(user);
+        if (initializing) setInitializing(false);
+        fetchSleepData(user)
+        fetchCaloricData(user)
     };
 
     GoogleSignin.getCurrentUser();
 
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     fetchSleepData();
-    // fetchCaloricData();
+    fetchCaloricData();
 
     return () => {
       subscriber(); // unsubscribe on unmount
