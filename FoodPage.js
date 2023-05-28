@@ -1,5 +1,17 @@
 import {useEffect, useState} from "react";
-import {Alert, StyleSheet, Modal, Text, View, TouchableOpacity, SectionList, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
+import {
+  Alert,
+  StyleSheet,
+  Modal,
+  Text,
+  View,
+  TouchableOpacity,
+  SectionList,
+  TextInput,
+  Pressable,
+  KeyboardAvoidingView,
+  ScrollView
+} from 'react-native';
 import database from "@react-native-firebase/database";
 import {AddNewFoodItem} from "./AddNewFoodItem";
 import {FoodPreferences} from "./FoodPreferences"
@@ -108,7 +120,7 @@ function FoodPage(props) {
           Alert.alert('Food page has been closed.');
           setModalVisible(!modalVisible);
         }}>
-        <View style={styles.appContainer}>
+        <ScrollView style={styles.appContainer}>
           <Pressable
             onPress={() => {
               setModalVisible(!modalVisible)
@@ -173,7 +185,7 @@ function FoodPage(props) {
               </View>
             ))}
           </View>
-        </View>
+        </ScrollView>
       </Modal>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
