@@ -100,14 +100,9 @@ export default function App() {
     //     datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
     // }), []);
 
-    const caloric_lost_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
-    }), []);
-
-    // const caloric_lost_chart_data = useMemo(() => ({
+    // const calories_burned_chart_data = useMemo(() => ({
     //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: getCalorieLostData() }],
+    //     datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
     // }), []);
 
     const workout_hours_chart_data = useMemo(() => ({
@@ -136,6 +131,7 @@ export default function App() {
     const [user, setUser] = useState();
     const [sleepChartData, setSleepChartData] = useState([]);
     const [caloricChartData, setCaloricChartData] = useState([]);
+    const [caloriesBurnedChartData, setCaloriesBurnedChartData] = useState([]);
 
     const sleep_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -146,6 +142,11 @@ export default function App() {
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: caloricChartData }],
     }), [caloricChartData]);
+
+    const calories_burned_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: caloriesBurnedChartData }],
+    }), [caloriesBurnedChartData]);
 
     async function onGoogleButtonPress() {
     // Check if your device supports Google Play
@@ -176,6 +177,7 @@ export default function App() {
           "Friday": 5,
           "Saturday": 6
         };
+
         const fetchSleepData = async (currentUser) => {
             try {
                 const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Sleep Samples');
@@ -220,7 +222,7 @@ export default function App() {
             try {
                 const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Energy Consumed Samples');
                 const snapshot = await newReference.once('value');
-                console.log(currentUser)
+                // console.log(currentUser)
 
                 // Array for sleep hours
                 let daysOfWeek = Array(7).fill(0);
@@ -241,9 +243,8 @@ export default function App() {
 
                         // Adding calories to respective day
                         daysOfWeek[daysDict[day]] += childSnapshot.val().value;
-                        console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
-                        console.log("DayDict: " + daysDict[day]);
                         console.log("Calories: " + childSnapshot.val().value);
+                        console.log("daysOfWeek: " + daysOfWeek);
                     } else { return true; }
                 });
 
@@ -254,11 +255,49 @@ export default function App() {
             }
         };
 
+        const fetchCaloriesBurnedData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Active Energy Burned');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    console.log("START DATE: " + start)
+                    console.log("TODAY: " + new Date())
+
+                    console.log(inSameWeek(start, new Date()))
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        console.log("DAY: " + day)
+
+                        // Adding calories to respective day
+                        daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+                        console.log("Calories: " + childSnapshot.val().value);
+                        console.log("daysOfWeek: " + daysOfWeek);
+                    } else { return true; }
+                });
+
+                console.log("Calories Burned reading done!")
+                setCaloriesBurnedData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING ENERGY BURNED SAMPLES: " + error)
+            }
+        };
+
     const onAuthStateChanged = (user) => {
         setUser(user);
         if (initializing) setInitializing(false);
         fetchSleepData(user)
         fetchCaloricData(user)
+        fetchCaloriesBurnedData(user)
     };
 
     GoogleSignin.getCurrentUser();
@@ -266,6 +305,7 @@ export default function App() {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     fetchSleepData();
     fetchCaloricData();
+    fetchCaloriesBurnedLostData();
 
     return () => {
       subscriber(); // unsubscribe on unmount
@@ -416,50 +456,7 @@ export default function App() {
   //     }
   // )
 
-    // ===============================================================================================================
-    // Function to get the ISO week number for a given date
-    // function getISOWeek(date) {
-    //     const target = new Date(date.valueOf());
-    //     const dayNr = (date.getDay() + 6) % 7;
-    //     target.setDate(target.getDate() - dayNr + 3);
-    //     const firstThursday = target.valueOf();
-    //     target.setMonth(0, 1);
-    //     if (target.getDay() !== 4) {
-    //         target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
-    //     }
-    //     return 1 + Math.ceil((firstThursday - target) / 604800000);
-    // }
-    // ===============================================================================================================
-
-    // // ===============================================================================================================
-    //
-    // const getCalorieLostData = () => {
-    //     //Array for sleep hours
-    //     let daysOfWeek = Array(7).fill(0);
-    //
-    //     newReference.once('value').then((snapshot) => {
-    //         snapshot.child("Health Info/Active Energy Burned").forEach((childSnapshot) => {
-    //             // Step 1: Parse the timestamp into a Date object
-    //             const start = new Date(childSnapshot.val().startDate);
-    //
-    //             // Determining if the day is on the same week
-    //             if (getISOWeek(start) === getISOWeek(new Date())) {
-    //                 // Step 2: Get the day from the start date
-    //                 const day = new Intl.DateTimeFormat('en-US', options).format(start);
-    //                 // console.log("Day: " + day);
-    //
-    //                 // Adding calories to respective day
-    //                 daysOfWeek[daysDict[day]] += childSnapshot.val().value;
-    //                 // console.log("Day Calories: " + daysOfWeek[daysDict[day]]);
-    //                 // console.log("DayDict: " + daysDict[day]);
-    //                 // console.log("Calories: " + childSnapshot.val().value);
-    //             }
-    //         });
-    //     })
-    //     console.log(daysOfWeek)
-    //     return daysOfWeek;
-    // }
-
+    // Function to determine if two dates are within the same week (Sunday to Saturday)
     function inSameWeek(firstDay, secondDay) {
         const firstMoment = moment(firstDay);
         const secondMoment = moment(secondDay);
@@ -470,16 +467,6 @@ export default function App() {
 
         return startOfWeek(firstMoment, -1).isSame(startOfWeek(secondMoment, -1), 'day');
     }
-
-
-    const test = () => {
-        const date1 = new Date('2023-05-27');  // Sunday
-        const date2 = new Date();  // Thursday
-
-        console.log("TEST: " + inSameWeek(date1, date2));  // Output: true
-    }
-
-    // test();
 
     return (
       <View style={styles.centeredView}>
@@ -560,7 +547,7 @@ export default function App() {
 
               <Text style={styles.subtitle}>Calories Burned</Text>
               <LineChart
-                data={caloric_lost_chart_data}
+                data={calories_burned_chart_data}
                 width={screenWidth}
                 height={250}
                 chartConfig={{
