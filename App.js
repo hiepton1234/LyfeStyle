@@ -100,10 +100,10 @@ export default function App() {
     //     datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
     // }), []);
 
-    const calories_burned_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
-    }), []);
+    // const calories_burned_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
+    // }), []);
 
     const workout_hours_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -143,10 +143,10 @@ export default function App() {
         datasets: [{ data: caloricChartData }],
     }), [caloricChartData]);
 
-    // const calories_burned_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: caloriesBurnedChartData }],
-    // }), [caloriesBurnedChartData]);
+    const calories_burned_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: caloriesBurnedChartData }],
+    }), [caloriesBurnedChartData]);
 
     async function onGoogleButtonPress() {
     // Check if your device supports Google Play
@@ -230,21 +230,21 @@ export default function App() {
                 snapshot.forEach((childSnapshot) => {
                     // Step 1: Parse the timestamp into a Date object
                     const start = new Date(childSnapshot.val().startDate);
-                    console.log("START DATE: " + start)
-                    console.log("TODAY: " + new Date())
+                    // console.log("START DATE: " + start)
+                    // console.log("TODAY: " + new Date())
 
-                    console.log(inSameWeek(start, new Date()))
+                    // console.log(inSameWeek(start, new Date()))
                     // Determining if the day is on the same week
                     if (inSameWeek(start, new Date())) {
                         // Step 2: Get the day from the start date
                         const options = { weekday: 'long' };
                         const day = start.toLocaleDateString('en-US', options).split(',')[0];
-                        console.log("DAY: " + day)
+                        // console.log("DAY: " + day)
 
                         // Adding calories to respective day
                         daysOfWeek[daysDict[day]] += childSnapshot.val().value;
-                        console.log("Calories: " + childSnapshot.val().value);
-                        console.log("daysOfWeek: " + daysOfWeek);
+                        // console.log("Calories: " + childSnapshot.val().value);
+                        // console.log("daysOfWeek: " + daysOfWeek);
                     } else { return true; }
                 });
 
@@ -297,7 +297,7 @@ export default function App() {
         if (initializing) setInitializing(false);
         fetchSleepData(user)
         fetchCaloricData(user)
-        // fetchCaloriesBurnedData(user)
+        fetchCaloriesBurnedData(user)
     };
 
     GoogleSignin.getCurrentUser();
@@ -305,7 +305,7 @@ export default function App() {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     fetchSleepData();
     fetchCaloricData();
-    // fetchCaloriesBurnedData();
+    fetchCaloriesBurnedData();
 
     return () => {
       subscriber(); // unsubscribe on unmount
