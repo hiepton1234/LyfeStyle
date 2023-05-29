@@ -270,7 +270,7 @@ export default function App() {
                     // console.log("START DATE: " + start)
                     // console.log("TODAY: " + new Date())
 
-                    console.log(inSameWeek(start, new Date()))
+                    // console.log(inSameWeek(start, new Date()))
                     // Determining if the day is on the same week
                     if (inSameWeek(start, new Date())) {
                         // Step 2: Get the day from the start date
