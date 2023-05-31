@@ -557,21 +557,25 @@ export default function App() {
                     />
 
                     <Profile
-                        user = {user}
-                        age={age}
-                        dob={dob}
-                        bio_sex={bio_sex}
-                        height={height}
+                    user = {user}
+                    age={age}
+                    dob={dob}
+                    bio_sex={bio_sex}
+                    height={height}
                     />
+
                     <HealthGoals
-                        user = {user}
-                        age={age}
-                        dob={dob}
-                        bio_sex={bio_sex}
-                        height={height}/>
+                    user = {user}
+                    age={age}
+                    dob={dob}
+                    bio_sex={bio_sex}
+                    height={height}/>
+
                     <FoodPage
-                        // personalModel = {personalModel} replace when we have one
+                    user = {user}
+                    // personalModel = {personalModel} replace when we have one
                     />
+
                     <WorkoutRec
                     />
 
