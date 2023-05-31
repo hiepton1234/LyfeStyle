@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View, ScrollView } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, Pressable, View, ScrollView, Platform } from 'react-native';
 import { Picker } from "@react-native-picker/picker";
 import database from "@react-native-firebase/database";
 
@@ -74,24 +74,21 @@ function WorkoutRec() {
             >
                 <View style={styles.appContainer}>
                     <Text style={styles.title}>Workouts</Text>
-                    <View style={styles.pickerSection}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={[styles.baseText, { paddingBottom: 10 }]}>What Workout Type?:</Text>
-                        </View>
-                    </View>
-
+                    <Text style={[styles.baseText, { paddingBottom: 10 }]}>What Workout Type?:</Text>
                     <Picker
                         style={{ flex: 1 }}
                         selectedValue={selectedWorkoutType}
                         onValueChange={(itemValue, itemIndex) =>
                             setSelectedWorkoutType(itemValue)
-                        }>
+                        }
+                        itemStyle={styles.pickerItem} // Set the custom style for Picker items
+                    >
                         {possibleWorkoutTypes.map((item, index) => (
                             <Picker.Item key={index} label={item} value={item} />
                         ))}
                     </Picker>
 
-                    <Text style={[styles.baseText, { paddingTop: 10, paddingBottom: 10 }]}>Here Are Your{"\n"}Suggested Workouts:</Text>
+                    <Text style={[styles.baseText, { paddingTop: 10, paddingBottom: 20 }]}>Here Are Your{"\n"}Suggested Workouts:</Text>
                     <ScrollView style={{ height: 120 }}>
                         {suggestedWorkouts.map((workout, index) => (
                             <View key={index} style={styles.itemContainer}>
@@ -120,11 +117,11 @@ function WorkoutRec() {
 }
 
 const styles = StyleSheet.create({
-    baseText: {
-        fontFamily: 'American Typewriter',
-        fontSize: 20,
-        textAlign: 'center',
-        paddingTop: 10,
+    appContainer: {
+        backgroundColor: '#ffff',
+        flex: 1,
+        paddingTop: 50,
+        padding: 25,
     },
 
     title: {
@@ -135,11 +132,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 
-    appContainer: {
-        backgroundColor: '#ffff',
-        flex: 1,
-        paddingTop: 50,
-        padding: 25,
+    baseText: {
+        fontFamily: 'American Typewriter',
+        fontSize: 20,
+        textAlign: 'center',
+        paddingTop: 10,
     },
 
     centeredView: {
@@ -172,10 +169,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
 
-    pickerSection: {
-        flexDirection: "row",
-    },
-
     itemContainer: {
         backgroundColor: '#F2F2F2',
         padding: 10,
@@ -186,6 +179,11 @@ const styles = StyleSheet.create({
     itemText: {
         fontFamily: 'American Typewriter', // Set the desired font family
         fontSize: 16, // Set the desired font size
+    },
+
+    pickerItem: {
+        fontFamily: 'American Typewriter',
+        fontSize: 18,
     },
 });
 
