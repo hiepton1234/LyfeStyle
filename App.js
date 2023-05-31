@@ -1,12 +1,13 @@
 import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
 import {useState, useMemo, useEffect} from "react";
-import {StyleSheet, Text, View, Modal, Button, Dimensions, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
+import {StyleSheet, Text, View, StatusBar, Dimensions, ScrollView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
-import { initializeApp } from 'firebase/app';
+import {WorkoutRec} from "./WorkoutRec"
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
+import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -78,7 +79,7 @@ export function score(activity, activity_goal, sleep, sleep_goal, intake, intake
 
 export default function App() {
     const lifescore_data = useMemo(() => ({
-        labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         datasets: [{
             data: [score(100, 100, 100, 100, 100, 100),
                 score(50, 100, 75, 100, 90, 100),
@@ -88,26 +89,6 @@ export default function App() {
                 score(50, 100, 75, 100, 100, 100),
                 score(150, 100, 90, 100, 90, 100),]
         }]
-    }), []);
-
-    const sleep_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
-    }), []);
-
-    const caloric_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
-    }), []);
-
-    const caloric_lost_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
-    }), []);
-
-    const workout_hours_chart_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [2.45, 5.34, 6.87, 0.72, 3.12, 1.89, 6.57] }],
     }), []);
 
     const commitsData = [
@@ -126,115 +107,372 @@ export default function App() {
 
     RNFirebase()
 
-  // Set an initializing state whilst Firebase connects
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
+    // Set an initializing state whilst Firebase connects
+    const [initializing, setInitializing] = useState(true);
+    const [user, setUser] = useState();
+    const [sleepChartData, setSleepChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [caloricChartData, setCaloricChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [caloriesBurnedChartData, setCaloriesBurnedChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [workoutHoursChartData, setWorkoutHoursChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
 
-  async function onGoogleButtonPress() {
-    // Check if your device supports Google Play
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    // Get the users ID token
-    const user = await GoogleSignin.signIn();
+    const sleep_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: sleepChartData }],
+    }), [sleepChartData]);
 
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(user.idToken);
+    const caloric_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: caloricChartData }],
+    }), [caloricChartData]);
 
-    // Sign-in the user with the credential
-    return auth().signInWithCredential(googleCredential);
-  }
+    const calories_burned_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: caloriesBurnedChartData }],
+    }), [caloriesBurnedChartData]);
 
-  // Handle user state changes
-  function onAuthStateChanged(user) {
+    const workout_hours_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: workoutHoursChartData }],
+    }), [workoutHoursChartData]);
+
+    async function onGoogleButtonPress() {
+        // Check if your device supports Google Play
+        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+        // Get the users ID token
+        const user = await GoogleSignin.signIn();
+
+        // Create a Google credential with the token
+        const googleCredential = auth.GoogleAuthProvider.credential(user.idToken);
+
+        // Sign-in the user with the credential
+        return auth().signInWithCredential(googleCredential);
+    }
+
+    // Handle user state changes
+    function onAuthStateChanged(user) {
     setUser(user);
     if (initializing) setInitializing(false);
-  }
+    }
 
-  useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
-  }, []);
+    // Function to determine if two dates are within the same week (Sunday to Saturday)
+    function inSameWeek(firstDay, secondDay) {
+        const firstMoment = moment(firstDay);
+        const secondMoment = moment(secondDay);
 
-  if (initializing) return null;
+        const startOfWeek = function (_moment, _offset) {
+            return _moment.clone().startOf('week').add(_offset, 'days');
+        };
 
-  if (!user) {
-    return (
-      <View style={styles.centeredView}>
-        <Text style={styles.subtitle}>Please Login</Text>
-        <GoogleSigninButton
-          style={{ width: 192, height: 48 }}
-          size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Dark}
-          onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
-        />
-      </View>
-    );
-  }
+        return startOfWeek(firstMoment, -1).isSame(startOfWeek(secondMoment, -1), 'day');
+    }
 
-  GoogleSignin.getCurrentUser()
-  const newReference = database().ref('user/' + user.uid)
+    const daysDict = {
+        "Sunday": 0,
+        "Monday": 1,
+        "Tuesday": 2,
+        "Wednesday": 3,
+        "Thursday": 4,
+        "Friday": 5,
+        "Saturday": 6
+    };
 
-  AppleHealthKit.initHealthKit(permissions, (error) => {
+    useEffect(() => {
+        const fetchSleepData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Sleep Samples');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    const end = new Date(childSnapshot.val().endDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("END DATE: " + end)
+                    // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
+
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
+
+                        // Step 3: Calculate hours
+                        const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                        // console.log("HOURS: " + hours)
+
+                        // Adding hours to respective day
+                        daysOfWeek[daysDict[day]] += hours;
+                    } else { return true; }
+                });
+
+                // console.log("Sleep reading done!")
+                setSleepChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
+            }
+        };
+
+        const fetchCaloricData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Energy Consumed Samples');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("TODAY: " + new Date())
+
+                    // console.log(inSameWeek(start, new Date()))
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
+
+                        // Adding calories to respective day
+                        daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+                        // console.log("Calories: " + childSnapshot.val().value);
+                        // console.log("daysOfWeek: " + daysOfWeek);
+                    } else { return true; }
+                });
+
+                // console.log("Calorie reading done!")
+                setCaloricChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING CALORIC SAMPLES: " + error)
+            }
+        };
+
+        const fetchCaloriesBurnedData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Active Energy Burned');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("TODAY: " + new Date())
+
+                    // console.log(inSameWeek(start, new Date()))
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
+
+                        // Adding calories to respective day
+                        daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+                        // console.log("Calories: " + childSnapshot.val().value);
+                        // console.log("daysOfWeek: " + daysOfWeek);
+                    } else { return true; }
+                });
+
+                // console.log("Calories Burned reading done!")
+                setCaloriesBurnedChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING ENERGY BURNED SAMPLES: " + error)
+            }
+        };
+
+        const fetchWorkoutHoursData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Active Energy Burned');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    const end = new Date(childSnapshot.val().endDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("END DATE: " + end)
+                    // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
+
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
+
+                        // Step 3: Calculate hours
+                        const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                        // console.log("HOURS: " + hours)
+
+                        // Adding hours to respective day
+                        daysOfWeek[daysDict[day]] += hours;
+                    } else { return true; }
+                });
+
+                // console.log("Workout hours reading done!")
+                setWorkoutHoursChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING WORKOUT HOURS SAMPLES: " + error)
+            }
+        };
+
+        const onAuthStateChanged = (user) => {
+            setUser(user);
+            if (initializing) setInitializing(false);
+            if (user) {
+                fetchSleepData(user)
+                    .then(() => {
+                        // Sleep data fetching completed
+                        console.log('Sleep data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching sleep data:', error);
+                    });
+
+                fetchCaloricData(user)
+                    .then(() => {
+                        // Caloric data fetching completed
+                        console.log('Caloric data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching caloric data:', error);
+                    });
+
+                fetchCaloriesBurnedData(user)
+                    .then(() => {
+                        // Calories burned data fetching completed
+                        console.log('Calories burned data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching calories burned data:', error);
+                    });
+
+                fetchWorkoutHoursData(user)
+                    .then(() => {
+                        // Calories burned data fetching completed
+                        console.log('Workout hours data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching workout hours data:', error);
+                    });
+            }
+        };
+
+        GoogleSignin.getCurrentUser()
+            .then((currentUser) => {
+                onAuthStateChanged(currentUser);
+            })
+            .catch((error) => {
+                console.log('Error getting current user:', error);
+            });
+
+        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+
+        return () => {
+            subscriber(); // unsubscribe on unmount
+        };
+    }, []);
+
+    if (initializing) return null;
+
+    if (!user) {
+        return (
+            <View style={styles.centeredView}>
+            <Text style={styles.subtitle}>Please Login</Text>
+            <GoogleSigninButton
+                style={{ width: 192, height: 48 }}
+                size={GoogleSigninButton.Size.Wide}
+                color={GoogleSigninButton.Color.Dark}
+                onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
+            />
+            </View>
+        );
+    }
+
+    // GoogleSignin.getCurrentUser()
+    const newReference = database().ref('user/' + user.uid)
+
+    AppleHealthKit.initHealthKit(permissions, (error) => {
     /* Called after we receive a response from the system */
 
     if (error) {
-      console.log('[ERROR] Cannot grant permissions!')
+        console.log('[ERROR] Cannot grant permissions!')
     }
 
     /* Can now read or write to HealthKit */
 
     const options = {
-      startDate: new Date(2020, 1, 1).toISOString(),
-      endDate: new Date().toISOString(), // optional; default now
-      type: 'AllergyRecord',
+        startDate: new Date(2020, 1, 1).toISOString(),
+        endDate: new Date().toISOString(), // optional; default now
+        type: 'AllergyRecord',
     }
 
     AppleHealthKit.getSleepSamples(
-      options,
-      (callbackError, result) => {
+        options,
+        (callbackError, result) => {
         /* Samples are now collected from HealthKit */
-        console.log(result[0])
+        // console.log(result[0])
         newReference.child("Health Info/Sleep Samples")
-          .set(result)
-      },
+            .set(result)
+        },
     )
+
     AppleHealthKit.getBiologicalSex(
-      options,
-      (callBackError, result) => {
-        console.log(result)
+        options,
+        (callBackError, result) => {
+        // console.log(result)
         bio_sex = result.value
 
         newReference.child("Health Info")
-          .update({
+            .update({
             bio_sex: bio_sex
-          })
-      }
+            })
+        }
     )
+
     AppleHealthKit.getLatestHeight(
-      options,
-      (callBackError, result) => {
-        console.log(result)
+        options,
+        (callBackError, result) => {
+        // console.log(result)
         height = result.value
 
         newReference.child("Health Info")
-          .update({
+            .update({
             height: height
-          })
+            })
       }
     )
+
     AppleHealthKit.getDailyStepCountSamples(
       options,
       (callBackError, result) => {
-        console.log(result[0])
+        // console.log(result[0])
         newReference.child("Health Info/Step Counts")
           .set(
             result.slice(0, 90)
           )
       }
     )
+
     AppleHealthKit.getLatestWeight(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
 
         newReference.child("Health Info")
           .update({
@@ -242,10 +480,11 @@ export default function App() {
           })
       }
     )
+
     AppleHealthKit.getDateOfBirth(
       options,
       (callbackError, result) => {
-        console.log(result)
+        // console.log(result)
         dob = result.value.substring(0, 10)
         age = result.age
         newReference.child("Health Info")
@@ -259,7 +498,7 @@ export default function App() {
     AppleHealthKit.getActiveEnergyBurned(
       options,
       (callbackError, result) => {
-        console.log(result[0])
+        // console.log(result[0])
         newReference.child("Health Info/Active Energy Burned")
           .set(
             result
@@ -270,7 +509,7 @@ export default function App() {
     AppleHealthKit.getEnergyConsumedSamples(
       options,
       (callbackError, result) => {
-        console.log(result[0])
+        // console.log(result[0])
 
         newReference.child("Health Info/Energy Consumed Samples")
           .set(
@@ -278,10 +517,11 @@ export default function App() {
           )
       }
     )
+
     AppleHealthKit.getProteinSamples(
       options,
       (callbackError, result) => {
-        console.log(result[0])
+        // console.log(result[0])
 
         newReference.child("Health Info/Protein Samples")
           .set(
@@ -290,145 +530,155 @@ export default function App() {
       }
     )
     }
-  )
-  // AppleHealthKit.getClinicalRecords(
-  //     options,
-  //     (callbackError, result) => {
-  //         console.log(result[0])
-  //     }
-  // )
+    )
+    
+    // AppleHealthKit.getClinicalRecords(
+    //     options,
+    //     (callbackError, result) => {
+    //         console.log(result[0])
+    //     }
+    // )
 
     return (
-      <View style={styles.centeredView}>
-        <Text style={styles.textStyle}>Lyfestyle</Text>
+        <>
+            <StatusBar barStyle="dark-content" />
+            <View style={styles.centeredView}>
+                <Text style={styles.textStyle}>Lyfestyle</Text>
 
-        <ScrollView contentContainerStyle={styles.scrollView}>
-            <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
-            <Text style={styles.subtitle}>Current Week's Lifestyle Scores</Text>
-            <LineChart
-                data={lifescore_data}
-                width={screenWidth}
-                height={250}
-                chartConfig={{
-                    backgroundGradientFrom: '#f0f0f0',
-                    backgroundGradientTo: '#e0e0e0',
-                    decimalPlaces: 1,
-                    barPercentage: 0.6,
-                    color: (opacity = 1) => `rgba(255, 153, 0, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingTop: 10}}
-            />
+                <ScrollView contentContainerStyle={styles.scrollView}>
+                    <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
+                    <Text style={styles.subtitle}>Current Week's Lifestyle Scores</Text>
+                    <LineChart
+                        data={lifescore_data}
+                        width={screenWidth}
+                        height={250}
+                        chartConfig={{
+                            backgroundGradientFrom: '#f0f0f0',
+                            backgroundGradientTo: '#e0e0e0',
+                            decimalPlaces: 1,
+                            barPercentage: 0.6,
+                            color: (opacity = 1) => `rgba(255, 153, 0, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                        }}
+                        style={{ paddingTop: 10}}
+                    />
 
-          <Profile
-            user = {user}
-            age={age}
-            dob={dob}
-            bio_sex={bio_sex}
-            height={height}
-          />
-          <HealthGoals
-            user = {user}
-            age={age}
-            dob={dob}
-            bio_sex={bio_sex}
-            height={height}/>
-          <FoodPage
-            user = {user}
-            // personalModel = {personalModel} replace when we have one
-          />
+                    <Profile
+                    user = {user}
+                    age={age}
+                    dob={dob}
+                    bio_sex={bio_sex}
+                    height={height}
+                    />
 
-          {/*Personicle*/}
-          <View style={styles.centeredView}>
-            <Text style={styles.title}>Personicle</Text>
+                    <HealthGoals
+                    user = {user}
+                    age={age}
+                    dob={dob}
+                    bio_sex={bio_sex}
+                    height={height}/>
 
-            {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
-              <Text style={styles.subtitle}>Sleep</Text>
-              <BarChart
-                data={sleep_chart_data}
-                width={screenWidth}
-                height={250}
-                yAxisSuffix=" Hrs"
-                chartConfig={{
-                  backgroundGradientFrom: '#f0f0f0',
-                  backgroundGradientTo: '#e0e0e0',
-                  decimalPlaces: 1,
-                  barPercentage: 0.6,
-                  color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingBottom: 30 }}
-              />
+                    <FoodPage
+                    user = {user}
+                    // personalModel = {personalModel} replace when we have one
+                    />
 
-              <Text style={styles.subtitle}>Caloric Intake</Text>
-              <LineChart
-                data={caloric_chart_data}
-                width={screenWidth}
-                height={250}
-                chartConfig={{
-                  backgroundGradientFrom: '#f0f0f0',
-                  backgroundGradientTo: '#e0e0e0',
-                  decimalPlaces: 1,
-                  barPercentage: 0.6,
-                  color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingBottom: 20}}
-              />
+                    <WorkoutRec
+                    />
 
-              <Text style={styles.subtitle}>Calories Burned</Text>
-              <LineChart
-                data={caloric_lost_chart_data}
-                width={screenWidth}
-                height={250}
-                chartConfig={{
-                  backgroundGradientFrom: '#f0f0f0',
-                  backgroundGradientTo: '#e0e0e0',
-                  decimalPlaces: 1,
-                  barPercentage: 0.6,
-                  color: (opacity = 1) => `rgba(255, 0, 56, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingBottom: 20 }}
-              />
+                    {/*Personicle*/}
+                    <View style={styles.centeredView}>
+                        <Text style={styles.title}>Personicle</Text>
 
-              <Text style={styles.subtitle}>Workout Hours</Text>
-              <BarChart
-                data={workout_hours_chart_data}
-                width={screenWidth}
-                height={250}
-                chartConfig={{
-                  backgroundGradientFrom: '#f0f0f0',
-                  backgroundGradientTo: '#e0e0e0',
-                  decimalPlaces: 1,
-                  barPercentage: 0.6,
-                  color: (opacity = 1) => `rgba(150, 60, 170, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingBottom: 40 }}
-              />
+                        {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
+                        <Text style={styles.subtitle}>Sleep</Text>
+                        <BarChart
+                            data={sleep_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            yAxisSuffix=" Hrs"
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 30 }}
+                        />
 
-              <Text style={styles.subtitle}>Daily Activities</Text>
-              <ScrollView horizontal={true}>
-                <ContributionGraph
-                  values={commitsData}
-                  endDate={new Date("2017-04-01")}
-                  width={screenWidth + 280}
-                  height={220}
-                  showMonthLabels={true}
-                  chartConfig={{
-                    backgroundGradientFrom: "#f0f0f0",
-                    backgroundGradientTo: "#e0e0e0",
-                    color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  }}
-                  style={{ paddingBottom: 50 }}
-                />
-              </ScrollView>
+                        <Text style={styles.subtitle}>Caloric Intake</Text>
+                        <LineChart
+                            data={caloric_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 20}}
+                        />
+
+                        <Text style={styles.subtitle}>Calories Burned</Text>
+                        <LineChart
+                            data={calories_burned_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(255, 0, 56, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 20 }}
+                        />
+
+                        <Text style={styles.subtitle}>Workout Hours</Text>
+                        <BarChart
+                            data={workout_hours_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            yAxisSuffix=" Hrs"
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(150, 60, 170, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 40 }}
+                        />
+
+                        <Text style={styles.subtitle}>Daily Activities</Text>
+                        <ScrollView horizontal={true}>
+                            <ContributionGraph
+                                values={commitsData}
+                                endDate={new Date("2017-04-01")}
+                                width={screenWidth + 280}
+                                height={220}
+                                showMonthLabels={true}
+                                chartConfig={{
+                                    backgroundGradientFrom: "#f0f0f0",
+                                    backgroundGradientTo: "#e0e0e0",
+                                    color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                }}
+                                style={{ paddingBottom: 50 }}
+                            />
+                        </ScrollView>
+                    </View>
+                </ScrollView>
             </View>
-        </ScrollView>
-      </View>
-  );
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
