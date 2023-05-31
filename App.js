@@ -388,73 +388,76 @@ export default function App() {
         };
     }, []);
 
-  if (initializing) return null;
+    if (initializing) return null;
 
-  if (!user) {
-    return (
-      <View style={styles.centeredView}>
-        <Text style={styles.subtitle}>Please Login</Text>
-        <GoogleSigninButton
-          style={{ width: 192, height: 48 }}
-          size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Dark}
-          onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
-        />
-      </View>
-    );
-  }
+    if (!user) {
+        return (
+            <View style={styles.centeredView}>
+            <Text style={styles.subtitle}>Please Login</Text>
+            <GoogleSigninButton
+                style={{ width: 192, height: 48 }}
+                size={GoogleSigninButton.Size.Wide}
+                color={GoogleSigninButton.Color.Dark}
+                onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
+            />
+            </View>
+        );
+    }
 
-  // GoogleSignin.getCurrentUser()
-  const newReference = database().ref('user/' + user.uid)
+    // GoogleSignin.getCurrentUser()
+    const newReference = database().ref('user/' + user.uid)
 
-  AppleHealthKit.initHealthKit(permissions, (error) => {
+    AppleHealthKit.initHealthKit(permissions, (error) => {
     /* Called after we receive a response from the system */
 
     if (error) {
-      console.log('[ERROR] Cannot grant permissions!')
+        console.log('[ERROR] Cannot grant permissions!')
     }
 
     /* Can now read or write to HealthKit */
 
     const options = {
-      startDate: new Date(2020, 1, 1).toISOString(),
-      endDate: new Date().toISOString(), // optional; default now
-      type: 'AllergyRecord',
+        startDate: new Date(2020, 1, 1).toISOString(),
+        endDate: new Date().toISOString(), // optional; default now
+        type: 'AllergyRecord',
     }
 
     AppleHealthKit.getSleepSamples(
-      options,
-      (callbackError, result) => {
+        options,
+        (callbackError, result) => {
         /* Samples are now collected from HealthKit */
         // console.log(result[0])
         newReference.child("Health Info/Sleep Samples")
-          .set(result)
-      },
+            .set(result)
+        },
     )
+
     AppleHealthKit.getBiologicalSex(
-      options,
-      (callBackError, result) => {
+        options,
+        (callBackError, result) => {
         // console.log(result)
         bio_sex = result.value
 
         newReference.child("Health Info")
-          .update({
+            .update({
             bio_sex: bio_sex
-          })
-      }
+            })
+        }
     )
+
     AppleHealthKit.getLatestHeight(
-      options,
-      (callBackError, result) => {
+        options,
+        (callBackError, result) => {
         // console.log(result)
         height = result.value
 
         newReference.child("Health Info")
-          .update({
+            .update({
             height: height
-          })
+            })
       }
     )
+
     AppleHealthKit.getDailyStepCountSamples(
       options,
       (callBackError, result) => {
@@ -465,6 +468,7 @@ export default function App() {
           )
       }
     )
+
     AppleHealthKit.getLatestWeight(
       options,
       (callBackError, result) => {
@@ -476,6 +480,7 @@ export default function App() {
           })
       }
     )
+
     AppleHealthKit.getDateOfBirth(
       options,
       (callbackError, result) => {
@@ -512,6 +517,7 @@ export default function App() {
           )
       }
     )
+
     AppleHealthKit.getProteinSamples(
       options,
       (callbackError, result) => {
@@ -524,13 +530,14 @@ export default function App() {
       }
     )
     }
-  )
-  // AppleHealthKit.getClinicalRecords(
-  //     options,
-  //     (callbackError, result) => {
-  //         console.log(result[0])
-  //     }
-  // )
+    )
+    
+    // AppleHealthKit.getClinicalRecords(
+    //     options,
+    //     (callbackError, result) => {
+    //         console.log(result[0])
+    //     }
+    // )
 
     return (
         <>
@@ -670,7 +677,7 @@ export default function App() {
                 </ScrollView>
             </View>
         </>
-  );
+    );
 }
 
 const styles = StyleSheet.create({
