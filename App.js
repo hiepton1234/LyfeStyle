@@ -645,6 +645,7 @@ export default function App() {
                             data={workout_hours_chart_data}
                             width={screenWidth}
                             height={250}
+                            yAxisSuffix=" Hrs"
                             chartConfig={{
                                 backgroundGradientFrom: '#f0f0f0',
                                 backgroundGradientTo: '#e0e0e0',
