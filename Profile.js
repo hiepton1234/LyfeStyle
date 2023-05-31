@@ -56,7 +56,6 @@ function Profile (props) {
   }
 
   function saveProfile(profileElems) {
-    // NOTE: Name is not technically unique, change in final product
     const newReference = database().ref('user/' + props.user.uid);
 
     console.log('newReference key: ', newReference.key);
