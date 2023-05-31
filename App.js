@@ -4,6 +4,7 @@ import {StyleSheet, Text, View, Dimensions, ScrollView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
+import {WorkoutRec} from "./WorkoutRec"
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import moment from "moment";
@@ -95,15 +96,15 @@ export default function App() {
     //     datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
     // }), []);
 
-    // const caloric_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
-    // }), []);
+    const caloric_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
+    }), []);
 
-    // const calories_burned_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
-    // }), []);
+    const calories_burned_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
+    }), []);
 
     const workout_hours_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -138,15 +139,15 @@ export default function App() {
         datasets: [{ data: sleepChartData }],
     }), [sleepChartData]);
 
-    const caloric_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: caloricChartData }],
-    }), [caloricChartData]);
+    // const caloric_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: caloricChartData }],
+    // }), [caloricChartData]);
 
-    const calories_burned_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: caloriesBurnedChartData }],
-    }), [caloriesBurnedChartData]);
+    // const calories_burned_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: caloriesBurnedChartData }],
+    // }), [caloriesBurnedChartData]);
 
     async function onGoogleButtonPress() {
     // Check if your device supports Google Play
@@ -211,7 +212,7 @@ export default function App() {
                     } else { return true; }
                 });
 
-                console.log("Sleep reading done!")
+                // console.log("Sleep reading done!")
                 setSleepChartData(daysOfWeek);
             } catch (error) {
                 console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
@@ -248,7 +249,7 @@ export default function App() {
                     } else { return true; }
                 });
 
-                console.log("Calorie reading done!")
+                // console.log("Calorie reading done!")
                 setCaloricChartData(daysOfWeek);
             } catch (error) {
                 console.log("ERROR DETECTED FETCHING CALORIC SAMPLES: " + error)
@@ -285,7 +286,7 @@ export default function App() {
                     } else { return true; }
                 });
 
-                console.log("Calories Burned reading done!")
+                // console.log("Calories Burned reading done!")
                 setCaloriesBurnedChartData(daysOfWeek);
             } catch (error) {
                 console.log("ERROR DETECTED FETCHING ENERGY BURNED SAMPLES: " + error)
@@ -505,6 +506,8 @@ export default function App() {
             height={height}/>
           <FoodPage
             // personalModel = {personalModel} replace when we have one
+          />
+          <WorkoutRec
           />
 
           {/*Personicle*/}
