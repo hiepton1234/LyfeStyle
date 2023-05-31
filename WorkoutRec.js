@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View, KeyboardAvoidingView, ScrollView, TextInput } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, Pressable, View, ScrollView } from 'react-native';
 import { Picker } from "@react-native-picker/picker";
 import database from "@react-native-firebase/database";
 
@@ -142,32 +142,6 @@ const styles = StyleSheet.create({
         padding: 25,
     },
 
-    textInput: {
-        borderWidth: 1,
-        borderColor: "#cccccc",
-        // in most places where you can set size as num pixels, you can also use percentages passed as a string
-        // want this element to take up 80% of available width, defined by the container in which the element sits
-        width: '60%',
-        margin: 8,
-        padding: 8,
-        justifyContent: ''
-    },
-
-    save_or_cancel: {
-        flexDirection: "row",
-        justifyContent: 'space-evenly',
-    },
-
-    input: {
-        fontFamily: 'Avenir-Book',
-        flex: 1,
-        textAlign: 'right',
-        borderWidth: 1,
-        borderRadius: 5,
-        padding: 10,
-        fontSize: 20,
-    },
-
     centeredView: {
         flex: 1,
         justifyContent: 'center',
@@ -210,8 +184,8 @@ const styles = StyleSheet.create({
     },
 
     itemText: {
-        fontFamily: 'American Typewriter',
-        fontSize: 16,
+        fontFamily: 'American Typewriter', // Set the desired font family
+        fontSize: 16, // Set the desired font size
     },
 });
 

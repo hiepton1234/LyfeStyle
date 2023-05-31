@@ -91,26 +91,6 @@ export default function App() {
         }]
     }), []);
 
-    // const sleep_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
-    // }), []);
-
-    // const caloric_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
-    // }), []);
-
-    // const calories_burned_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
-    // }), []);
-
-    const workout_hours_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: [2.45, 5.34, 6.87, 0.72, 3.12, 1.89, 6.57] }],
-    }), []);
-
     const commitsData = [
         { date: "2017-01-02", count: 1 },
         { date: "2017-01-03", count: 2 },
@@ -133,6 +113,7 @@ export default function App() {
     const [sleepChartData, setSleepChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [caloricChartData, setCaloricChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [caloriesBurnedChartData, setCaloriesBurnedChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [workoutHoursChartData, setWorkoutHoursChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
 
     const sleep_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -148,6 +129,11 @@ export default function App() {
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: caloriesBurnedChartData }],
     }), [caloriesBurnedChartData]);
+
+    const workout_hours_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: workoutHoursChartData }],
+    }), [workoutHoursChartData]);
 
     async function onGoogleButtonPress() {
         // Check if your device supports Google Play
@@ -166,6 +152,18 @@ export default function App() {
     function onAuthStateChanged(user) {
     setUser(user);
     if (initializing) setInitializing(false);
+    }
+
+    // Function to determine if two dates are within the same week (Sunday to Saturday)
+    function inSameWeek(firstDay, secondDay) {
+        const firstMoment = moment(firstDay);
+        const secondMoment = moment(secondDay);
+
+        const startOfWeek = function (_moment, _offset) {
+            return _moment.clone().startOf('week').add(_offset, 'days');
+        };
+
+        return startOfWeek(firstMoment, -1).isSame(startOfWeek(secondMoment, -1), 'day');
     }
 
     const daysDict = {
@@ -293,6 +291,46 @@ export default function App() {
             }
         };
 
+        const fetchWorkoutHoursData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Active Energy Burned');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    const end = new Date(childSnapshot.val().endDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("END DATE: " + end)
+                    // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
+
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
+
+                        // Step 3: Calculate hours
+                        const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                        // console.log("HOURS: " + hours)
+
+                        // Adding hours to respective day
+                        daysOfWeek[daysDict[day]] += hours;
+                    } else { return true; }
+                });
+
+                // console.log("Workout hours reading done!")
+                setWorkoutHoursChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING WORKOUT HOURS SAMPLES: " + error)
+            }
+        };
+
         const onAuthStateChanged = (user) => {
             setUser(user);
             if (initializing) setInitializing(false);
@@ -322,6 +360,15 @@ export default function App() {
                     })
                     .catch((error) => {
                         console.log('Error fetching calories burned data:', error);
+                    });
+
+                fetchWorkoutHoursData(user)
+                    .then(() => {
+                        // Calories burned data fetching completed
+                        console.log('Workout hours data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching workout hours data:', error);
                     });
             }
         };
@@ -357,14 +404,14 @@ export default function App() {
     );
   }
 
-  GoogleSignin.getCurrentUser()
+  // GoogleSignin.getCurrentUser()
   const newReference = database().ref('user/' + user.uid)
 
   AppleHealthKit.initHealthKit(permissions, (error) => {
     /* Called after we receive a response from the system */
 
     if (error) {
-      // console.log('[ERROR] Cannot grant permissions!')
+      console.log('[ERROR] Cannot grant permissions!')
     }
 
     /* Can now read or write to HealthKit */
@@ -481,21 +528,9 @@ export default function App() {
   // AppleHealthKit.getClinicalRecords(
   //     options,
   //     (callbackError, result) => {
-  //         // console.log(result[0])
+  //         console.log(result[0])
   //     }
   // )
-
-    // Function to determine if two dates are within the same week (Sunday to Saturday)
-    function inSameWeek(firstDay, secondDay) {
-        const firstMoment = moment(firstDay);
-        const secondMoment = moment(secondDay);
-
-        const startOfWeek = function (_moment, _offset) {
-            return _moment.clone().startOf('week').add(_offset, 'days');
-        };
-
-        return startOfWeek(firstMoment, -1).isSame(startOfWeek(secondMoment, -1), 'day');
-    }
 
     return (
       <View style={styles.centeredView}>
