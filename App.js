@@ -1,6 +1,6 @@
 import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
 import {useState, useMemo, useEffect} from "react";
-import {StyleSheet, Text, View, Dimensions, ScrollView} from 'react-native';
+import {StyleSheet, Text, View, StatusBar, Dimensions, ScrollView} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
@@ -533,136 +533,139 @@ export default function App() {
   // )
 
     return (
-      <View style={styles.centeredView}>
-        <Text style={styles.textStyle}>Lyfestyle</Text>
+        <>
+            <StatusBar barStyle="dark-content" />
+            <View style={styles.centeredView}>
+                <Text style={styles.textStyle}>Lyfestyle</Text>
 
-        <ScrollView contentContainerStyle={styles.scrollView}>
-            <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
-            <Text style={styles.subtitle}>Current Week's Lifestyle Scores</Text>
-            <LineChart
-                data={lifescore_data}
-                width={screenWidth}
-                height={250}
-                chartConfig={{
-                    backgroundGradientFrom: '#f0f0f0',
-                    backgroundGradientTo: '#e0e0e0',
-                    decimalPlaces: 1,
-                    barPercentage: 0.6,
-                    color: (opacity = 1) => `rgba(255, 153, 0, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingTop: 10}}
-            />
+                <ScrollView contentContainerStyle={styles.scrollView}>
+                    <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
+                    <Text style={styles.subtitle}>Current Week's Lifestyle Scores</Text>
+                    <LineChart
+                        data={lifescore_data}
+                        width={screenWidth}
+                        height={250}
+                        chartConfig={{
+                            backgroundGradientFrom: '#f0f0f0',
+                            backgroundGradientTo: '#e0e0e0',
+                            decimalPlaces: 1,
+                            barPercentage: 0.6,
+                            color: (opacity = 1) => `rgba(255, 153, 0, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                        }}
+                        style={{ paddingTop: 10}}
+                    />
 
-          <Profile
-            user = {user}
-            age={age}
-            dob={dob}
-            bio_sex={bio_sex}
-            height={height}
-          />
-          <HealthGoals
-            user = {user}
-            age={age}
-            dob={dob}
-            bio_sex={bio_sex}
-            height={height}/>
-          <FoodPage
-            // personalModel = {personalModel} replace when we have one
-          />
-          <WorkoutRec
-          />
+                    <Profile
+                        user = {user}
+                        age={age}
+                        dob={dob}
+                        bio_sex={bio_sex}
+                        height={height}
+                    />
+                    <HealthGoals
+                        user = {user}
+                        age={age}
+                        dob={dob}
+                        bio_sex={bio_sex}
+                        height={height}/>
+                    <FoodPage
+                        // personalModel = {personalModel} replace when we have one
+                    />
+                    <WorkoutRec
+                    />
 
-          {/*Personicle*/}
-          <View style={styles.centeredView}>
-            <Text style={styles.title}>Personicle</Text>
+                    {/*Personicle*/}
+                    <View style={styles.centeredView}>
+                        <Text style={styles.title}>Personicle</Text>
 
-            {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
-              <Text style={styles.subtitle}>Sleep</Text>
-              <BarChart
-                data={sleep_chart_data}
-                width={screenWidth}
-                height={250}
-                yAxisSuffix=" Hrs"
-                chartConfig={{
-                  backgroundGradientFrom: '#f0f0f0',
-                  backgroundGradientTo: '#e0e0e0',
-                  decimalPlaces: 1,
-                  barPercentage: 0.6,
-                  color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingBottom: 30 }}
-              />
+                        {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
+                        <Text style={styles.subtitle}>Sleep</Text>
+                        <BarChart
+                            data={sleep_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            yAxisSuffix=" Hrs"
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(0, 153, 204, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 30 }}
+                        />
 
-              <Text style={styles.subtitle}>Caloric Intake</Text>
-              <LineChart
-                data={caloric_chart_data}
-                width={screenWidth}
-                height={250}
-                chartConfig={{
-                  backgroundGradientFrom: '#f0f0f0',
-                  backgroundGradientTo: '#e0e0e0',
-                  decimalPlaces: 1,
-                  barPercentage: 0.6,
-                  color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingBottom: 20}}
-              />
+                        <Text style={styles.subtitle}>Caloric Intake</Text>
+                        <LineChart
+                            data={caloric_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 20}}
+                        />
 
-              <Text style={styles.subtitle}>Calories Burned</Text>
-              <LineChart
-                data={calories_burned_chart_data}
-                width={screenWidth}
-                height={250}
-                chartConfig={{
-                  backgroundGradientFrom: '#f0f0f0',
-                  backgroundGradientTo: '#e0e0e0',
-                  decimalPlaces: 1,
-                  barPercentage: 0.6,
-                  color: (opacity = 1) => `rgba(255, 0, 56, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingBottom: 20 }}
-              />
+                        <Text style={styles.subtitle}>Calories Burned</Text>
+                        <LineChart
+                            data={calories_burned_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(255, 0, 56, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 20 }}
+                        />
 
-              <Text style={styles.subtitle}>Workout Hours</Text>
-              <BarChart
-                data={workout_hours_chart_data}
-                width={screenWidth}
-                height={250}
-                chartConfig={{
-                  backgroundGradientFrom: '#f0f0f0',
-                  backgroundGradientTo: '#e0e0e0',
-                  decimalPlaces: 1,
-                  barPercentage: 0.6,
-                  color: (opacity = 1) => `rgba(150, 60, 170, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={{ paddingBottom: 40 }}
-              />
+                        <Text style={styles.subtitle}>Workout Hours</Text>
+                        <BarChart
+                            data={workout_hours_chart_data}
+                            width={screenWidth}
+                            height={250}
+                            chartConfig={{
+                                backgroundGradientFrom: '#f0f0f0',
+                                backgroundGradientTo: '#e0e0e0',
+                                decimalPlaces: 1,
+                                barPercentage: 0.6,
+                                color: (opacity = 1) => `rgba(150, 60, 170, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            style={{ paddingBottom: 40 }}
+                        />
 
-              <Text style={styles.subtitle}>Daily Activities</Text>
-              <ScrollView horizontal={true}>
-                <ContributionGraph
-                  values={commitsData}
-                  endDate={new Date("2017-04-01")}
-                  width={screenWidth + 280}
-                  height={220}
-                  showMonthLabels={true}
-                  chartConfig={{
-                    backgroundGradientFrom: "#f0f0f0",
-                    backgroundGradientTo: "#e0e0e0",
-                    color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  }}
-                  style={{ paddingBottom: 50 }}
-                />
-              </ScrollView>
+                        <Text style={styles.subtitle}>Daily Activities</Text>
+                        <ScrollView horizontal={true}>
+                            <ContributionGraph
+                                values={commitsData}
+                                endDate={new Date("2017-04-01")}
+                                width={screenWidth + 280}
+                                height={220}
+                                showMonthLabels={true}
+                                chartConfig={{
+                                    backgroundGradientFrom: "#f0f0f0",
+                                    backgroundGradientTo: "#e0e0e0",
+                                    color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                }}
+                                style={{ paddingBottom: 50 }}
+                            />
+                        </ScrollView>
+                    </View>
+                </ScrollView>
             </View>
-        </ScrollView>
-      </View>
+        </>
   );
 }
 
