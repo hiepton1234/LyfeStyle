@@ -96,15 +96,15 @@ export default function App() {
     //     datasets: [{ data: [7.5, 8, 7, 6, 6.5, 9, 8.5] }],
     // }), []);
 
-    const caloric_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
-    }), []);
+    // const caloric_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: [2490, 2505, 2510, 2485, 2498, 2502, 2515] }],
+    // }), []);
 
-    const calories_burned_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
-    }), []);
+    // const calories_burned_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: [408, 429, 471, 488, 403, 416, 452] }],
+    // }), []);
 
     const workout_hours_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -130,55 +130,55 @@ export default function App() {
     // Set an initializing state whilst Firebase connects
     const [initializing, setInitializing] = useState(true);
     const [user, setUser] = useState();
-    const [sleepChartData, setSleepChartData] = useState([]);
-    const [caloricChartData, setCaloricChartData] = useState([]);
-    const [caloriesBurnedChartData, setCaloriesBurnedChartData] = useState([]);
+    const [sleepChartData, setSleepChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [caloricChartData, setCaloricChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [caloriesBurnedChartData, setCaloriesBurnedChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
 
     const sleep_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: sleepChartData }],
     }), [sleepChartData]);
 
-    // const caloric_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: caloricChartData }],
-    // }), [caloricChartData]);
+    const caloric_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: caloricChartData }],
+    }), [caloricChartData]);
 
-    // const calories_burned_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: caloriesBurnedChartData }],
-    // }), [caloriesBurnedChartData]);
+    const calories_burned_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: caloriesBurnedChartData }],
+    }), [caloriesBurnedChartData]);
 
     async function onGoogleButtonPress() {
-    // Check if your device supports Google Play
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    // Get the users ID token
-    const user = await GoogleSignin.signIn();
+        // Check if your device supports Google Play
+        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+        // Get the users ID token
+        const user = await GoogleSignin.signIn();
 
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(user.idToken);
+        // Create a Google credential with the token
+        const googleCredential = auth.GoogleAuthProvider.credential(user.idToken);
 
-    // Sign-in the user with the credential
-    return auth().signInWithCredential(googleCredential);
-  }
+        // Sign-in the user with the credential
+        return auth().signInWithCredential(googleCredential);
+    }
 
-  // Handle user state changes
-  function onAuthStateChanged(user) {
+    // Handle user state changes
+    function onAuthStateChanged(user) {
     setUser(user);
     if (initializing) setInitializing(false);
-  }
+    }
+
+    const daysDict = {
+        "Sunday": 0,
+        "Monday": 1,
+        "Tuesday": 2,
+        "Wednesday": 3,
+        "Thursday": 4,
+        "Friday": 5,
+        "Saturday": 6
+    };
 
     useEffect(() => {
-        const daysDict = {
-          "Sunday": 0,
-          "Monday": 1,
-          "Tuesday": 2,
-          "Wednesday": 3,
-          "Thursday": 4,
-          "Friday": 5,
-          "Saturday": 6
-        };
-
         const fetchSleepData = async (currentUser) => {
             try {
                 const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Sleep Samples');
@@ -293,25 +293,53 @@ export default function App() {
             }
         };
 
-    const onAuthStateChanged = (user) => {
-        setUser(user);
-        if (initializing) setInitializing(false);
-        fetchSleepData(user)
-        fetchCaloricData(user)
-        fetchCaloriesBurnedData(user)
-    };
+        const onAuthStateChanged = (user) => {
+            setUser(user);
+            if (initializing) setInitializing(false);
+            if (user) {
+                fetchSleepData(user)
+                    .then(() => {
+                        // Sleep data fetching completed
+                        console.log('Sleep data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching sleep data:', error);
+                    });
 
-    GoogleSignin.getCurrentUser();
+                fetchCaloricData(user)
+                    .then(() => {
+                        // Caloric data fetching completed
+                        console.log('Caloric data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching caloric data:', error);
+                    });
 
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    fetchSleepData();
-    fetchCaloricData();
-    fetchCaloriesBurnedData();
+                fetchCaloriesBurnedData(user)
+                    .then(() => {
+                        // Calories burned data fetching completed
+                        console.log('Calories burned data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching calories burned data:', error);
+                    });
+            }
+        };
 
-    return () => {
-      subscriber(); // unsubscribe on unmount
-    };
-  }, []);
+        GoogleSignin.getCurrentUser()
+            .then((currentUser) => {
+                onAuthStateChanged(currentUser);
+            })
+            .catch((error) => {
+                console.log('Error getting current user:', error);
+            });
+
+        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+
+        return () => {
+            subscriber(); // unsubscribe on unmount
+        };
+    }, []);
 
   if (initializing) return null;
 
