@@ -5,6 +5,7 @@ import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
+import {AddActivity} from "./AddActivity";
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import moment from "moment";
@@ -584,6 +585,9 @@ export default function App() {
                     />
 
                     <WorkoutRec
+                    />
+
+                    <AddActivity
                     />
 
                     {/*Personicle*/}

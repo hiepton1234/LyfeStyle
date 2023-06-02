@@ -68,7 +68,7 @@ function FoodPage(props) {
   };
 
   const foodReference = database().ref('user/' + props.user.uid);
-  console.log('foodReference key: ', foodReference.key);
+  // console.log('foodReference key: ', foodReference.key);
   const saveFoods = () => {
     // store contents of profile page user inputs to firebase
     for (let i = 0; i < mealList.length; i++){
