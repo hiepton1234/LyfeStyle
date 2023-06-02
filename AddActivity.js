@@ -40,14 +40,14 @@ function AddActivity() {
                             onChangeText={handleActivityChange}
                             placeholder="Enter activity"
                         />
-                        <Pressable style={[styles.button, styles.buttonClose]} onPress={handleAddActivity}>
-                            <Text style={styles.textStyle}>Add</Text>
-                        </Pressable>
-                        <Pressable
-                            style={[styles.button, styles.buttonClose]}
-                            onPress={() => setModalVisible(!modalVisible)}>
-                            <Text style={styles.textStyle}>Back</Text>
-                        </Pressable>
+                        <View style={styles.buttonContainer}>
+                            <Pressable style={[styles.button, styles.buttonClose, { marginRight: 35 }]} onPress={handleAddActivity}>
+                                <Text style={styles.textStyle}>Add</Text>
+                            </Pressable>
+                            <Pressable style={[styles.button, styles.buttonClose, { marginLeft: 35 }]} onPress={() => setModalVisible(!modalVisible)}>
+                                <Text style={styles.textStyle}>Cancel</Text>
+                            </Pressable>
+                        </View>
                     </View>
                 </View>
             </Modal>
