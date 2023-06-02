@@ -28,9 +28,11 @@ function AddNewFoodItem(props) {
       return;
     }
 
-    props.addNewFoodItem(props.index, enteredFood)
+    props.addNewFoodItem(props.index, enteredFood, selectedServings, selectedLike)
 
     setEnteredFood('');
+    setSelectedServings('0.25')
+    setSelectedLike('1')
   };
 
   return (

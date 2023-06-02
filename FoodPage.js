@@ -20,8 +20,10 @@ import {getCurrentLocation, fetchNearbyRestaurants, fetchRestaurantMenu, searchF
 import Geolocation from 'react-native-geolocation-service';
 
 class FoodEntry {
-  constructor(food_name, hour_recorded, minute_recorded) {
+  constructor(food_name, selectedServings, selectedLike, hour_recorded, minute_recorded) {
     this.food_name = food_name
+    this.selectedServings = selectedServings
+    this.selectedLike = selectedLike
     this.hour_recorded = hour_recorded
     this.minute_recorded = minute_recorded
   }
@@ -72,12 +74,12 @@ function FoodPage(props) {
     return formatDate(currentSelectedDate)
   }
 
-  const addNewFoodItem = (index, enteredText) => {
+  const addNewFoodItem = (index, enteredText, selectedServings, selectedLike) => {
     const d = new Date()
     let hour_recorded = d.getHours()
     let minute_recorded = d.getMinutes()
 
-    let newItem = new FoodEntry(enteredText, hour_recorded, minute_recorded)
+    let newItem = new FoodEntry(enteredText, selectedServings, selectedLike, hour_recorded, minute_recorded)
 
     console.log(index + enteredText)
     const newMealList = [...mealList];
@@ -98,14 +100,16 @@ function FoodPage(props) {
       // for each food entry for a meal time
       for (let j = 0; j < mealList[i].data.length; j++) {
         const food = mealList[i].data[j];
-        const { food_name: foodName, hour_recorded, minute_recorded } = food;
+        const { food_name: foodName, selectedServings, selectedLike, hour_recorded, minute_recorded, } = food;
 
         const foodEntry = {
+          selectedServings,
+          selectedLike,
           hour_recorded,
           minute_recorded,
         };
 
-        mealReference.child(foodName).set(foodEntry)
+        mealReference.child(foodName).update(foodEntry)
           .then(() => console.log('Food updated.'));
       }
     }
@@ -130,6 +134,8 @@ function FoodPage(props) {
             if (elem.meal in data) {
               const foodList = Object.entries(data[elem.meal]).map(([foodName, foodEntry]) => ({
                 food_name: foodName,
+                selectedServings: foodEntry.selectedServings,
+                selectedLike: foodEntry.selectedLike,
                 hour_recorded: foodEntry.hour_recorded,
                 minute_recorded: foodEntry.minute_recorded,
               }));
