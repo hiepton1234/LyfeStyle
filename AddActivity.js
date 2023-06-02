@@ -1,22 +1,30 @@
 import React, { useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, TextInput } from 'react-native';
 import InteractiveCalendar from "./InteractiveCalendar";
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 function AddActivity() {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
+    const [isTimePickerVisible, setTimePickerVisibility] = useState(true);
+    const [selectedTime, setSelectedTime] = useState(null);
 
     const handleActivityChange = (text) => {
         setActivity(text);
     };
 
     const handleAddActivity = () => {
-        // Perform any action you want with the entered activity
+        // Perform any action you want with the entered activity and selected time
         console.log('Activity:', activity);
+        console.log('Selected Time:', selectedTime);
 
         // Close the modal and clear the activity input
         setModalVisible(false);
         setActivity('');
+    };
+
+    const handleConfirm = (time) => {
+        setSelectedTime(time);
     };
 
     return (
@@ -31,21 +39,33 @@ function AddActivity() {
                 }}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
-                        <Text style={styles.baseText}>Which Day Would You Like To Add An Activity:</Text>
-                        <InteractiveCalendar />
                         <Text style={styles.baseText}>Please Enter An Activity:</Text>
                         <TextInput
                             style={styles.input}
                             value={activity}
                             onChangeText={handleActivityChange}
-                            placeholder="Enter activity"
+                            placeholder="PLease enter activity here"
                         />
+
+                        <Text style={styles.baseText}>Which Day?:</Text>
+                        <InteractiveCalendar />
+
+                        <Text style={styles.baseText}>What Time?:</Text>
+                        <View>
+                            <DateTimePickerModal
+                                mode="time"
+                                onConfirm={handleConfirm}
+                                isVisible // Time picker is always visible
+                            />
+                            {selectedTime && <Text>Selected Time: {selectedTime.toString()}</Text>}
+                        </View>
+
                         <View style={styles.buttonContainer}>
                             <Pressable style={[styles.button, styles.buttonClose, { marginRight: 35 }]} onPress={handleAddActivity}>
                                 <Text style={styles.textStyle}>Add</Text>
                             </Pressable>
                             <Pressable style={[styles.button, styles.buttonClose, { marginLeft: 35 }]} onPress={() => setModalVisible(!modalVisible)}>
-                                <Text style={styles.textStyle}>Cancel</Text>
+                                <Text style={styles.textStyle}>Back</Text>
                             </Pressable>
                         </View>
                     </View>
@@ -97,12 +117,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#64D2FF',
     },
 
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 10,
-    },
-
     textStyle: {
         fontFamily: 'American Typewriter',
         textAlign: 'center',
@@ -122,8 +136,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         marginTop: 10,
-        marginBottom: 20,
+        marginBottom: 10,
         paddingHorizontal: 10,
+    },
+
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
     },
 });
 

@@ -409,136 +409,128 @@ export default function App() {
     const newReference = database().ref('user/' + user.uid)
 
     AppleHealthKit.initHealthKit(permissions, (error) => {
-    /* Called after we receive a response from the system */
+        /* Called after we receive a response from the system */
 
-    if (error) {
-        console.log('[ERROR] Cannot grant permissions!')
-    }
-
-    /* Can now read or write to HealthKit */
-
-    const options = {
-        startDate: new Date(2020, 1, 1).toISOString(),
-        endDate: new Date().toISOString(), // optional; default now
-        type: 'AllergyRecord',
-    }
-
-    AppleHealthKit.getSleepSamples(
-        options,
-        (callbackError, result) => {
-        /* Samples are now collected from HealthKit */
-        // console.log(result[0])
-        newReference.child("Health Info/Sleep Samples")
-            .set(result)
-        },
-    )
-
-    AppleHealthKit.getBiologicalSex(
-        options,
-        (callBackError, result) => {
-        // console.log(result)
-        bio_sex = result.value
-
-        newReference.child("Health Info")
-            .update({
-            bio_sex: bio_sex
-            })
+        if (error) {
+            console.log('[ERROR] Cannot grant permissions!')
         }
-    )
 
-    AppleHealthKit.getLatestHeight(
-        options,
-        (callBackError, result) => {
-        // console.log(result)
-        height = result.value
+        /* Can now read or write to HealthKit */
 
-        newReference.child("Health Info")
-            .update({
-            height: height
-            })
-      }
-    )
+        const options = {
+            startDate: new Date(2020, 1, 1).toISOString(),
+            endDate: new Date().toISOString(), // optional; default now
+            type: 'AllergyRecord',
+        }
 
-    AppleHealthKit.getDailyStepCountSamples(
-      options,
-      (callBackError, result) => {
-        // console.log(result[0])
-        newReference.child("Health Info/Step Counts")
-          .set(
-            result.slice(0, 90)
-          )
-      }
-    )
+        AppleHealthKit.getSleepSamples(
+            options,
+            (callbackError, result) => {
+            /* Samples are now collected from HealthKit */
+            // console.log(result[0])
+            newReference.child("Health Info/Sleep Samples")
+                .set(result)
+            },
+        )
 
-    AppleHealthKit.getLatestWeight(
-      options,
-      (callBackError, result) => {
-        // console.log(result)
+        AppleHealthKit.getBiologicalSex(
+            options,
+            (callBackError, result) => {
+            // console.log(result)
+            bio_sex = result.value
 
-        newReference.child("Health Info")
-          .update({
-            weight: result
-          })
-      }
-    )
+            newReference.child("Health Info")
+                .update({
+                bio_sex: bio_sex
+                })
+            }
+        )
 
-    AppleHealthKit.getDateOfBirth(
-      options,
-      (callbackError, result) => {
-        // console.log(result)
-        dob = result.value.substring(0, 10)
-        age = result.age
-        newReference.child("Health Info")
-          .update({
-            dob: dob,
-            age: age
-          })
-      }
-    )
+        AppleHealthKit.getLatestHeight(
+            options,
+            (callBackError, result) => {
+            // console.log(result)
+            height = result.value
 
-    AppleHealthKit.getActiveEnergyBurned(
-      options,
-      (callbackError, result) => {
-        // console.log(result[0])
-        newReference.child("Health Info/Active Energy Burned")
-          .set(
-            result
-          )
-      }
-    )
+            newReference.child("Health Info")
+                .update({
+                height: height
+                })
+          }
+        )
 
-    AppleHealthKit.getEnergyConsumedSamples(
-      options,
-      (callbackError, result) => {
-        // console.log(result[0])
+        AppleHealthKit.getDailyStepCountSamples(
+          options,
+          (callBackError, result) => {
+            // console.log(result[0])
+            newReference.child("Health Info/Step Counts")
+              .set(
+                result.slice(0, 90)
+              )
+          }
+        )
 
-        newReference.child("Health Info/Energy Consumed Samples")
-          .set(
-            result
-          )
-      }
-    )
+        AppleHealthKit.getLatestWeight(
+          options,
+          (callBackError, result) => {
+            // console.log(result)
 
-    AppleHealthKit.getProteinSamples(
-      options,
-      (callbackError, result) => {
-        // console.log(result[0])
+            newReference.child("Health Info")
+              .update({
+                weight: result
+              })
+          }
+        )
 
-        newReference.child("Health Info/Protein Samples")
-          .set(
-            result
-          )
-      }
-    )
-    }
-    )
-    
-    // AppleHealthKit.getClinicalRecords(
-    //     options,
-    //     (callbackError, result) => {
-    //         console.log(result[0])
-    //     }
-    // )
+        AppleHealthKit.getDateOfBirth(
+          options,
+          (callbackError, result) => {
+            // console.log(result)
+            dob = result.value.substring(0, 10)
+            age = result.age
+            newReference.child("Health Info")
+              .update({
+                dob: dob,
+                age: age
+              })
+          }
+        )
+
+        AppleHealthKit.getActiveEnergyBurned(
+          options,
+          (callbackError, result) => {
+            // console.log(result[0])
+            newReference.child("Health Info/Active Energy Burned")
+              .set(
+                result
+              )
+          }
+        )
+
+        AppleHealthKit.getEnergyConsumedSamples(
+          options,
+          (callbackError, result) => {
+            // console.log(result[0])
+
+            newReference.child("Health Info/Energy Consumed Samples")
+              .set(
+                result
+              )
+          }
+        )
+
+        AppleHealthKit.getProteinSamples(
+          options,
+          (callbackError, result) => {
+            // console.log(result[0])
+
+            newReference.child("Health Info/Protein Samples")
+              .set(
+                result
+              )
+          }
+        )
+    })
 
     return (
         <>
