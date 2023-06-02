@@ -7,6 +7,8 @@ import {FoodPage} from "./FoodPage";
 import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
+import {fetchNearbyRestaurants} from './Recommender/FoodRecs'
+import * as Location from 'expo-location';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -154,6 +156,27 @@ export default function App() {
     return subscriber; // unsubscribe on unmount
   }, []);
 
+
+  const [location, setLocation] = useState(null)
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location permission denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location)
+      // console.log(location.coords.latitude, location.coords.longitude);
+    })();
+  }, []);
+
+  if (location === null) {
+    return null
+  }
+
   if (initializing) return null;
 
   if (!user) {
@@ -297,6 +320,7 @@ export default function App() {
   //         console.log(result[0])
   //     }
   // )
+  
 
     return (
       <View style={styles.centeredView}>
@@ -335,6 +359,8 @@ export default function App() {
             height={height}/>
           <FoodPage
             user = {user}
+            latitude = {location.coords.latitude}
+            longitude = {location.coords.longitude}
             // personalModel = {personalModel} replace when we have one
           />
 

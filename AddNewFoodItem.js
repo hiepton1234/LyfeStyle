@@ -27,6 +27,7 @@ function AddNewFoodItem(props) {
     if (enteredFood.trim() === '') {
       return;
     }
+
     props.addNewFoodItem(props.index, enteredFood)
 
     setEnteredFood('');

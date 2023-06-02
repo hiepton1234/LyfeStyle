@@ -15,13 +15,25 @@ import {
 import database from "@react-native-firebase/database";
 import {AddNewFoodItem} from "./AddNewFoodItem";
 import {FoodPreferences} from "./FoodPreferences"
-import moment from 'moment'
+import moment, {min} from 'moment'
+import {getCurrentLocation, fetchNearbyRestaurants, fetchRestaurantMenu, searchFoodItems} from "./Recommender/FoodRecs";
+import Geolocation from 'react-native-geolocation-service';
+
+class FoodEntry {
+  constructor(food_name, hour_recorded, minute_recorded) {
+    this.food_name = food_name
+    this.hour_recorded = hour_recorded
+    this.minute_recorded = minute_recorded
+  }
+}
 
 function FoodPage(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [info, setInfo] = useState("");
   const [currentSelectedDate, setCurrentSelectedDate] = useState(new Date());
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const yelpFusionApiKey = '3YfmZ-MolZrxxP2KBnefV1eepEw034xAmxOleosjvwytWvLjAeXb0mf1emgb0rnhLD-2_Pwz97JW5JFU_c7xGcfglxG51N5RWp9MM3DZTuW2ORSngo6OtS_wExx3ZHYx'
+
 
   let emptyMealList = [
     {
@@ -61,9 +73,16 @@ function FoodPage(props) {
   }
 
   const addNewFoodItem = (index, enteredText) => {
+    const d = new Date()
+    let hour_recorded = d.getHours()
+    let minute_recorded = d.getMinutes()
+
+    let newItem = new FoodEntry(enteredText, hour_recorded, minute_recorded)
+
     console.log(index + enteredText)
     const newMealList = [...mealList];
-    newMealList[index].data.push(enteredText);
+    newMealList[index].data.push(newItem);
+
     setMealList(newMealList);
   };
 
@@ -72,11 +91,23 @@ function FoodPage(props) {
   const saveFoods = () => {
     // store contents of profile page user inputs to firebase
     for (let i = 0; i < mealList.length; i++){
-      foodReference.child("Food Entries/" + formatDate(currentSelectedDate))
-        .update({
-          [mealList[i].meal] : mealList[i].data,
-        })
-        .then(() => console.log('Food updated.'));
+      const mealReference = foodReference
+        .child("Food Entries/" + formatDate(currentSelectedDate))
+        .child(mealList[i].meal);
+
+      // for each food entry for a meal time
+      for (let j = 0; j < mealList[i].data.length; j++) {
+        const food = mealList[i].data[j];
+        const { food_name: foodName, hour_recorded, minute_recorded } = food;
+
+        const foodEntry = {
+          hour_recorded,
+          minute_recorded,
+        };
+
+        mealReference.child(foodName).set(foodEntry)
+          .then(() => console.log('Food updated.'));
+      }
     }
   }
 
@@ -94,10 +125,15 @@ function FoodPage(props) {
           const data = snapshot.val();
           setInfo(data);
 
-          // Update the profileElems array with the respective data from info
+          // Update the profileElems array with data from info
           const updatedMealList = mealList.map((elem) => {
             if (elem.meal in data) {
-              return { ...elem, data: data[elem.meal] };
+              const foodList = Object.entries(data[elem.meal]).map(([foodName, foodEntry]) => ({
+                food_name: foodName,
+                hour_recorded: foodEntry.hour_recorded,
+                minute_recorded: foodEntry.minute_recorded,
+              }));
+              return { ...elem, data: foodList };
             }
             return elem;
           });
@@ -110,6 +146,11 @@ function FoodPage(props) {
       })
   };
 
+  // get menu items of restaurants nearby, used for possible recommendations
+  // fetchNearbyRestaurants(props.latitude, props.longitude, yelpFusionApiKey)
+  // commented right now to stop API calls
+  // searchFoodItems('chicken sandwich')
+
   return (
     <View style={styles.centeredView}>
       <Modal
@@ -121,6 +162,7 @@ function FoodPage(props) {
           setModalVisible(!modalVisible);
         }}>
         <ScrollView style={styles.appContainer}>
+          {/* make recommendation */}
           <Pressable
             onPress={() => {
               setModalVisible(!modalVisible)
@@ -178,7 +220,7 @@ function FoodPage(props) {
                 <Text style={styles.modalText}>{meal.meal}</Text>
                 <View>
                   {meal.data.map((food, foodIndex) => (
-                    <Text style={styles.baseText} key={foodIndex}>{food}</Text>
+                    <Text style={styles.baseText} key={foodIndex}>{food.food_name}</Text>
                   ))}
                 </View>
                 <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
