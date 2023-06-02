@@ -6,7 +6,6 @@ import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
 import {RNFirebase} from "./RNFirebase";
-import InteractiveCalendar from './InteractiveCalendar';
 import database from "@react-native-firebase/database";
 import moment from "moment";
 
@@ -36,7 +35,6 @@ import AppleHealthKit, {
   HealthValue,
   HealthKitPermissions,
 } from 'react-native-health'
-import {AddActivity} from "./AddActivity";
 
 /* Permission options */
 const permissions = {
@@ -204,13 +202,7 @@ export default function App() {
                         // console.log("DAY: " + day)
 
                         // Step 3: Calculate hours
-                        let hours = 0
-                        // Step 3: Calculate hours
-                        if (end.getHours() === 0 && end.getMinutes() === 0 && end.getSeconds() === 0) {
-                            hours = 24 - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
-                        } else {
-                            hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
-                        }
+                        const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
                         // console.log("HOURS: " + hours)
 
                         // Adding hours to respective day
@@ -324,13 +316,7 @@ export default function App() {
                         // console.log("DAY: " + day)
 
                         // Step 3: Calculate hours
-                        let hours = 0
-                        // Step 3: Calculate hours
-                        if (end.getHours() === 0 && end.getMinutes() === 0 && end.getSeconds() === 0) {
-                            hours = 24 - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
-                        } else {
-                            hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
-                        }
+                        const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
                         // console.log("HOURS: " + hours)
 
                         // Adding hours to respective day
@@ -352,7 +338,7 @@ export default function App() {
                 fetchSleepData(user)
                     .then(() => {
                         // Sleep data fetching completed
-                        // console.log('Sleep data fetched');
+                        console.log('Sleep data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching sleep data:', error);
@@ -361,7 +347,7 @@ export default function App() {
                 fetchCaloricData(user)
                     .then(() => {
                         // Caloric data fetching completed
-                        // console.log('Caloric data fetched');
+                        console.log('Caloric data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching caloric data:', error);
@@ -370,7 +356,7 @@ export default function App() {
                 fetchCaloriesBurnedData(user)
                     .then(() => {
                         // Calories burned data fetching completed
-                        // console.log('Calories burned data fetched');
+                        console.log('Calories burned data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching calories burned data:', error);
@@ -379,7 +365,7 @@ export default function App() {
                 fetchWorkoutHoursData(user)
                     .then(() => {
                         // Calories burned data fetching completed
-                        // console.log('Workout hours data fetched');
+                        console.log('Workout hours data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching workout hours data:', error);
@@ -553,7 +539,6 @@ export default function App() {
     //     }
     // )
 
-
     return (
         <>
             <StatusBar barStyle="dark-content" />
@@ -598,9 +583,8 @@ export default function App() {
                     // personalModel = {personalModel} replace when we have one
                     />
 
-                    <WorkoutRec />
-
-                    <AddActivity />
+                    <WorkoutRec
+                    />
 
                     {/*Personicle*/}
                     <View style={styles.centeredView}>
@@ -714,6 +698,13 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 
+    baseText: {
+        fontFamily: 'Avenir-Book',
+        fontSize: 20,
+        lineHeight: 40,
+        marginRight: 10,
+    },
+
     title: {
         fontSize: 24,
         marginBottom: 10,
@@ -730,5 +721,5 @@ const styles = StyleSheet.create({
         color: '#000000',
         textAlign: 'center',
         fontFamily: 'American Typewriter',
-    },
+    }
 });
