@@ -202,7 +202,13 @@ export default function App() {
                         // console.log("DAY: " + day)
 
                         // Step 3: Calculate hours
-                        const hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                        let hours = 0
+                        // Step 3: Calculate hours
+                        if (end.getHours() === 0 && end.getMinutes() === 0 && end.getSeconds() === 0) {
+                            hours = 24 - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                        } else {
+                            hours = (end.getHours() + (end.getMinutes() / 60) + (end.getSeconds() / 3600)) - (start.getHours() + (start.getMinutes() / 60) + (start.getSeconds() / 3600));
+                        }
                         // console.log("HOURS: " + hours)
 
                         // Adding hours to respective day
