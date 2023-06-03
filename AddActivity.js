@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View, TextInput } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, Pressable, View, TextInput, Button } from 'react-native';
 import InteractiveCalendar from "./InteractiveCalendar";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 function AddActivity() {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
-    const [isTimePickerVisible, setTimePickerVisibility] = useState(true);
-    const [selectedTime, setSelectedTime] = useState(null);
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [selectedTime, setSelectedTime] = useState('');
 
     const handleActivityChange = (text) => {
         setActivity(text);
@@ -23,8 +23,8 @@ function AddActivity() {
         setActivity('');
     };
 
-    const handleConfirm = (time) => {
-        setSelectedTime(time);
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
     };
 
     return (
@@ -52,12 +52,16 @@ function AddActivity() {
 
                         <Text style={styles.baseText}>What Time?:</Text>
                         <View>
+                            <Button title="Select Time" onPress={showDatePicker} />
                             <DateTimePickerModal
+                                isVisible={isDatePickerVisible}
                                 mode="time"
-                                onConfirm={handleConfirm}
-                                isVisible // Time picker is always visible
+                                onConfirm={(time) => {
+                                    setSelectedTime(time);
+                                    setDatePickerVisibility(false);
+                                }}
+                                onCancel={() => setDatePickerVisibility(false)}
                             />
-                            {selectedTime && <Text>Selected Time: {selectedTime.toString()}</Text>}
                         </View>
 
                         <View style={styles.buttonContainer}>
