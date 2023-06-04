@@ -406,7 +406,7 @@ export default function App() {
     if (!user) {
         return (
             <View style={styles.centeredView}>
-            <Text style={styles.subtitle}>Please Login</Text>
+            <Text style={styles.baseText}>Please Login</Text>
             <GoogleSigninButton
                 style={{ width: 192, height: 48 }}
                 size={GoogleSigninButton.Size.Wide}
@@ -548,11 +548,11 @@ export default function App() {
         <>
             <StatusBar barStyle="dark-content" />
             <View style={styles.centeredView}>
-                <Text style={styles.textStyle}>Lyfestyle</Text>
+                <Text style={[styles.title, { paddingTop: 20, paddingBottom: 10, fontSize: 35 }]}>Lyfestyle</Text>
 
                 <ScrollView contentContainerStyle={styles.scrollView}>
                     <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
-                    <Text style={styles.subtitle}>Current Week's Lifestyle Scores</Text>
+                    <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
                         data={lifescore_data}
                         width={screenWidth}
@@ -599,7 +599,7 @@ export default function App() {
                         <Text style={styles.title}>Personicle</Text>
 
                         {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
-                        <Text style={styles.subtitle}>Sleep</Text>
+                        <Text style={styles.baseText}>Sleep</Text>
                         <BarChart
                             data={sleep_chart_data}
                             width={screenWidth}
@@ -616,7 +616,7 @@ export default function App() {
                             style={{ paddingBottom: 30 }}
                         />
 
-                        <Text style={styles.subtitle}>Caloric Intake</Text>
+                        <Text style={styles.baseText}>Caloric Intake</Text>
                         <LineChart
                             data={caloric_chart_data}
                             width={screenWidth}
@@ -632,7 +632,7 @@ export default function App() {
                             style={{ paddingBottom: 20}}
                         />
 
-                        <Text style={styles.subtitle}>Calories Burned</Text>
+                        <Text style={styles.baseText}>Calories Burned</Text>
                         <LineChart
                             data={calories_burned_chart_data}
                             width={screenWidth}
@@ -648,7 +648,7 @@ export default function App() {
                             style={{ paddingBottom: 20 }}
                         />
 
-                        <Text style={styles.subtitle}>Workout Hours</Text>
+                        <Text style={styles.baseText}>Workout Hours</Text>
                         <BarChart
                             data={workout_hours_chart_data}
                             width={screenWidth}
@@ -665,7 +665,7 @@ export default function App() {
                             style={{ paddingBottom: 40 }}
                         />
 
-                        <Text style={styles.subtitle}>Daily Activities</Text>
+                        <Text style={styles.baseText}>Daily Activities</Text>
                         <ScrollView horizontal={true}>
                             <ContributionGraph
                                 values={commitsData}
@@ -697,37 +697,21 @@ const styles = StyleSheet.create({
         marginTop: 22,
     },
 
-    textStyle: {
-        fontFamily: 'American Typewriter',
-        paddingTop: 20,
-        paddingBottom: 20,
-        fontSize: 35,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-
-    baseText: {
-        fontFamily: 'Avenir-Book',
-        fontSize: 20,
-        lineHeight: 40,
-        marginRight: 10,
-    },
-
     title: {
         fontSize: 24,
-        marginBottom: 10,
+        paddingBottom: 10,
         color: '#000000',
         fontWeight: 'bold',
         textAlign: 'center',
         fontFamily: 'American Typewriter',
     },
 
-    subtitle: {
+    baseText: {
         fontSize: 16,
         marginTop: 10,
         marginBottom: 10,
         color: '#000000',
         textAlign: 'center',
         fontFamily: 'American Typewriter',
-    }
+    },
 });

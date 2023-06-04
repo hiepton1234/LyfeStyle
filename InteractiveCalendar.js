@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import moment from 'moment';
 
 const InteractiveCalendar = ({ onDateSelect }) => {
     const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
 
+    useEffect(() => {
+        onDateSelect(selectedDate);
+    }, [selectedDate, onDateSelect]);
+
     const handleDayPress = (day) => {
         const selectedDateString = day.dateString;
         setSelectedDate(selectedDateString);
-        onDateSelect(selectedDateString);
     };
 
     return (
