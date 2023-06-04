@@ -1,30 +1,38 @@
 import React, { useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View, TextInput, Button } from 'react-native';
-import InteractiveCalendar from "./InteractiveCalendar";
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { Alert, Modal, StyleSheet, Text, Pressable, View, TextInput } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 function AddActivity() {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [selectedTime, setSelectedTime] = useState('');
+    const [startTime, setStartTime] = useState(new Date());
+    const [endTime, setEndTime] = useState(new Date());
 
     const handleActivityChange = (text) => {
         setActivity(text);
     };
 
+    const handleStartTimeChange = (event, selectedTime) => {
+        if (selectedTime !== undefined) {
+            setStartTime(selectedTime);
+        }
+    };
+
+    const handleEndTimeChange = (event, selectedTime) => {
+        if (selectedTime !== undefined) {
+            setEndTime(selectedTime);
+        }
+    };
+
     const handleAddActivity = () => {
-        // Perform any action you want with the entered activity and selected time
+        // Perform any action you want with the entered activity and selected times
         console.log('Activity:', activity);
-        console.log('Selected Time:', selectedTime);
+        console.log('Start Time:', startTime);
+        console.log('End Time:', endTime);
 
         // Close the modal and clear the activity input
         setModalVisible(false);
         setActivity('');
-    };
-
-    const showDatePicker = () => {
-        setDatePickerVisibility(true);
     };
 
     return (
@@ -44,25 +52,26 @@ function AddActivity() {
                             style={styles.input}
                             value={activity}
                             onChangeText={handleActivityChange}
-                            placeholder="PLease enter activity here"
+                            placeholder="Please enter activity here"
                         />
 
-                        <Text style={styles.baseText}>Which Day?:</Text>
-                        <InteractiveCalendar />
+                        <Text style={styles.baseText}>Start Time:</Text>
+                        <DateTimePicker
+                            value={startTime}
+                            mode="time"
+                            is24Hour={true}
+                            display="default"
+                            onChange={handleStartTimeChange}
+                        />
 
-                        <Text style={styles.baseText}>What Time?:</Text>
-                        <View>
-                            <Button title="Select Time" onPress={showDatePicker} />
-                            <DateTimePickerModal
-                                isVisible={isDatePickerVisible}
-                                mode="time"
-                                onConfirm={(time) => {
-                                    setSelectedTime(time);
-                                    setDatePickerVisibility(false);
-                                }}
-                                onCancel={() => setDatePickerVisibility(false)}
-                            />
-                        </View>
+                        <Text style={styles.baseText}>End Time:</Text>
+                        <DateTimePicker
+                            value={endTime}
+                            mode="time"
+                            is24Hour={true}
+                            display="default"
+                            onChange={handleEndTimeChange}
+                        />
 
                         <View style={styles.buttonContainer}>
                             <Pressable style={[styles.button, styles.buttonClose, { marginRight: 35 }]} onPress={handleAddActivity}>
@@ -89,7 +98,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 22,
     },
-
     modalView: {
         margin: 20,
         backgroundColor: 'white',
@@ -105,34 +113,28 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
     },
-
     button: {
         borderRadius: 20,
         padding: 10,
         elevation: 2,
         marginTop: 10,
     },
-
     buttonOpen: {
         backgroundColor: '#64D2FF',
     },
-
     buttonClose: {
         backgroundColor: '#64D2FF',
     },
-
     textStyle: {
         fontFamily: 'American Typewriter',
         textAlign: 'center',
     },
-
     baseText: {
         fontFamily: 'American Typewriter',
         fontSize: 20,
         textAlign: 'center',
         paddingTop: 10,
     },
-
     input: {
         width: 250,
         height: 40,
@@ -143,7 +145,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         paddingHorizontal: 10,
     },
-
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
