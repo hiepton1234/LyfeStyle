@@ -16,16 +16,19 @@ import database from "@react-native-firebase/database";
 import {AddNewFoodItem} from "./AddNewFoodItem";
 import {FoodPreferences} from "./FoodPreferences"
 import moment, {min} from 'moment'
-import {getCurrentLocation, fetchNearbyRestaurants, fetchRestaurantMenu, searchFoodItems} from "./Recommender/FoodRecs";
+import {
+  getCurrentLocation,
+  fetchNearbyRestaurants,
+  fetchRestaurantMenu,
+  makeRecommendation, FoodRecs
+} from "./Recommender/FoodRecs";
 import Geolocation from 'react-native-geolocation-service';
 
 class FoodEntry {
-  constructor(food_name, selectedServings, selectedLike, hour_recorded, minute_recorded) {
+  constructor(food_name, selectedServings, selectedLike) {
     this.food_name = food_name
     this.selectedServings = selectedServings
     this.selectedLike = selectedLike
-    this.hour_recorded = hour_recorded
-    this.minute_recorded = minute_recorded
   }
 }
 
@@ -40,18 +43,26 @@ function FoodPage(props) {
   let emptyMealList = [
     {
       meal: 'Breakfast',
+      hour_recorded: 0,
+      minute_recorded: 0,
       data: []
     },
     {
       meal: 'Lunch',
+      hour_recorded: 0,
+      minute_recorded: 0,
       data: [],
     },
     {
       meal: 'Dinner',
+      hour_recorded: 0,
+      minute_recorded: 0,
       data: [],
     },
     {
       meal: 'Snacks',
+      hour_recorded: 0,
+      minute_recorded: 0,
       data: [],
     },
   ]
@@ -74,22 +85,24 @@ function FoodPage(props) {
     return formatDate(currentSelectedDate)
   }
 
+  const foodReference = database().ref('user/' + props.user.uid);
+  console.log('foodReference key: ', foodReference.key);
+
   const addNewFoodItem = (index, enteredText, selectedServings, selectedLike) => {
     const d = new Date()
     let hour_recorded = d.getHours()
     let minute_recorded = d.getMinutes()
 
-    let newItem = new FoodEntry(enteredText, selectedServings, selectedLike, hour_recorded, minute_recorded)
+    let newItem = new FoodEntry(enteredText, selectedServings, selectedLike)
 
     console.log(index + enteredText)
-    const newMealList = [...mealList];
-    newMealList[index].data.push(newItem);
+    const newMealList = [...mealList]
+    newMealList[index].data.push(newItem)
+    newMealList[index].hour_recorded = hour_recorded
+    newMealList[index].minute_recorded = minute_recorded
 
     setMealList(newMealList);
   };
-
-  const foodReference = database().ref('user/' + props.user.uid);
-  console.log('foodReference key: ', foodReference.key);
   const saveFoods = () => {
     // store contents of profile page user inputs to firebase
     for (let i = 0; i < mealList.length; i++){
@@ -100,16 +113,16 @@ function FoodPage(props) {
       // for each food entry for a meal time
       for (let j = 0; j < mealList[i].data.length; j++) {
         const food = mealList[i].data[j];
-        const { food_name: foodName, selectedServings, selectedLike, hour_recorded, minute_recorded, } = food;
+        const { food_name: foodName, selectedServings, selectedLike} = food;
 
         const foodEntry = {
           selectedServings,
           selectedLike,
-          hour_recorded,
-          minute_recorded,
         };
+        console.log(foodName)
 
-        mealReference.child(foodName).update(foodEntry)
+        mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded})
+        mealReference.child('Items/' + foodName).update(foodEntry)
           .then(() => console.log('Food updated.'));
       }
     }
@@ -120,7 +133,7 @@ function FoodPage(props) {
   }, [currentSelectedDate]);
 
   const loadFoodEntries = () => {
-    console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate)
+    console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate);
     database()
       .ref('user/' + props.user.uid + '/Food Entries/' + formatDate(currentSelectedDate))
       .once('value')
@@ -129,33 +142,98 @@ function FoodPage(props) {
           const data = snapshot.val();
           setInfo(data);
 
-          // Update the profileElems array with data from info
+          // Update mealList array with data from info
           const updatedMealList = mealList.map((elem) => {
             if (elem.meal in data) {
-              const foodList = Object.entries(data[elem.meal]).map(([foodName, foodEntry]) => ({
-                food_name: foodName,
-                selectedServings: foodEntry.selectedServings,
-                selectedLike: foodEntry.selectedLike,
-                hour_recorded: foodEntry.hour_recorded,
-                minute_recorded: foodEntry.minute_recorded,
-              }));
-              return { ...elem, data: foodList };
+              const mealData = data[elem.meal];
+              const foodList = Object.entries(mealData.Items || {}).map(([foodName, foodEntry]) => {
+                const { selectedServings, selectedLike } = foodEntry;
+                return {
+                  food_name: foodName,
+                  selectedServings,
+                  selectedLike,
+                };
+              });
+              return { ...elem, data: foodList, hour_recorded: mealData.hour_recorded, minute_recorded: mealData.minute_recorded };
             }
             return elem;
           });
 
           setMealList(updatedMealList);
         } else {
-          setInfo("")
-          setMealList(emptyMealList)
+          setInfo("");
+          setMealList(emptyMealList);
         }
-      })
+      });
   };
+
 
   // get menu items of restaurants nearby, used for possible recommendations
   // fetchNearbyRestaurants(props.latitude, props.longitude, yelpFusionApiKey)
   // commented right now to stop API calls
-  // searchFoodItems('chicken sandwich')
+  // searchFoodItems('chicken breast')
+
+  const [recommendation, setRecommendation] = useState('');
+
+  useEffect(() => {
+    const calculateMedianTimes = () => {
+      const mealTimes = ["Breakfast", "Lunch", "Dinner"];
+      const medianTimes = {};
+
+      // Initialize an empty array for each meal time
+      for (const mealTime of mealTimes) {
+        medianTimes[mealTime] = [];
+      }
+
+      // Iterate over the dates in Food Entries
+      database()
+        .ref('user/' + props.user.uid + '/Food Entries')
+        .once('value')
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const foodEntries = snapshot.val();
+
+            for (const date in foodEntries) {
+              const meals = foodEntries[date];
+
+              // Iterate over each meal time for the current date
+              for (const mealTime of mealTimes) {
+                if (meals[mealTime]) {
+                  const hourRecorded = meals[mealTime].hour_recorded;
+                  const minuteRecorded = meals[mealTime].minute_recorded;
+
+                  // Push the recorded time to the array
+                  medianTimes[mealTime].push({ hour: hourRecorded, minute: minuteRecorded });
+                }
+              }
+            }
+
+            // Calculate the median for each meal time
+            for (const mealTime of mealTimes) {
+              const recordedTimes = medianTimes[mealTime];
+
+              if (recordedTimes.length > 0) {
+                // Sort the recorded times in ascending order
+                recordedTimes.sort((a, b) => {
+                  return a.hour - b.hour || a.minute - b.minute;
+                });
+
+                const medianIndex = Math.floor(recordedTimes.length / 2);
+                medianTimes[mealTime] = recordedTimes[medianIndex];
+              } else {
+                medianTimes[mealTime] = null;
+              }
+            }
+            if (medianTimes){
+              const recommendation = makeRecommendation(medianTimes);
+              setRecommendation(recommendation);
+            }
+          }
+        });
+    };
+
+    calculateMedianTimes();
+  }, []);
 
   return (
     <View style={styles.centeredView}>
@@ -168,7 +246,6 @@ function FoodPage(props) {
           setModalVisible(!modalVisible);
         }}>
         <ScrollView style={styles.appContainer}>
-          {/* make recommendation */}
           <Pressable
             onPress={() => {
               setModalVisible(!modalVisible)
@@ -229,6 +306,18 @@ function FoodPage(props) {
                     <Text style={styles.baseText} key={foodIndex}>{food.food_name}</Text>
                   ))}
                 </View>
+                {/* if date is today, give a recommendation for a meal, corresponding to appropriate time*/}
+                {isTodayOrYesterday(currentSelectedDate) === 'Today' && meal.meal === recommendation &&
+                  (
+                  <Text>{recommendation && `Recommended: ${recommendation}`}</Text>
+                )}
+                <FoodRecs
+                  user={props.user}
+                  age={props.age}
+                  bio_sex={props.bio_sex}
+                  height={props.height}
+                  weight={props.weight}>
+                </FoodRecs>
                 <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>
             ))}

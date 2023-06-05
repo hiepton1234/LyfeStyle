@@ -7,7 +7,6 @@ import {FoodPage} from "./FoodPage";
 import { initializeApp } from 'firebase/app';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
-import {fetchNearbyRestaurants} from './Recommender/FoodRecs'
 import * as Location from 'expo-location';
 
 const screenWidth = Dimensions.get('window').width;
@@ -62,7 +61,7 @@ let height = 0;
 let dob = "";
 let age = 0;
 let bio_sex = "";
-
+let weight = 0;
 
 
 
@@ -258,6 +257,7 @@ export default function App() {
       options,
       (callBackError, result) => {
         console.log(result)
+        weight = result.value
 
         newReference.child("Health Info")
           .update({
@@ -351,6 +351,7 @@ export default function App() {
             bio_sex={bio_sex}
             height={height}
           />
+          {/*{console.log(calculateMaintenanceCalories(age, bio_sex, height, weight))}*/}
           <HealthGoals
             user = {user}
             age={age}
@@ -359,6 +360,10 @@ export default function App() {
             height={height}/>
           <FoodPage
             user = {user}
+            age={age}
+            bio_sex={bio_sex}
+            height={height}
+            weight ={weight}
             latitude = {location.coords.latitude}
             longitude = {location.coords.longitude}
             // personalModel = {personalModel} replace when we have one
