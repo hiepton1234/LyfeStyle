@@ -85,7 +85,7 @@ function FoodPage(props) {
   }, [currentSelectedDate]);
 
   const loadFoodEntries = () => {
-    console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate)
+    // console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate)
     database()
       .ref('user/' + props.user.uid + '/Food Entries/' + formatDate(currentSelectedDate))
       .once('value')

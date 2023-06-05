@@ -80,6 +80,11 @@ function AddActivity() {
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <Text style={styles.baseText}>Please Enter An Activity:</Text>
+                        <View style={styles.tagContainer}>
+                            <Text style={styles.tagText}>
+                                Make sure the activity is something that does not allow with your sleep or workout. For example, work or school.
+                            </Text>
+                        </View>
                         <TextInput
                             style={styles.input}
                             value={activity}
@@ -221,6 +226,19 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
         paddingHorizontal: 10,
+    },
+
+    tagContainer: {
+        backgroundColor: '#F0F0F0',
+        borderRadius: 10,
+        padding: 10,
+    },
+
+    tagText: {
+        fontFamily: 'American Typewriter',
+        fontSize: 14,
+        color: '#555555',
+        textAlign: 'center',
     },
 });
 

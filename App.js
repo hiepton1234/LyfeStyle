@@ -351,7 +351,7 @@ export default function App() {
                 fetchSleepData(user)
                     .then(() => {
                         // Sleep data fetching completed
-                        console.log('Sleep data fetched');
+                        // console.log('Sleep data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching sleep data:', error);
@@ -360,7 +360,7 @@ export default function App() {
                 fetchCaloricData(user)
                     .then(() => {
                         // Caloric data fetching completed
-                        console.log('Caloric data fetched');
+                        // console.log('Caloric data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching caloric data:', error);
@@ -369,7 +369,7 @@ export default function App() {
                 fetchCaloriesBurnedData(user)
                     .then(() => {
                         // Calories burned data fetching completed
-                        console.log('Calories burned data fetched');
+                        // console.log('Calories burned data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching calories burned data:', error);
@@ -378,7 +378,7 @@ export default function App() {
                 fetchWorkoutHoursData(user)
                     .then(() => {
                         // Calories burned data fetching completed
-                        console.log('Workout hours data fetched');
+                        // console.log('Workout hours data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching workout hours data:', error);
