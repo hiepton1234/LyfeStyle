@@ -3,6 +3,8 @@ import { Alert, Modal, StyleSheet, Text, Pressable, View, TextInput } from 'reac
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InteractiveCalendar from './InteractiveCalendar';
 
+const activities = []; // Define the activities array outside the component
+
 function AddActivity() {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
@@ -13,8 +15,6 @@ function AddActivity() {
     const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
     const [minEndTime, setMinEndTime] = useState(null);
 
-    let activities = [];
-
     const handleActivityChange = (text) => {
         setActivity(text);
     };
@@ -22,7 +22,11 @@ function AddActivity() {
     const handleStartTimeChange = (time) => {
         setStartTime(time);
         setStartTimePickerVisible(false);
-        setMinEndTime(time); // Set the minimum end time
+
+        // Calculate the minimum end time by adding 1 minute to the start time
+        const minEndTime = new Date(time);
+        minEndTime.setMinutes(minEndTime.getMinutes() + 1);
+        setMinEndTime(minEndTime);
     };
 
     const handleEndTimeChange = (time) => {
@@ -31,6 +35,11 @@ function AddActivity() {
     };
 
     const handleAddActivity = () => {
+        if (!activity || !startTime || !endTime || !selectedDate) {
+            Alert.alert('Error', 'Please fill in all fields');
+            return;
+        }
+
         // Create a new activity object
         const newActivity = {
             activity: activity,
@@ -40,11 +49,10 @@ function AddActivity() {
         };
 
         // Add the new activity to the activities array
-        activities.push(newActivity)
-        console.log(activities)
+        activities.push(newActivity);
+        console.log(activities); // Print the activities array
 
-        // Close the modal and clear the input fields
-        setModalVisible(false);
+        // Clear the input fields
         setActivity('');
         setStartTime('');
         setEndTime('');
@@ -138,7 +146,7 @@ function AddActivity() {
                                 style={[styles.button, styles.buttonClose, { marginLeft: 35 }]}
                                 onPress={() => setModalVisible(!modalVisible)}
                             >
-                                <Text style={styles.textStyle}>Cancel</Text>
+                                <Text style={styles.textStyle}>Back</Text>
                             </Pressable>
                         </View>
                     </View>
@@ -247,4 +255,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export { AddActivity };
+export { AddActivity, activities };

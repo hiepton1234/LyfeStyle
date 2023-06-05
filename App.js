@@ -5,7 +5,7 @@ import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
-import {AddActivity} from "./AddActivity";
+import { AddActivity, activities } from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import moment from "moment";
@@ -684,6 +684,13 @@ export default function App() {
                         </ScrollView>
 
                         <Text style={styles.baseText}>Activities For Today:</Text>
+                        <ScrollView style={[styles.activitiesContainer, { height: 120 }]}>
+                            {activities.map((activity, index) => (
+                                <View key={index} style={styles.itemContainer}>
+                                    <Text style={styles.itemText}>{activity}</Text>
+                                </View>
+                            ))}
+                        </ScrollView>
                     </View>
                 </ScrollView>
             </View>
@@ -715,5 +722,12 @@ const styles = StyleSheet.create({
         color: '#000000',
         textAlign: 'center',
         fontFamily: 'American Typewriter',
+    },
+
+    activitiesContainer: {
+        backgroundColor: '#e0e0e0',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        width: screenWidth,
     },
 });
