@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View, TextInput } from 'react-native';
+import {Alert, Modal, StyleSheet, Text, Pressable, View, TextInput, Dimensions} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InteractiveCalendar from './InteractiveCalendar';
 
-const activities = []; // Define the activities array outside the component
+const screenWidth = Dimensions.get('window').width;
 
-function AddActivity() {
+function AddActivity(props) {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
     const [startTime, setStartTime] = useState('');
@@ -49,8 +49,16 @@ function AddActivity() {
         };
 
         // Add the new activity to the activities array
-        activities.push(newActivity);
-        console.log("AddActivity.js: " + activities); // Print the updated activities array
+        props.activities.push(newActivity);
+        // Print the updated activities array
+        console.log("AddActivity.js:");
+        props.activities.forEach((activity) => {
+            console.log("Activity: " + activity.activity);
+            console.log("Start Time: " + activity.startTime);
+            console.log("End Time: " + activity.endTime);
+            console.log("Selected Date: " + activity.selectedDate);
+            console.log("------");
+        });
 
         // Clear the input fields
         setActivity('');
@@ -89,66 +97,68 @@ function AddActivity() {
                     setModalVisible(!modalVisible);
                 }}
             >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.baseText}>Please Enter An Activity:</Text>
-                        <View style={styles.tagContainer}>
-                            <Text style={styles.tagText}>
-                                Make sure the activity is something that does not allow with your sleep or workout. For example, work or school.
-                            </Text>
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            value={activity}
-                            onChangeText={handleActivityChange}
-                            placeholder="Please enter an activity here"
+                <View style={styles.appContainer}>
+                    <Text style={styles.title}>Add Activities</Text>
+                    <Text style={[styles.baseText, { paddingBottom: 5 }]}>Please Enter An Activity:</Text>
+                    <View style={styles.tagContainer}>
+                        <Text style={styles.tagText}>
+                            Ensure the activity is something that does not allow with your sleep or workout. For example, work or school.
+                        </Text>
+                    </View>
+                    <TextInput
+                        style={styles.input}
+                        value={activity}
+                        onChangeText={handleActivityChange}
+                        placeholder="Please enter an activity here"
+                    />
+
+                    <Text style={styles.baseText}>Start Time:</Text>
+                    <Pressable onPress={showStartTimePicker}>
+                        <Text style={{ color: '#64D2FF', fontFamily: 'American Typewriter', textAlign: 'center', fontSize: 17 }}>
+                            {startTime ? startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Start Time'}
+                        </Text>
+                    </Pressable>
+                    {isStartTimePickerVisible && (
+                        <DateTimePickerModal
+                            isVisible={isStartTimePickerVisible}
+                            mode="time"
+                            onConfirm={handleStartTimeChange}
+                            onCancel={hideStartTimePicker}
                         />
+                    )}
+                    <View style={{ paddingBottom: 20 }} />
 
-                        <Text style={styles.baseText}>Start Time:</Text>
-                        <Pressable onPress={showStartTimePicker}>
-                            <Text style={{ color: '#64D2FF', fontFamily: 'American Typewriter' }}>
-                                {startTime ? startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Start Time'}
-                            </Text>
+                    <Text style={styles.baseText}>End Time:</Text>
+                    <Pressable onPress={showEndTimePicker}>
+                        <Text style={{ color: '#64D2FF', fontFamily: 'American Typewriter', textAlign: 'center', fontSize: 17 }}>
+                            {endTime ? endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select End Time'}
+                        </Text>
+                    </Pressable>
+                    {isEndTimePickerVisible && (
+                        <DateTimePickerModal
+                            isVisible={isEndTimePickerVisible}
+                            mode="time"
+                            onConfirm={handleEndTimeChange}
+                            onCancel={hideEndTimePicker}
+                            minimumDate={minEndTime} // Set the minimum end time
+                        />
+                    )}
+                    <View style={{ paddingBottom: 20 }} />
+
+                    <Text style={styles.baseText}>Select Day:</Text>
+                    <InteractiveCalendar onDateSelect={handleDateSelect} />
+                    <View style={{ paddingBottom: 20 }} />
+
+                    <View style={styles.buttonContainer}>
+                        <Pressable style={[styles.button, styles.buttonClose]} onPress={handleAddActivity}>
+                            <Text style={styles.textStyle}>Add</Text>
                         </Pressable>
-                        {isStartTimePickerVisible && (
-                            <DateTimePickerModal
-                                isVisible={isStartTimePickerVisible}
-                                mode="time"
-                                onConfirm={handleStartTimeChange}
-                                onCancel={hideStartTimePicker}
-                            />
-                        )}
-
-                        <Text style={styles.baseText}>End Time:</Text>
-                        <Pressable onPress={showEndTimePicker}>
-                            <Text style={{ color: '#64D2FF', fontFamily: 'American Typewriter' }}>
-                                {endTime ? endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select End Time'}
-                            </Text>
+                        <Pressable
+                            style={[styles.button, styles.buttonClose]}
+                            onPress={() => setModalVisible(!modalVisible)}
+                        >
+                            <Text style={styles.textStyle}>Back</Text>
                         </Pressable>
-                        {isEndTimePickerVisible && (
-                            <DateTimePickerModal
-                                isVisible={isEndTimePickerVisible}
-                                mode="time"
-                                onConfirm={handleEndTimeChange}
-                                onCancel={hideEndTimePicker}
-                                minimumDate={minEndTime} // Set the minimum end time
-                            />
-                        )}
-
-                        <Text style={styles.baseText}>Which Day?:</Text>
-                        <InteractiveCalendar onDateSelect={handleDateSelect} />
-
-                        <View style={styles.buttonContainer}>
-                            <Pressable style={[styles.button, styles.buttonClose, { marginRight: 35 }]} onPress={handleAddActivity}>
-                                <Text style={styles.textStyle}>Add</Text>
-                            </Pressable>
-                            <Pressable
-                                style={[styles.button, styles.buttonClose, { marginLeft: 35 }]}
-                                onPress={() => setModalVisible(!modalVisible)}
-                            >
-                                <Text style={styles.textStyle}>Back</Text>
-                            </Pressable>
-                        </View>
                     </View>
                 </View>
             </Modal>
@@ -183,20 +193,26 @@ const styles = StyleSheet.create({
         marginTop: 22,
     },
 
-    modalView: {
-        margin: 20,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
+    appContainer: {
+        backgroundColor: '#ffff',
+        flex: 1,
+        paddingTop: 50,
+        padding: 25,
+    },
+
+    title: {
+        fontFamily: 'American Typewriter',
+        paddingBottom: 10,
+        fontSize: 35,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+
+    baseText: {
+        fontFamily: 'American Typewriter',
+        fontSize: 20,
+        textAlign: 'center',
+        paddingTop: 10,
     },
 
     button: {
@@ -216,6 +232,7 @@ const styles = StyleSheet.create({
 
     buttonClose: {
         backgroundColor: '#64D2FF',
+        width: (screenWidth - 130) / 2,
     },
 
     textStyle: {
@@ -223,15 +240,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 
-    baseText: {
-        fontFamily: 'American Typewriter',
-        fontSize: 20,
-        textAlign: 'center',
-        paddingTop: 10,
-    },
-
     input: {
-        width: 250,
+        width: screenWidth - 50,
         height: 40,
         borderColor: 'gray',
         borderWidth: 1,
@@ -255,4 +265,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export { AddActivity, activities };
+export { AddActivity };

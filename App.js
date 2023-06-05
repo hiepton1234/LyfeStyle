@@ -5,7 +5,7 @@ import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
-import { AddActivity, activities } from './AddActivity';
+import { AddActivity } from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import moment from "moment";
@@ -62,6 +62,7 @@ let height = 0;
 let dob = "";
 let age = 0;
 let bio_sex = "";
+let activities = [];
 
 
 
@@ -544,6 +545,18 @@ export default function App() {
         )
     })
 
+    // Function to print the activities array
+    const printActivities = () => {
+        console.log("Activities:");
+        activities.forEach((activity) => {
+            console.log("Activity: " + activity.activity);
+            console.log("Start Time: " + activity.startTime);
+            console.log("End Time: " + activity.endTime);
+            console.log("Selected Date: " + activity.selectedDate);
+            console.log("------");
+        });
+    };
+
     return (
         <>
             <StatusBar barStyle="dark-content" />
@@ -591,7 +604,7 @@ export default function App() {
 
                     <WorkoutRec />
 
-                    <AddActivity />
+                    <AddActivity activities={activities} />
 
                     {/*Personicle*/}
                     <View style={styles.centeredView}>
@@ -683,6 +696,7 @@ export default function App() {
                         </ScrollView>
 
                         <Text style={styles.baseText}>Activities For Today:</Text>
+                        {console.log("App.js: ", activities)}
                         {activities.length === 0 ? (
                             <View style={[styles.activitiesContainer, { height: 40 }]}>
                                 <Text style={styles.baseText}>No activities for today!</Text>
