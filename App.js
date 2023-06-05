@@ -569,30 +569,29 @@ export default function App() {
                     />
 
                     <Profile
-                    user = {user}
-                    age={age}
-                    dob={dob}
-                    bio_sex={bio_sex}
-                    height={height}
+                        user={user}
+                        age={age}
+                        dob={dob}
+                        bio_sex={bio_sex}
+                        height={height}
                     />
 
                     <HealthGoals
-                    user = {user}
-                    age={age}
-                    dob={dob}
-                    bio_sex={bio_sex}
-                    height={height}/>
+                        user={user}
+                        age={age}
+                        dob={dob}
+                        bio_sex={bio_sex}
+                        height={height}
+                    />
 
                     <FoodPage
-                    user = {user}
-                    // personalModel = {personalModel} replace when we have one
+                        user={user}
+                        // personalModel = {personalModel} replace when we have one
                     />
 
-                    <WorkoutRec
-                    />
+                    <WorkoutRec />
 
-                    <AddActivity
-                    />
+                    <AddActivity />
 
                     {/*Personicle*/}
                     <View style={styles.centeredView}>
@@ -679,21 +678,36 @@ export default function App() {
                                     color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
                                     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                                 }}
-                                style={{ paddingBottom: 50 }}
+                                style={{ paddingBottom: 40 }}
                             />
                         </ScrollView>
 
                         <Text style={styles.baseText}>Activities For Today:</Text>
-                        <ScrollView style={[styles.activitiesContainer, { height: 120 }]}>
-                            {activities.map((activity, index) => (
-                                <View key={index} style={styles.itemContainer}>
-                                    <Text style={styles.itemText}>{activity}</Text>
-                                </View>
-                            ))}
-                        </ScrollView>
+                        {activities.length === 0 ? (
+                            <View style={[styles.activitiesContainer, { height: 40 }]}>
+                                <Text style={styles.baseText}>No activities for today!</Text>
+                            </View>
+                        ) : (
+                            <ScrollView style={[styles.activitiesContainer, { height: 120 }]}>
+                                {activities.map((activity, index) => (
+                                    <View key={index} style={styles.itemContainer}>
+                                        <Text style={styles.itemText}>
+                                            Activity: {activity.activity}
+                                            {'\n'}
+                                            Start Time: {activity.startTime}
+                                            {'\n'}
+                                            End Time: {activity.endTime}
+                                            {'\n'}
+                                            Selected Date: {activity.selectedDate}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        )}
                     </View>
                 </ScrollView>
             </View>
+            <View style={{ paddingBottom: 70 }} />
         </>
     );
 }
@@ -726,8 +740,11 @@ const styles = StyleSheet.create({
 
     activitiesContainer: {
         backgroundColor: '#e0e0e0',
-        paddingHorizontal: 10,
-        paddingVertical: 5,
         width: screenWidth,
+    },
+
+    itemText: {
+        fontFamily: 'American Typewriter', // Set the desired font family
+        fontSize: 16, // Set the desired font size
     },
 });

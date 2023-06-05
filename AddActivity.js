@@ -50,7 +50,7 @@ function AddActivity() {
 
         // Add the new activity to the activities array
         activities.push(newActivity);
-        console.log(activities); // Print the activities array
+        console.log(activities); // Print the updated activities array
 
         // Clear the input fields
         setActivity('');
