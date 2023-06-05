@@ -682,6 +682,8 @@ export default function App() {
                                 style={{ paddingBottom: 50 }}
                             />
                         </ScrollView>
+
+                        <Text style={styles.baseText}>Activities For Today:</Text>
                     </View>
                 </ScrollView>
             </View>

@@ -9,9 +9,11 @@ function AddActivity() {
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [selectedDate, setSelectedDate] = useState('');
-    const [activities, setActivities] = useState([]);
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
     const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
+    const [minEndTime, setMinEndTime] = useState(null);
+
+    let activities = [];
 
     const handleActivityChange = (text) => {
         setActivity(text);
@@ -20,6 +22,7 @@ function AddActivity() {
     const handleStartTimeChange = (time) => {
         setStartTime(time);
         setStartTimePickerVisible(false);
+        setMinEndTime(time); // Set the minimum end time
     };
 
     const handleEndTimeChange = (time) => {
@@ -37,7 +40,8 @@ function AddActivity() {
         };
 
         // Add the new activity to the activities array
-        setActivities([...activities, newActivity]);
+        activities.push(newActivity)
+        console.log(activities)
 
         // Close the modal and clear the input fields
         setModalVisible(false);
@@ -119,6 +123,7 @@ function AddActivity() {
                                 mode="time"
                                 onConfirm={handleEndTimeChange}
                                 onCancel={hideEndTimePicker}
+                                minimumDate={minEndTime} // Set the minimum end time
                             />
                         )}
 
