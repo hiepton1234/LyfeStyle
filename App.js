@@ -11,6 +11,7 @@ import database from "@react-native-firebase/database";
 import moment from "moment";
 import auth from '@react-native-firebase/auth'
 import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
+import AppleHealthKit, {HealthValue, HealthKitPermissions} from 'react-native-health'
 
 const screenWidth = Dimensions.get('window').width;
 
