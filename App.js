@@ -49,12 +49,12 @@ const permissions = {
   },
 }
 
-export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
-    const a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
-    const s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
-    const i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
+export function score(calories_burned, calories_burned_goal, sleep, sleep_goal, caloric_intake, caloric_intake_goal) {
+    const calories_burned_dev = 100 * Math.abs((calories_burned - calories_burned_goal) / calories_burned_goal);
+    const sleep_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
+    const caloric_intake_dev = 100 * Math.abs((caloric_intake - caloric_intake_goal) / caloric_intake_goal);
 
-    return 100 - a_dev - s_dev - i_dev;
+    return 100 - calories_burned_dev - sleep_dev - caloric_intake_dev;
 }
 
 // auth()
