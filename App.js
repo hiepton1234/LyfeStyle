@@ -7,6 +7,7 @@ import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
+import * as Location from 'expo-location';
 import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
@@ -57,11 +58,6 @@ const permissions = {
   },
 }
 
-let height = 0;
-let dob = "";
-let age = 0;
-let bio_sex = "";
-
 
 
 
@@ -78,6 +74,12 @@ export function score(activity, activity_goal, sleep, sleep_goal, intake, intake
 //   .then(() => console.log('User signed out!'));
 
 export default function App() {
+  const [height, setHeight] = useState(0);
+  const [dob, setDob] = useState("");
+  const [age, setAge] = useState(0);
+  const [bio_sex, setBio_sex] = useState("");
+  const [weight, setWeight] = useState(0);
+
     const lifescore_data = useMemo(() => ({
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         datasets: [{
@@ -159,6 +161,28 @@ export default function App() {
         const firstMoment = moment(firstDay);
         const secondMoment = moment(secondDay);
 
+
+  const [location, setLocation] = useState(null)
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location permission denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location)
+      // console.log(location.coords.latitude, location.coords.longitude);
+    })();
+  }, []);
+
+  if (location === null) {
+    return null
+  }
+
+  if (initializing) return null;
         const startOfWeek = function (_moment, _offset) {
             return _moment.clone().startOf('week').add(_offset, 'days');
         };
@@ -445,10 +469,10 @@ export default function App() {
     )
 
     AppleHealthKit.getBiologicalSex(
-        options,
-        (callBackError, result) => {
-        // console.log(result)
-        bio_sex = result.value
+      options,
+      (callBackError, result) => {
+        console.log(result)
+        setBio_sex(result.value)
 
         newReference.child("Health Info")
             .update({
@@ -458,10 +482,10 @@ export default function App() {
     )
 
     AppleHealthKit.getLatestHeight(
-        options,
-        (callBackError, result) => {
-        // console.log(result)
-        height = result.value
+      options,
+      (callBackError, result) => {
+        console.log(result)
+        setHeight(result.value)
 
         newReference.child("Health Info")
             .update({
@@ -484,7 +508,8 @@ export default function App() {
     AppleHealthKit.getLatestWeight(
       options,
       (callBackError, result) => {
-        // console.log(result)
+        console.log(result)
+        setWeight(result.value)
 
         newReference.child("Health Info")
           .update({
@@ -496,9 +521,10 @@ export default function App() {
     AppleHealthKit.getDateOfBirth(
       options,
       (callbackError, result) => {
-        // console.log(result)
-        dob = result.value.substring(0, 10)
-        age = result.age
+        console.log(result)
+        setDob(result.value.substring(0, 10))
+        setAge(result.age)
+        
         newReference.child("Health Info")
           .update({
             dob: dob,
@@ -582,7 +608,7 @@ export default function App() {
                     bio_sex={bio_sex}
                     height={height}
                     />
-
+                    {/*{console.log(calculateMaintenanceCalories(age, bio_sex, height, weight))}*/}
                     <HealthGoals
                     user = {user}
                     age={age}
@@ -591,8 +617,14 @@ export default function App() {
                     height={height}/>
 
                     <FoodPage
-                    user = {user}
-                    // personalModel = {personalModel} replace when we have one
+                      user = {user}
+                      age={age}
+                      bio_sex={bio_sex}
+                      height={height}
+                      weight ={weight}
+                      latitude = {location.coords.latitude}
+                      longitude = {location.coords.longitude}
+                      // personalModel = {personalModel} replace when we have one
                     />
 
                     <WorkoutRec
