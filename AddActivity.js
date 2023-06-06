@@ -49,8 +49,15 @@ function AddActivity({ setActivities }) {
         // Convert selectedDate to a Date object
         const formattedDate = new Date(selectedDate);
 
-        // Check if the selected date is before the current date
-        if (formattedDate < currentDate) {
+        // console.log("CURRENT: ", currentDate);
+        // console.log("FORMATTED: ", formattedDate);
+
+        // Set UTC hours to 0 for both currentDate and formattedDate
+        currentDate.setUTCHours(0, 0, 0, 0);
+        formattedDate.setUTCHours(0, 0, 0, 0);
+
+        // Compare the timestamps of formattedDate and currentDate
+        if (formattedDate.getTime() < currentDate.getTime()) {
             Alert.alert('Error!', 'Please select today\'s date or a future date');
             return;
         }
@@ -117,7 +124,7 @@ function AddActivity({ setActivities }) {
                     <Text style={[styles.baseText, { paddingBottom: 5 }]}>Please Enter An Activity:</Text>
                     <View style={styles.tagContainer}>
                         <Text style={styles.tagText}>
-                            Ensure the activity is something that does not allow with your sleep or workout. For example, work or school.
+                            Ensure the activity is something that does not allow you to sleep or workout. For example, work or school.
                         </Text>
                     </View>
                     <TextInput

@@ -8,10 +8,10 @@ import {WorkoutRec} from "./WorkoutRec"
 import {AddActivity} from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
-import moment from "moment";
 import auth from '@react-native-firebase/auth'
 import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
 import AppleHealthKit, {HealthValue, HealthKitPermissions} from 'react-native-health'
+import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -511,7 +511,7 @@ export default function App() {
         // console.log(result)
         setDob(result.value.substring(0, 10))
         setAge(result.age)
-        
+
         newReference.child("Health Info")
           .update({
             dob: dob,
@@ -556,7 +556,7 @@ export default function App() {
     )
     }
     )
-    
+
     // AppleHealthKit.getClinicalRecords(
     //     options,
     //     (callbackError, result) => {
@@ -700,7 +700,7 @@ export default function App() {
                                 </Text>
                             </View>
                         ) : (
-                            <ScrollView style={{ height: 170 }}>
+                            <>
                                 {(() => {
                                     const filteredActivities = activities.filter((activity) => {
                                         const today = new Date();
@@ -716,27 +716,31 @@ export default function App() {
                                         return (
                                             <View style={styles.itemContainer}>
                                                 <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
-                                                    No activities for today!
+                                                    No Activities For Today!
                                                 </Text>
                                             </View>
                                         );
                                     } else {
-                                        return filteredActivities.map((activity, index) => (
-                                            <View key={index} style={styles.itemContainer}>
-                                                <Text style={styles.itemText}>
-                                                    Activity: <Text style={{ fontWeight: 'bold' }}>{activity.activity}</Text>
-                                                    {'\n'}
-                                                    Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                                                    {'\n'}
-                                                    End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                                                    {/*{'\n'}*/}
-                                                    {/*Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>*/}
-                                                </Text>
-                                            </View>
-                                        ));
+                                        return (
+                                            <ScrollView style={{ height: 135 }}>
+                                                {filteredActivities.map((activity, index) => (
+                                                    <View key={index} style={styles.itemContainer}>
+                                                        <Text style={styles.itemText}>
+                                                            Activity: <Text style={{ fontWeight: 'bold' }}>{activity.activity}</Text>
+                                                            {'\n'}
+                                                            Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                            {'\n'}
+                                                            End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                            {/*{'\n'}*/}
+                                                            {/*Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>*/}
+                                                        </Text>
+                                                    </View>
+                                                ))}
+                                            </ScrollView>
+                                        );
                                     }
                                 })()}
-                            </ScrollView>
+                            </>
                         )}
                     </View>
                 </ScrollView>
