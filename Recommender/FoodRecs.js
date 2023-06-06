@@ -1,29 +1,84 @@
 import axios, {CancelToken} from 'axios';
 import Geolocation from 'react-native-geolocation-service';
 import database from "@react-native-firebase/database";
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import {Text} from 'react-native'
 
 
 export function FoodRecs(props) {
-  const makeRecommendation = (medianTimes) => {
+  const [recommendedTime, setRecommendedTime] = useState('');
+
+  useEffect(() => {
+    const calculateMedianTimes = () => {
+      const mealTimes = ['Breakfast', 'Lunch', 'Dinner'];
+      const medianTimes = {};
+
+      // Initialize an empty array for each meal time
+      for (const mealTime of mealTimes) {
+        medianTimes[mealTime] = [];
+      }
+
+      // Iterate over the dates in Food Entries
+      database()
+        .ref('user/' + props.user.uid + '/Food Entries')
+        .once('value')
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const foodEntries = snapshot.val();
+
+            for (const date in foodEntries) {
+              const meals = foodEntries[date];
+
+              // Iterate over each meal time for the current date
+              for (const mealTime of mealTimes) {
+                if (meals[mealTime]) {
+                  const hourRecorded = meals[mealTime].hour_recorded;
+                  const minuteRecorded = meals[mealTime].minute_recorded;
+
+                  // Push the recorded time to the array
+                  medianTimes[mealTime].push({ hour: hourRecorded, minute: minuteRecorded });
+                }
+              }
+            }
+
+            // Calculate the median for each meal time
+            for (const mealTime of mealTimes) {
+              const recordedTimes = medianTimes[mealTime];
+
+              if (recordedTimes.length > 0) {
+                // Sort the recorded times in ascending order
+                recordedTimes.sort((a, b) => {
+                  return a.hour - b.hour || a.minute - b.minute;
+                });
+
+                const medianIndex = Math.floor(recordedTimes.length / 2);
+                medianTimes[mealTime] = recordedTimes[medianIndex];
+              } else {
+                medianTimes[mealTime] = null;
+              }
+            }
+
+            const recommendedTime = calculateRecommendedTime(medianTimes);
+            setRecommendedTime(recommendedTime);
+          }
+        });
+    };
+
+    calculateMedianTimes();
+  }, []);
+
+  const calculateRecommendedTime = (medianTimes) => {
     let d = new Date();
     let currentHour = d.getHours();
 
-    // make recommendation for which meal time to record, depending on current time with 1 hour grace period
+    // make recommendedTime for which meal time to record, depending on current time with 1 hour grace period
     switch (true) {
-      case (
-        currentHour >= medianTimes.Breakfast.hour - 1 &&
-        currentHour < medianTimes.Lunch.hour - 1
-      ):
-        return "Breakfast";
-      case (
-        currentHour >= medianTimes.Lunch.hour - 1 &&
-        currentHour < medianTimes.Dinner.hour - 1
-      ):
-        return "Lunch";
+      case currentHour >= (medianTimes?.Breakfast?.hour || 0) - 1 && currentHour < (medianTimes?.Lunch?.hour || 0) - 1:
+        return 'Breakfast';
+      case currentHour >= (medianTimes?.Lunch?.hour || 0) - 1 && currentHour < (medianTimes?.Dinner?.hour || 0) - 1:
+        return 'Lunch';
       default:
-        return "Dinner";
+        return 'Dinner';
     }
   };
 
@@ -83,7 +138,8 @@ export function FoodRecs(props) {
   };
 
 // calculate user's maintenance calories based on Mifflin-St Jeor Equation
-  function calculateMaintenanceCalories(avgEnergyBurntDaily) {
+  function calculateGoalCalories(avgEnergyBurntDaily) {
+
     let genderConstant = 5
     if (props.bio_sex === 'female')
       genderConstant = -161
@@ -91,7 +147,29 @@ export function FoodRecs(props) {
     console.log(props.weight)
 
     // increase basal metabolic rate by avg daily energy burnt from activity to obtain maintenance cals
-    return Math.round(BMR * avgEnergyBurntDaily / 15)
+    let maintenance_cals = BMR * avgEnergyBurntDaily / 15
+
+    // get weight gaol
+    const [weightGoal, setWeightGoal] = useState([])
+    database()
+      .ref('user/' + props.user.uid + '/goals/weightGoal')
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          setWeightGoal(snapshot.val());
+        }
+      })
+
+    let goalModifier = 1
+    if (weightGoal === 'lose')
+      goalModifier = 0.9
+    else if (weightGoal === 'gain')
+      goalModifier = 1.1
+
+    // goal calories = maintenance calories times a multiplier depending on weight goal. 0.9 and 1.1 for
+    // healthy and feasible weight loss rate of +/- 0.5 pound each week
+    let goal_cals = Math.round(maintenance_cals * goalModifier)
+    return goal_cals
   }
 
   function loadEnergyBurned() {
@@ -138,10 +216,10 @@ export function FoodRecs(props) {
 
   }
 
-  let test = calculateMaintenanceCalories(avgEnergyBurned())
+  let goalCalories = calculateGoalCalories(avgEnergyBurned())
 
   return(
-    <Text>Recommended: </Text>
+    <Text>{recommendedTime === props.mealTime && goalCalories}</Text>
   )
 
 }
