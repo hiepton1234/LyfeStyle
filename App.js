@@ -721,30 +721,48 @@ export default function App() {
                         </ScrollView>
 
                         <Text style={styles.baseText}>Activities For Today:</Text>
-                        {console.log("App.js: ", activities)}
                         {activities.length === 0 ? (
-                            <View style={[styles.activitiesContainer, { height: 40 }]}>
-                                <Text style={styles.baseText}>No activities for today!</Text>
+                            <View style={styles.itemContainer}>
+                                <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>No activities registered!</Text>
                             </View>
                         ) : (
-                            <ScrollView style={[styles.activitiesContainer, { height: 120 }]}>
-                                {activities.map((activity, index) => (
-                                    <View key={index} style={styles.itemContainer}>
-                                        <Text style={styles.itemText}>
-                                            Activity: {activity.activity}
-                                            {'\n'}
-                                            Start Time: {activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            {'\n'}
-                                            End Time: {activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            {'\n'}
-                                            Selected Date: {activity.selectedDate}
-                                            {/*{console.log(typeof activity.activity)}*/}
-                                            {/*{console.log(typeof activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}*/}
-                                            {/*{console.log(typeof activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}*/}
-                                            {/*{console.log(typeof activity.selectedDate)}*/}
-                                        </Text>
-                                    </View>
-                                ))}
+                            <ScrollView style={{ height: 300 }}>
+                                {(() => {
+                                    const filteredActivities = activities.filter((activity) => {
+                                        const today = new Date();
+                                        const selectedDate = activity.selectedDate;
+                                        const isToday =
+                                            selectedDate.getDate() === today.getDate() &&
+                                            selectedDate.getMonth() === today.getMonth() &&
+                                            selectedDate.getFullYear() === today.getFullYear();
+
+                                        return isToday;
+                                    });
+
+                                    if (filteredActivities.length === 0) {
+                                        return (
+                                            <View style={styles.itemContainer}>
+                                                <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
+                                                    No activities for today!
+                                                </Text>
+                                            </View>
+                                        );
+                                    } else {
+                                        return filteredActivities.map((activity, index) => (
+                                            <View key={index} style={styles.itemContainer}>
+                                                <Text style={styles.itemText}>
+                                                    Activity: <Text style={{ fontWeight: 'bold' }}>{activity.activity}</Text>
+                                                    {'\n'}
+                                                    Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                    {'\n'}
+                                                    End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                    {'\n'}
+                                                    Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>
+                                                </Text>
+                                            </View>
+                                        ));
+                                    }
+                                })()}
                             </ScrollView>
                         )}
                     </View>
@@ -784,6 +802,14 @@ const styles = StyleSheet.create({
     activitiesContainer: {
         backgroundColor: '#e0e0e0',
         width: screenWidth,
+    },
+
+    itemContainer: {
+        width: screenWidth - 25,
+        backgroundColor: '#F2F2F2',
+        padding: 10,
+        marginVertical: 5,
+        borderRadius: 5,
     },
 
     itemText: {

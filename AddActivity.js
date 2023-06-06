@@ -43,12 +43,15 @@ function AddActivity({ setActivities }) {
             return;
         }
 
+        // Convert selectedDate to a Date object
+        const formattedDate = new Date(selectedDate);
+
         // Create a new activity object
         const newActivity = {
             activity: activity,
             startTime: startTime,
             endTime: endTime,
-            selectedDate: selectedDate
+            selectedDate: formattedDate
         };
 
         // Updating the activities array in the parent component
@@ -156,7 +159,13 @@ function AddActivity({ setActivities }) {
                         </Pressable>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
-                            onPress={() => setModalVisible(!modalVisible)}
+                            onPress={() => {
+                                setModalVisible(!modalVisible);
+                                // Clear the input fields
+                                setActivity('');
+                                setStartTime('');
+                                setEndTime('');
+                            }}
                         >
                             <Text style={styles.textStyle}>Back</Text>
                         </Pressable>
