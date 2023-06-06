@@ -1,6 +1,6 @@
-import {BarChart, ContributionGraph, LineChart} from 'react-native-chart-kit';
-import {useEffect, useMemo, useState} from "react";
-import {Dimensions, ScrollView, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {BarChart, LineChart} from 'react-native-chart-kit';
+import {useEffect, useMemo, useRef, useState} from "react";
+import {Dimensions, Pressable, ScrollView, StatusBar, StyleSheet, Text, View} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
@@ -68,6 +68,11 @@ export default function App() {
     const [bio_sex, setBio_sex] = useState("");
     const [weight, setWeight] = useState(0);
     const [activities, setActivities] = useState([]);
+    const scrollViewRef = useRef(null);
+
+    const scrollToTop = () => {
+        scrollViewRef.current.scrollTo({ y: 0, animated: true });
+    };
 
     useEffect(() => {
         // Delete activities from yesterday
@@ -570,7 +575,10 @@ export default function App() {
             <View style={styles.centeredView}>
                 <Text style={[styles.title, { paddingTop: 20, paddingBottom: 10, fontSize: 35 }]}>Lyfestyle</Text>
 
-                <ScrollView contentContainerStyle={styles.scrollView}>
+                <ScrollView
+                    ref={scrollViewRef}
+                    contentContainerStyle={styles.scrollView}
+                >
                     <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
                     <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
@@ -742,6 +750,11 @@ export default function App() {
                                 })()}
                             </>
                         )}
+
+                        {/* "Back to Top" button */}
+                        <Pressable style={styles.button} onPress={scrollToTop}>
+                            <Text style={styles.textStyle}>Back to Top</Text>
+                        </Pressable>
                     </View>
                 </ScrollView>
             </View>
@@ -792,5 +805,19 @@ const styles = StyleSheet.create({
     itemText: {
         fontFamily: 'American Typewriter', // Set the desired font family
         fontSize: 16, // Set the desired font size
+    },
+
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+        backgroundColor: '#64D2FF',
+        width: screenWidth - 50,
+        marginTop: 40,
+    },
+
+    textStyle: {
+        fontFamily: 'American Typewriter',
+        textAlign: 'center',
     },
 });
