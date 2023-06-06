@@ -8,10 +8,10 @@ import {WorkoutRec} from "./WorkoutRec"
 import {AddActivity} from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
-import moment from "moment";
 import auth from '@react-native-firebase/auth'
 import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
 import AppleHealthKit, {HealthValue, HealthKitPermissions} from 'react-native-health'
+import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
 
