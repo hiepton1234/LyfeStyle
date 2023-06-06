@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Alert, StyleSheet, Switch, Modal, Text, View, ScrollView, Button, SectionList, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import database from "@react-native-firebase/database";
 import {Picker} from "@react-native-picker/picker";
+import axios from "axios";
 
 const SwitchList = ({ data, onToggle }) => {
   // use regex to add spaces in between where the variable has a lowercase letter followed by an uppercase, such as
@@ -45,6 +46,47 @@ export function FoodPreferences(props) {
       treeNuts: false,
     },
   });
+
+  // Credentials for Edamam Food Database API
+  const APP_ID = '494db791';
+  const APP_KEY = '89d36b8cf6bc7b3dd26a06900ad6c473';
+
+  let truePreferences = []
+  let foodSearchResults = []
+  const searchFoodItems = async (query) => {
+    // Iterate over the preferences object
+    for (const category in preferences) {
+      const preferenceCategory = preferences[category];
+
+      // Iterate over each preference category
+      for (const preference in preferenceCategory) {
+        if (preferenceCategory[preference] === true) {
+          truePreferences.push(preference);
+        }
+      }
+    }
+
+    try {
+      const response = await axios.get(
+        'https://api.edamam.com/api/food-database/v2/parser', {
+          params: {
+            ingr: query,
+            app_id: APP_ID,
+            app_key: APP_KEY,
+            health: truePreferences.join(',')
+          }
+        }
+      );
+
+      // Handle the response data here
+      response.data.hints.forEach((data_elem) => {
+        console.log(data_elem.food.knownAs)
+      })
+    } catch (error) {
+      // Handle any errors
+      console.error(error);
+    }
+  };
 
   const prefRef = database().ref('user/' + props.user.uid);
 

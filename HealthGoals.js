@@ -9,15 +9,24 @@ import {
   TextInput,
   Pressable,
   KeyboardAvoidingView,
-  Button, FlatList
+  Button, FlatList, Switch
 } from 'react-native';
 import {AddNewGoal} from './AddNewGoal'
 import database from "@react-native-firebase/database";
+import {Picker} from "@react-native-picker/picker";
+import ModalSelector from 'react-native-modal-selector'
 
 function HealthGoals (props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [goalList, setGoalList] = useState([]);
   const [info, setInfo] = useState("");
+  const [weightGoal, setWeightGoal] = useState("maintain")
+  const possibleWeightGoals = [
+    {key: 0, label: "maintain"},
+    {key: 1, label: "lose"},
+    {key: 2, label: "gain"},]
+  const [sleepEarlier, setSleepEarlier] = useState(true)
+  const [betterSleep, setBetterSleep] = useState(true)
 
   useEffect(() => {
     loadHealthGoals();
@@ -46,8 +55,9 @@ function HealthGoals (props) {
   const saveGoals = () => {
     const newReference = database().ref('user/' + props.user.uid + '/goals');
 
-    console.log(goalList)
-    newReference.set(goalList).then(() => console.log("Saved Goals"))
+    newReference.update({weightGoal: weightGoal}).then(() => console.log("Updated weight goal"))
+    newReference.update({sleepEarlier: sleepEarlier}).then(() => console.log("Saved sleep earlier"))
+    newReference.update({betterSleep: betterSleep}).then(() => console.log("Saved sleep quality"))
   }
 
   return (
@@ -78,25 +88,49 @@ function HealthGoals (props) {
           <Text style={styles.sectionHeading}>
             My Health Goals
           </Text>
-          <AddNewGoal
-            goalList = {goalList}
-            setGoalList = {setGoalList}
-          />
-          <FlatList
-            data={goalList}
-            renderItem={(itemData) => (
-              <View style={styles.goalItem}>
-                <Text style={styles.modalText}>{itemData.item}</Text>
-              </View>
-            )}
-          />
+          <View style={styles.goalContainer}>
+            <Text style={styles.modalText}>I would like to </Text>
+            <ModalSelector
+              data={possibleWeightGoals}
+              initValue="maintain"
+              accessible={true}
+              animationType={"fade"}
+              scrollViewAccessibilityLabel={'Scrollable options'}
+              cancelButtonAccessibilityLabel={'Cancel Button'}
+              onChange={(option)=>{setWeightGoal(option.label)}}>
+
+              <TextInput
+                style={styles.goalInput}
+                editable={false}
+                placeholder="Select something yummy!"
+                value={weightGoal} />
+
+            </ModalSelector>
+            <Text style={styles.modalText}> weight</Text>
+          </View>
+          <View style={styles.goalContainer}>
+            <Text style={styles.modalText}>Sleep earlier</Text>
+            <Switch value={sleepEarlier} onValueChange={setSleepEarlier}></Switch>
+          </View>
+          <View style={styles.goalContainer}>
+            <Text style={styles.modalText}>Improve sleep quality</Text>
+            <Switch value={betterSleep} onValueChange={setBetterSleep}></Switch>
+          </View>
+          {/*<FlatList*/}
+          {/*  data={goalList}*/}
+          {/*  renderItem={(itemData) => (*/}
+          {/*    <View style={styles.goalItem}>*/}
+          {/*      <Text style={styles.modalText}>{itemData.item}</Text>*/}
+          {/*    </View>*/}
+          {/*  )}*/}
+          {/*/>*/}
         </View>
       </Modal>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
         onPress={() => {
           setModalVisible(true)
-          loadHealthGoals()
+          // loadHealthGoals()
         }}>
         <Text style={styles.textStyle}>Health Goals</Text>
       </Pressable>
@@ -153,10 +187,10 @@ const styles = StyleSheet.create({
   goalInput: {
     fontFamily: 'Avenir-Book',
     flex: 1,
-    textAlign: 'left',
+    textAlign: 'center',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 10,
+    padding: 14,
     fontSize: 20,
   },
   centeredView: {
@@ -172,9 +206,8 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontFamily: 'Avenir-Book',
-    fontWeight: 'bold',
     fontSize: 20,
-    marginBottom: 5,
+    marginBottom: 10,
     textAlign: 'center',
   },
   buttonOpen: {
@@ -186,5 +219,10 @@ const styles = StyleSheet.create({
   textStyle: {
     fontFamily: 'American Typewriter',
     textAlign: 'center',
+  },
+  goalContainer: {
+    flexDirection: "row",
+    justifyContent: 'space-between',
+    padding: 5,
   }
 });

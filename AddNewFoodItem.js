@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import {Alert, StyleSheet, Modal, Text, View, ScrollView, TextInput, Pressable, KeyboardAvoidingView} from 'react-native';
 import database from "@react-native-firebase/database";
 import {Picker} from "@react-native-picker/picker";
+import {FoodRecs} from "./Recommender/FoodRecs";
 
 class FoodItem {
   constructor(name, serving_size, num_servings, calories) {
@@ -13,9 +14,9 @@ class FoodItem {
 }
 function AddNewFoodItem(props) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedServings, setSelectedServings] = useState();
+  const [selectedServings, setSelectedServings] = useState('0.25');
   const possible_num_servings = ['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75', '2']
-  const [selectedLike, setSelectedLike] = useState();
+  const [selectedLike, setSelectedLike] = useState('1');
   const like_scale = ['1', '2', '3', '4', '5']
   const [enteredFood, setEnteredFood] = useState('');
 
@@ -27,9 +28,12 @@ function AddNewFoodItem(props) {
     if (enteredFood.trim() === '') {
       return;
     }
-    props.addNewFoodItem(props.index, enteredFood)
+
+    props.addNewFoodItem(props.index, enteredFood, selectedServings, selectedLike)
 
     setEnteredFood('');
+    setSelectedServings('0.25')
+    setSelectedLike('1')
   };
 
   return (

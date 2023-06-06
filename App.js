@@ -8,6 +8,7 @@ import {WorkoutRec} from "./WorkoutRec"
 import { AddActivity } from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
+import * as Location from 'expo-location';
 import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
@@ -58,15 +59,6 @@ const permissions = {
   },
 }
 
-let height = 0;
-let dob = "";
-let age = 0;
-let bio_sex = "";
-let activities = [];
-
-
-
-
 export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
     var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
     var s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
@@ -80,6 +72,13 @@ export function score(activity, activity_goal, sleep, sleep_goal, intake, intake
 //   .then(() => console.log('User signed out!'));
 
 export default function App() {
+    const [height, setHeight] = useState(0);
+    const [dob, setDob] = useState("");
+    const [age, setAge] = useState(0);
+    const [bio_sex, setBio_sex] = useState("");
+    const [weight, setWeight] = useState(0);
+    const [activities, setActivities] = useState([]);
+
     const lifescore_data = useMemo(() => ({
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         datasets: [{
@@ -155,6 +154,26 @@ export default function App() {
     setUser(user);
     if (initializing) setInitializing(false);
     }
+
+  // const [location, setLocation] = useState(null)
+  //
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       console.log('Location permission denied');
+  //       return;
+  //     }
+  //
+  //     let location = await Location.getCurrentPositionAsync({});
+  //     setLocation(location)
+  //     // console.log(location.coords.latitude, location.coords.longitude);
+  //   })();
+  // }, []);
+  //
+  // if (location === null) {
+  //   return null
+  // }
 
     // Function to determine if two dates are within the same week (Sunday to Saturday)
     function inSameWeek(firstDay, secondDay) {
@@ -430,132 +449,130 @@ export default function App() {
 
         /* Can now read or write to HealthKit */
 
-        const options = {
-            startDate: new Date(2020, 1, 1).toISOString(),
-            endDate: new Date().toISOString(), // optional; default now
-            type: 'AllergyRecord',
+    const options = {
+        startDate: new Date(2020, 1, 1).toISOString(),
+        endDate: new Date().toISOString(), // optional; default now
+        type: 'AllergyRecord',
+    }
+
+    AppleHealthKit.getSleepSamples(
+        options,
+        (callbackError, result) => {
+        /* Samples are now collected from HealthKit */
+        // console.log(result[0])
+        newReference.child("Health Info/Sleep Samples")
+            .set(result)
+        },
+    )
+
+    AppleHealthKit.getBiologicalSex(
+      options,
+      (callBackError, result) => {
+        console.log(result)
+        setBio_sex(result.value)
+
+        newReference.child("Health Info")
+            .update({
+            bio_sex: bio_sex
+            })
         }
+    )
 
-        AppleHealthKit.getSleepSamples(
-            options,
-            (callbackError, result) => {
-            /* Samples are now collected from HealthKit */
-            // console.log(result[0])
-            newReference.child("Health Info/Sleep Samples")
-                .set(result)
-            },
-        )
+    AppleHealthKit.getLatestHeight(
+      options,
+      (callBackError, result) => {
+        console.log(result)
+        setHeight(result.value)
 
-        AppleHealthKit.getBiologicalSex(
-            options,
-            (callBackError, result) => {
-            // console.log(result)
-            bio_sex = result.value
+        newReference.child("Health Info")
+            .update({
+            height: height
+            })
+      }
+    )
 
-            newReference.child("Health Info")
-                .update({
-                bio_sex: bio_sex
-                })
-            }
-        )
+    AppleHealthKit.getDailyStepCountSamples(
+      options,
+      (callBackError, result) => {
+        // console.log(result[0])
+        newReference.child("Health Info/Step Counts")
+          .set(
+            result.slice(0, 90)
+          )
+      }
+    )
 
-        AppleHealthKit.getLatestHeight(
-            options,
-            (callBackError, result) => {
-            // console.log(result)
-            height = result.value
+    AppleHealthKit.getLatestWeight(
+      options,
+      (callBackError, result) => {
+        console.log(result)
+        setWeight(result.value)
 
-            newReference.child("Health Info")
-                .update({
-                height: height
-                })
-          }
-        )
+        newReference.child("Health Info")
+          .update({
+            weight: result
+          })
+      }
+    )
 
-        AppleHealthKit.getDailyStepCountSamples(
-          options,
-          (callBackError, result) => {
-            // console.log(result[0])
-            newReference.child("Health Info/Step Counts")
-              .set(
-                result.slice(0, 90)
-              )
-          }
-        )
+    AppleHealthKit.getDateOfBirth(
+      options,
+      (callbackError, result) => {
+        console.log(result)
+        setDob(result.value.substring(0, 10))
+        setAge(result.age)
+        
+        newReference.child("Health Info")
+          .update({
+            dob: dob,
+            age: age
+          })
+      }
+    )
 
-        AppleHealthKit.getLatestWeight(
-          options,
-          (callBackError, result) => {
-            // console.log(result)
+    AppleHealthKit.getActiveEnergyBurned(
+      options,
+      (callbackError, result) => {
+        // console.log(result[0])
+        newReference.child("Health Info/Active Energy Burned")
+          .set(
+            result
+          )
+      }
+    )
 
-            newReference.child("Health Info")
-              .update({
-                weight: result
-              })
-          }
-        )
+    AppleHealthKit.getEnergyConsumedSamples(
+      options,
+      (callbackError, result) => {
+        // console.log(result[0])
 
-        AppleHealthKit.getDateOfBirth(
-          options,
-          (callbackError, result) => {
-            // console.log(result)
-            dob = result.value.substring(0, 10)
-            age = result.age
-            newReference.child("Health Info")
-              .update({
-                dob: dob,
-                age: age
-              })
-          }
-        )
+        newReference.child("Health Info/Energy Consumed Samples")
+          .set(
+            result
+          )
+      }
+    )
 
-        AppleHealthKit.getActiveEnergyBurned(
-          options,
-          (callbackError, result) => {
-            // console.log(result[0])
-            newReference.child("Health Info/Active Energy Burned")
-              .set(
-                result
-              )
-          }
-        )
+    AppleHealthKit.getProteinSamples(
+      options,
+      (callbackError, result) => {
+        // console.log(result[0])
 
-        AppleHealthKit.getEnergyConsumedSamples(
-          options,
-          (callbackError, result) => {
-            // console.log(result[0])
-
-            newReference.child("Health Info/Energy Consumed Samples")
-              .set(
-                result
-              )
-          }
-        )
-
-        AppleHealthKit.getProteinSamples(
-          options,
-          (callbackError, result) => {
-            // console.log(result[0])
-
-            newReference.child("Health Info/Protein Samples")
-              .set(
-                result
-              )
-          }
-        )
-    })
-
-    // Function to print the activities array
-    const printActivities = () => {
-        console.log("Activities:");
-        activities.forEach((activity) => {
-            console.log("Activity: " + activity.activity);
-            console.log("Start Time: " + activity.startTime);
-            console.log("End Time: " + activity.endTime);
-            console.log("Selected Date: " + activity.selectedDate);
-            console.log("------");
-        });
-    };
+        newReference.child("Health Info/Protein Samples")
+          .set(
+            result
+          )
+      }
+    )
+    }
+    )
+    
+    // AppleHealthKit.getClinicalRecords(
+    //     options,
+    //     (callbackError, result) => {
+    //         console.log(result[0])
+    //     }
+    // )
 
     return (
         <>
@@ -588,7 +605,7 @@ export default function App() {
                         bio_sex={bio_sex}
                         height={height}
                     />
-
+                    {/*{console.log(calculateMaintenanceCalories(age, bio_sex, height, weight))}*/}
                     <HealthGoals
                         user={user}
                         age={age}
@@ -598,8 +615,14 @@ export default function App() {
                     />
 
                     <FoodPage
-                        user={user}
-                        // personalModel = {personalModel} replace when we have one
+                      user = {user}
+                      age={age}
+                      bio_sex={bio_sex}
+                      height={height}
+                      weight ={weight}
+                      // latitude = {location.coords.latitude}
+                      // longitude = {location.coords.longitude}
+                      // personalModel = {personalModel} replace when we have one
                     />
 
                     <WorkoutRec />
