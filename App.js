@@ -716,7 +716,7 @@ export default function App() {
                                         return (
                                             <View style={styles.itemContainer}>
                                                 <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
-                                                    No activities for today!
+                                                    No Activities For Today!
                                                 </Text>
                                             </View>
                                         );
