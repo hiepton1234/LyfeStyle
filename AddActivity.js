@@ -5,7 +5,7 @@ import InteractiveCalendar from './InteractiveCalendar';
 
 const screenWidth = Dimensions.get('window').width;
 
-function AddActivity(props) {
+function AddActivity({ setActivities }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
     const [startTime, setStartTime] = useState('');
@@ -30,7 +30,10 @@ function AddActivity(props) {
     };
 
     const handleEndTimeChange = (time) => {
-        setEndTime(time);
+        // Manually add 1 minute to the selected end time
+        const adjustedEndTime = new Date(time);
+        adjustedEndTime.setMinutes(adjustedEndTime.getMinutes() + 1);
+        setEndTime(adjustedEndTime);
         setEndTimePickerVisible(false);
     };
 
@@ -45,20 +48,18 @@ function AddActivity(props) {
             activity: activity,
             startTime: startTime,
             endTime: endTime,
-            selectedDate: selectedDate,
+            selectedDate: selectedDate
         };
 
-        // Add the new activity to the activities array
-        props.activities.push(newActivity);
-        // Print the updated activities array
-        console.log("AddActivity.js:");
-        props.activities.forEach((activity) => {
-            console.log("Activity: " + activity.activity);
-            console.log("Start Time: " + activity.startTime);
-            console.log("End Time: " + activity.endTime);
-            console.log("Selected Date: " + activity.selectedDate);
-            console.log("------");
-        });
+        // Updating the activities array in the parent component
+        setActivities((prevActivities) => [...prevActivities, newActivity]);
+
+        // Print each element of newActivity separately
+        console.log("ADDACTIVITY.JS")
+        console.log('Activity:', newActivity.activity);
+        console.log('Start Time:', newActivity.startTime);
+        console.log('End Time:', newActivity.endTime);
+        console.log('Selected Date:', newActivity.selectedDate);
 
         // Clear the input fields
         setActivity('');

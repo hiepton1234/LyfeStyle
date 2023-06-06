@@ -60,9 +60,9 @@ const permissions = {
 }
 
 export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
-    var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
-    var s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
-    var i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
+    const a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
+    const s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
+    const i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
 
     return 100 - a_dev - s_dev - i_dev;
 }
@@ -627,7 +627,9 @@ export default function App() {
 
                     <WorkoutRec />
 
-                    <AddActivity activities={activities} />
+                    <AddActivity
+                        setActivities={setActivities}
+                    />
 
                     {/*Personicle*/}
                     <View style={styles.centeredView}>
@@ -719,7 +721,7 @@ export default function App() {
                         </ScrollView>
 
                         <Text style={styles.baseText}>Activities For Today:</Text>
-                        {/*{console.log("App.js: ", activities)}*/}
+                        {console.log("App.js: ", activities)}
                         {activities.length === 0 ? (
                             <View style={[styles.activitiesContainer, { height: 40 }]}>
                                 <Text style={styles.baseText}>No activities for today!</Text>
@@ -731,11 +733,15 @@ export default function App() {
                                         <Text style={styles.itemText}>
                                             Activity: {activity.activity}
                                             {'\n'}
-                                            Start Time: {activity.startTime}
+                                            Start Time: {activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             {'\n'}
-                                            End Time: {activity.endTime}
+                                            End Time: {activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             {'\n'}
                                             Selected Date: {activity.selectedDate}
+                                            {/*{console.log(typeof activity.activity)}*/}
+                                            {/*{console.log(typeof activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}*/}
+                                            {/*{console.log(typeof activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}*/}
+                                            {/*{console.log(typeof activity.selectedDate)}*/}
                                         </Text>
                                     </View>
                                 ))}
