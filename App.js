@@ -156,33 +156,31 @@ export default function App() {
     if (initializing) setInitializing(false);
     }
 
+  // const [location, setLocation] = useState(null)
+  //
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       console.log('Location permission denied');
+  //       return;
+  //     }
+  //
+  //     let location = await Location.getCurrentPositionAsync({});
+  //     setLocation(location)
+  //     // console.log(location.coords.latitude, location.coords.longitude);
+  //   })();
+  // }, []);
+  //
+  // if (location === null) {
+  //   return null
+  // }
+
     // Function to determine if two dates are within the same week (Sunday to Saturday)
     function inSameWeek(firstDay, secondDay) {
         const firstMoment = moment(firstDay);
         const secondMoment = moment(secondDay);
 
-
-  const [location, setLocation] = useState(null)
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Location permission denied');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location)
-      // console.log(location.coords.latitude, location.coords.longitude);
-    })();
-  }, []);
-
-  if (location === null) {
-    return null
-  }
-
-  if (initializing) return null;
         const startOfWeek = function (_moment, _offset) {
             return _moment.clone().startOf('week').add(_offset, 'days');
         };
@@ -622,8 +620,8 @@ export default function App() {
                       bio_sex={bio_sex}
                       height={height}
                       weight ={weight}
-                      latitude = {location.coords.latitude}
-                      longitude = {location.coords.longitude}
+                      // latitude = {location.coords.latitude}
+                      // longitude = {location.coords.longitude}
                       // personalModel = {personalModel} replace when we have one
                     />
 
