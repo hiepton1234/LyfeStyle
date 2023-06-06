@@ -696,7 +696,7 @@ export default function App() {
                         </ScrollView>
 
                         <Text style={styles.baseText}>Activities For Today:</Text>
-                        {console.log("App.js: ", activities)}
+                        {/*{console.log("App.js: ", activities)}*/}
                         {activities.length === 0 ? (
                             <View style={[styles.activitiesContainer, { height: 40 }]}>
                                 <Text style={styles.baseText}>No activities for today!</Text>
