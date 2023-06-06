@@ -700,7 +700,7 @@ export default function App() {
                                 </Text>
                             </View>
                         ) : (
-                            <ScrollView style={{ height: 170 }}>
+                            <View>
                                 {(() => {
                                     const filteredActivities = activities.filter((activity) => {
                                         const today = new Date();
@@ -721,22 +721,26 @@ export default function App() {
                                             </View>
                                         );
                                     } else {
-                                        return filteredActivities.map((activity, index) => (
-                                            <View key={index} style={styles.itemContainer}>
-                                                <Text style={styles.itemText}>
-                                                    Activity: <Text style={{ fontWeight: 'bold' }}>{activity.activity}</Text>
-                                                    {'\n'}
-                                                    Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                                                    {'\n'}
-                                                    End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                                                    {/*{'\n'}*/}
-                                                    {/*Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>*/}
-                                                </Text>
-                                            </View>
-                                        ));
+                                        return (
+                                            <ScrollView style={{ height: 170 }}>
+                                                {filteredActivities.map((activity, index) => (
+                                                    <View key={index} style={styles.itemContainer}>
+                                                        <Text style={styles.itemText}>
+                                                            Activity: <Text style={{ fontWeight: 'bold' }}>{activity.activity}</Text>
+                                                            {'\n'}
+                                                            Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                            {'\n'}
+                                                            End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                            {/*{'\n'}*/}
+                                                            {/*Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>*/}
+                                                        </Text>
+                                                    </View>
+                                                ))}
+                                            </ScrollView>
+                                        );
                                     }
                                 })()}
-                            </ScrollView>
+                            </View>
                         )}
                     </View>
                 </ScrollView>
