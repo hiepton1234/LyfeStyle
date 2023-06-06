@@ -1,24 +1,19 @@
-import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
-import {useState, useMemo, useEffect} from "react";
-import {StyleSheet, Text, View, StatusBar, Dimensions, ScrollView} from 'react-native';
+import {BarChart, ContributionGraph, LineChart} from 'react-native-chart-kit';
+import {useEffect, useMemo, useState} from "react";
+import {Dimensions, ScrollView, StatusBar, StyleSheet, Text, View} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
-import { AddActivity } from './AddActivity';
+import {AddActivity} from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
-import * as Location from 'expo-location';
 import moment from "moment";
+import auth from '@react-native-firebase/auth'
+import {GoogleSignin, GoogleSigninButton,} from '@react-native-google-signin/google-signin';
+import AppleHealthKit from 'react-native-health'
 
 const screenWidth = Dimensions.get('window').width;
-
-import auth from '@react-native-firebase/auth'
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 
 GoogleSignin.configure({
   scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
@@ -32,11 +27,6 @@ GoogleSignin.configure({
   openIdRealm: '', // [iOS] The OpenID2 realm of the home web server. This allows Google to include the user's OpenID Identifier in the OpenID Connect ID token.
   profileImageSize: 120, // [iOS] The desired height (and width) of the profile image. Defaults to 120px
 });
-
-import AppleHealthKit, {
-  HealthValue,
-  HealthKitPermissions,
-} from 'react-native-health'
 
 /* Permission options */
 const permissions = {
@@ -468,7 +458,7 @@ export default function App() {
     AppleHealthKit.getBiologicalSex(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
         setBio_sex(result.value)
 
         newReference.child("Health Info")
@@ -481,7 +471,7 @@ export default function App() {
     AppleHealthKit.getLatestHeight(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
         setHeight(result.value)
 
         newReference.child("Health Info")
@@ -505,7 +495,7 @@ export default function App() {
     AppleHealthKit.getLatestWeight(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
         setWeight(result.value)
 
         newReference.child("Health Info")
@@ -518,7 +508,7 @@ export default function App() {
     AppleHealthKit.getDateOfBirth(
       options,
       (callbackError, result) => {
-        console.log(result)
+        // console.log(result)
         setDob(result.value.substring(0, 10))
         setAge(result.age)
         
@@ -731,12 +721,11 @@ export default function App() {
                                     const filteredActivities = activities.filter((activity) => {
                                         const today = new Date();
                                         const selectedDate = activity.selectedDate;
-                                        const isToday =
-                                            selectedDate.getDate() === today.getDate() &&
-                                            selectedDate.getMonth() === today.getMonth() &&
-                                            selectedDate.getFullYear() === today.getFullYear();
 
-                                        return isToday;
+                                        today.setUTCHours(0, 0, 0, 0);
+                                        selectedDate.setUTCHours(0, 0, 0, 0);
+
+                                        return today.getTime() === selectedDate.getTime();
                                     });
 
                                     if (filteredActivities.length === 0) {

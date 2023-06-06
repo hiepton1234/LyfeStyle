@@ -86,7 +86,7 @@ function FoodPage(props) {
   }
 
   const foodReference = database().ref('user/' + props.user.uid);
-  console.log('foodReference key: ', foodReference.key);
+  // console.log('foodReference key: ', foodReference.key);
 
   const addNewFoodItem = (index, enteredText, selectedServings, selectedLike) => {
     const d = new Date()
