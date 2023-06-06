@@ -91,7 +91,7 @@ export function FoodRecs(props) {
     console.log(props.weight)
 
     // increase basal metabolic rate by avg daily energy burnt from activity to obtain maintenance cals
-    return BMR + avgEnergyBurntDaily
+    return Math.round(BMR * avgEnergyBurntDaily / 15)
   }
 
   function loadEnergyBurned() {
@@ -134,14 +134,14 @@ export function FoodRecs(props) {
     const totalEnergyBurned = dailyTotals.reduce((sum, { totalEnergyBurned }) => sum + totalEnergyBurned, 0);
     const averageEnergyBurnedPerDay = totalEnergyBurned / numberOfDays;
 
-    return Math.round(averageEnergyBurnedPerDay);
+    return (averageEnergyBurnedPerDay);
 
   }
 
   let test = calculateMaintenanceCalories(avgEnergyBurned())
 
   return(
-    <Text>{test}</Text>
+    <Text>Recommended: </Text>
   )
 
 }

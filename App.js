@@ -57,11 +57,6 @@ const permissions = {
   },
 }
 
-let height = 0;
-let dob = "";
-let age = 0;
-let bio_sex = "";
-let weight = 0;
 
 
 
@@ -78,6 +73,12 @@ export function score(activity, activity_goal, sleep, sleep_goal, intake, intake
 //   .then(() => console.log('User signed out!'));
 
 export default function App() {
+  const [height, setHeight] = useState(0);
+  const [dob, setDob] = useState("");
+  const [age, setAge] = useState(0);
+  const [bio_sex, setBio_sex] = useState("");
+  const [weight, setWeight] = useState(0);
+
     const lifescore_data = useMemo(() => ({
         labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         datasets: [{
@@ -223,7 +224,7 @@ export default function App() {
       options,
       (callBackError, result) => {
         console.log(result)
-        bio_sex = result.value
+        setBio_sex(result.value)
 
         newReference.child("Health Info")
           .update({
@@ -235,7 +236,7 @@ export default function App() {
       options,
       (callBackError, result) => {
         console.log(result)
-        height = result.value
+        setHeight(result.value)
 
         newReference.child("Health Info")
           .update({
@@ -257,7 +258,7 @@ export default function App() {
       options,
       (callBackError, result) => {
         console.log(result)
-        weight = result.value
+        setWeight(result.value)
 
         newReference.child("Health Info")
           .update({
@@ -269,8 +270,8 @@ export default function App() {
       options,
       (callbackError, result) => {
         console.log(result)
-        dob = result.value.substring(0, 10)
-        age = result.age
+        setDob(result.value.substring(0, 10))
+        setAge(result.age)
         newReference.child("Health Info")
           .update({
             dob: dob,
@@ -345,7 +346,7 @@ export default function App() {
             />
 
           <Profile
-            user = {user}
+            user={user}
             age={age}
             dob={dob}
             bio_sex={bio_sex}

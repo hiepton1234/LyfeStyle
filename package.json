@@ -22,6 +22,7 @@
     "child_process": "^1.0.2",
     "expo": "~48.0.11",
     "expo-build-properties": "^0.6.0",
+    "expo-camera": "~13.2.1",
     "expo-dev-client": "~2.2.1",
     "expo-gl": "^12.4.0",
     "expo-location": "~15.1.1",
@@ -36,7 +37,9 @@
     "react-native-geolocation-service": "^5.3.1",
     "react-native-health": "^1.14.0",
     "react-native-modal-datetime-picker": "^15.0.1",
+    "react-native-modal-selector": "^2.1.2",
     "react-native-picker": "^4.3.7",
+    "react-native-popup-confirm-toast": "^2.3.2",
     "react-native-svg": "13.4.0"
   },
   "devDependencies": {
