@@ -10,8 +10,7 @@ import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import moment from "moment";
 import auth from '@react-native-firebase/auth'
-import {GoogleSignin, GoogleSigninButton,} from '@react-native-google-signin/google-signin';
-import AppleHealthKit from 'react-native-health'
+import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
 
 const screenWidth = Dimensions.get('window').width;
 
