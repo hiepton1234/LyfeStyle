@@ -72,11 +72,12 @@ export function score(activity, activity_goal, sleep, sleep_goal, intake, intake
 //   .then(() => console.log('User signed out!'));
 
 export default function App() {
-  const [height, setHeight] = useState(0);
-  const [dob, setDob] = useState("");
-  const [age, setAge] = useState(0);
-  const [bio_sex, setBio_sex] = useState("");
-  const [weight, setWeight] = useState(0);
+    const [height, setHeight] = useState(0);
+    const [dob, setDob] = useState("");
+    const [age, setAge] = useState(0);
+    const [bio_sex, setBio_sex] = useState("");
+    const [weight, setWeight] = useState(0);
+    const [activities, setActivities] = useState([]);
 
     const lifescore_data = useMemo(() => ({
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -447,6 +448,12 @@ export default function App() {
         }
 
         /* Can now read or write to HealthKit */
+
+    const options = {
+        startDate: new Date(2020, 1, 1).toISOString(),
+        endDate: new Date().toISOString(), // optional; default now
+        type: 'AllergyRecord',
+    }
 
     AppleHealthKit.getSleepSamples(
         options,
