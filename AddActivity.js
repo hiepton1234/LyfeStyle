@@ -124,7 +124,7 @@ function AddActivity({ setActivities }) {
                     <Text style={[styles.baseText, { paddingBottom: 5 }]}>Please Enter An Activity:</Text>
                     <View style={styles.tagContainer}>
                         <Text style={styles.tagText}>
-                            Ensure the activity is something that does not allow with your sleep or workout. For example, work or school.
+                            Ensure the activity is something that does not allow you to sleep or workout. For example, work or school.
                         </Text>
                     </View>
                     <TextInput
