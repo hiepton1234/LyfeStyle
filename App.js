@@ -694,7 +694,7 @@ export default function App() {
 
                         <Text style={[styles.baseText, { marginBottom: 5 }]}>Activities For Today</Text>
                         {activities.length === 0 ? (
-                            <View style={[styles.itemContainer, { width: screenWidth }]}>
+                            <View style={styles.itemContainer}>
                                 <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
                                     No Activities Registered!
                                 </Text>
@@ -714,7 +714,7 @@ export default function App() {
 
                                     if (filteredActivities.length === 0) {
                                         return (
-                                            <View style={[styles.itemContainer, { width: screenWidth }]}>
+                                            <View style={styles.itemContainer}>
                                                 <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
                                                     No activities for today!
                                                 </Text>
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
     },
 
     itemContainer: {
-        width: screenWidth - 50,
+        width: screenWidth,
         backgroundColor: '#F2F2F2',
         padding: 10,
         marginVertical: 5,
