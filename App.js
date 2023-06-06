@@ -692,31 +692,15 @@ export default function App() {
                             style={{ paddingBottom: 40 }}
                         />
 
-                        <Text style={styles.baseText}>Daily Activities</Text>
-                        <ScrollView horizontal={true}>
-                            <ContributionGraph
-                                values={commitsData}
-                                endDate={new Date("2017-04-01")}
-                                width={screenWidth + 280}
-                                height={220}
-                                showMonthLabels={true}
-                                chartConfig={{
-                                    backgroundGradientFrom: "#f0f0f0",
-                                    backgroundGradientTo: "#e0e0e0",
-                                    color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                style={{ paddingBottom: 40 }}
-                            />
-                        </ScrollView>
-
-                        <Text style={styles.baseText}>Activities For Today:</Text>
+                        <Text style={[styles.baseText, { marginBottom: 5 }]}>Activities For Today</Text>
                         {activities.length === 0 ? (
-                            <View style={styles.itemContainer}>
-                                <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>No activities registered!</Text>
+                            <View style={[styles.itemContainer, { width: screenWidth }]}>
+                                <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
+                                    No Activities Registered!
+                                </Text>
                             </View>
                         ) : (
-                            <ScrollView style={{ height: 300 }}>
+                            <ScrollView style={{ height: 170 }}>
                                 {(() => {
                                     const filteredActivities = activities.filter((activity) => {
                                         const today = new Date();
@@ -730,7 +714,7 @@ export default function App() {
 
                                     if (filteredActivities.length === 0) {
                                         return (
-                                            <View style={styles.itemContainer}>
+                                            <View style={[styles.itemContainer, { width: screenWidth }]}>
                                                 <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
                                                     No activities for today!
                                                 </Text>
@@ -745,8 +729,8 @@ export default function App() {
                                                     Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                                                     {'\n'}
                                                     End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                                                    {'\n'}
-                                                    Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>
+                                                    {/*{'\n'}*/}
+                                                    {/*Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>*/}
                                                 </Text>
                                             </View>
                                         ));
@@ -757,7 +741,7 @@ export default function App() {
                     </View>
                 </ScrollView>
             </View>
-            <View style={{ paddingBottom: 70 }} />
+            <View style={{ paddingBottom: 50 }} />
         </>
     );
 }
@@ -794,7 +778,7 @@ const styles = StyleSheet.create({
     },
 
     itemContainer: {
-        width: screenWidth - 25,
+        width: screenWidth - 50,
         backgroundColor: '#F2F2F2',
         padding: 10,
         marginVertical: 5,

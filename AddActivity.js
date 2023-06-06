@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import {Alert, Modal, StyleSheet, Text, Pressable, View, TextInput, Dimensions} from 'react-native';
+import React, {useState} from 'react';
+import {Alert, Dimensions, Modal, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InteractiveCalendar from './InteractiveCalendar';
 
@@ -39,8 +39,11 @@ function AddActivity({ setActivities }) {
 
     const handleAddActivity = () => {
         if (!activity || !startTime || !endTime || !selectedDate) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert('Error!', 'Please fill in all fields');
             return;
+        } else {
+             // Replace this with the actual value of the added activity
+            Alert.alert('Success!', `Added Activity: ${activity}`);
         }
 
         // Convert selectedDate to a Date object
@@ -58,11 +61,11 @@ function AddActivity({ setActivities }) {
         setActivities((prevActivities) => [...prevActivities, newActivity]);
 
         // Print each element of newActivity separately
-        console.log("ADDACTIVITY.JS")
-        console.log('Activity:', newActivity.activity);
-        console.log('Start Time:', newActivity.startTime);
-        console.log('End Time:', newActivity.endTime);
-        console.log('Selected Date:', newActivity.selectedDate);
+        // console.log("ADDACTIVITY.JS")
+        // console.log('Activity:', newActivity.activity);
+        // console.log('Start Time:', newActivity.startTime);
+        // console.log('End Time:', newActivity.endTime);
+        // console.log('Selected Date:', newActivity.selectedDate);
 
         // Clear the input fields
         setActivity('');
