@@ -5,6 +5,7 @@ import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
+import { AddActivity } from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import * as Location from 'expo-location';
@@ -57,9 +58,6 @@ const permissions = {
     write: [],
   },
 }
-
-
-
 
 export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
     var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
@@ -372,7 +370,7 @@ export default function App() {
                 fetchSleepData(user)
                     .then(() => {
                         // Sleep data fetching completed
-                        console.log('Sleep data fetched');
+                        // console.log('Sleep data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching sleep data:', error);
@@ -381,7 +379,7 @@ export default function App() {
                 fetchCaloricData(user)
                     .then(() => {
                         // Caloric data fetching completed
-                        console.log('Caloric data fetched');
+                        // console.log('Caloric data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching caloric data:', error);
@@ -390,7 +388,7 @@ export default function App() {
                 fetchCaloriesBurnedData(user)
                     .then(() => {
                         // Calories burned data fetching completed
-                        console.log('Calories burned data fetched');
+                        // console.log('Calories burned data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching calories burned data:', error);
@@ -399,7 +397,7 @@ export default function App() {
                 fetchWorkoutHoursData(user)
                     .then(() => {
                         // Calories burned data fetching completed
-                        console.log('Workout hours data fetched');
+                        // console.log('Workout hours data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching workout hours data:', error);
@@ -427,7 +425,7 @@ export default function App() {
     if (!user) {
         return (
             <View style={styles.centeredView}>
-            <Text style={styles.subtitle}>Please Login</Text>
+            <Text style={styles.baseText}>Please Login</Text>
             <GoogleSigninButton
                 style={{ width: 192, height: 48 }}
                 size={GoogleSigninButton.Size.Wide}
@@ -442,19 +440,13 @@ export default function App() {
     const newReference = database().ref('user/' + user.uid)
 
     AppleHealthKit.initHealthKit(permissions, (error) => {
-    /* Called after we receive a response from the system */
+        /* Called after we receive a response from the system */
 
-    if (error) {
-        console.log('[ERROR] Cannot grant permissions!')
-    }
+        if (error) {
+            console.log('[ERROR] Cannot grant permissions!')
+        }
 
-    /* Can now read or write to HealthKit */
-
-    const options = {
-        startDate: new Date(2020, 1, 1).toISOString(),
-        endDate: new Date().toISOString(), // optional; default now
-        type: 'AllergyRecord',
-    }
+        /* Can now read or write to HealthKit */
 
     AppleHealthKit.getSleepSamples(
         options,
@@ -579,11 +571,11 @@ export default function App() {
         <>
             <StatusBar barStyle="dark-content" />
             <View style={styles.centeredView}>
-                <Text style={styles.textStyle}>Lyfestyle</Text>
+                <Text style={[styles.title, { paddingTop: 20, paddingBottom: 10, fontSize: 35 }]}>Lyfestyle</Text>
 
                 <ScrollView contentContainerStyle={styles.scrollView}>
                     <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
-                    <Text style={styles.subtitle}>Current Week's Lifestyle Scores</Text>
+                    <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
                         data={lifescore_data}
                         width={screenWidth}
@@ -600,19 +592,20 @@ export default function App() {
                     />
 
                     <Profile
-                    user = {user}
-                    age={age}
-                    dob={dob}
-                    bio_sex={bio_sex}
-                    height={height}
+                        user={user}
+                        age={age}
+                        dob={dob}
+                        bio_sex={bio_sex}
+                        height={height}
                     />
                     {/*{console.log(calculateMaintenanceCalories(age, bio_sex, height, weight))}*/}
                     <HealthGoals
-                    user = {user}
-                    age={age}
-                    dob={dob}
-                    bio_sex={bio_sex}
-                    height={height}/>
+                        user={user}
+                        age={age}
+                        dob={dob}
+                        bio_sex={bio_sex}
+                        height={height}
+                    />
 
                     <FoodPage
                       user = {user}
@@ -625,15 +618,16 @@ export default function App() {
                       // personalModel = {personalModel} replace when we have one
                     />
 
-                    <WorkoutRec
-                    />
+                    <WorkoutRec />
+
+                    <AddActivity activities={activities} />
 
                     {/*Personicle*/}
                     <View style={styles.centeredView}>
                         <Text style={styles.title}>Personicle</Text>
 
                         {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
-                        <Text style={styles.subtitle}>Sleep</Text>
+                        <Text style={styles.baseText}>Sleep</Text>
                         <BarChart
                             data={sleep_chart_data}
                             width={screenWidth}
@@ -650,7 +644,7 @@ export default function App() {
                             style={{ paddingBottom: 30 }}
                         />
 
-                        <Text style={styles.subtitle}>Caloric Intake</Text>
+                        <Text style={styles.baseText}>Caloric Intake</Text>
                         <LineChart
                             data={caloric_chart_data}
                             width={screenWidth}
@@ -666,7 +660,7 @@ export default function App() {
                             style={{ paddingBottom: 20}}
                         />
 
-                        <Text style={styles.subtitle}>Calories Burned</Text>
+                        <Text style={styles.baseText}>Calories Burned</Text>
                         <LineChart
                             data={calories_burned_chart_data}
                             width={screenWidth}
@@ -682,7 +676,7 @@ export default function App() {
                             style={{ paddingBottom: 20 }}
                         />
 
-                        <Text style={styles.subtitle}>Workout Hours</Text>
+                        <Text style={styles.baseText}>Workout Hours</Text>
                         <BarChart
                             data={workout_hours_chart_data}
                             width={screenWidth}
@@ -699,7 +693,7 @@ export default function App() {
                             style={{ paddingBottom: 40 }}
                         />
 
-                        <Text style={styles.subtitle}>Daily Activities</Text>
+                        <Text style={styles.baseText}>Daily Activities</Text>
                         <ScrollView horizontal={true}>
                             <ContributionGraph
                                 values={commitsData}
@@ -713,12 +707,37 @@ export default function App() {
                                     color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
                                     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                                 }}
-                                style={{ paddingBottom: 50 }}
+                                style={{ paddingBottom: 40 }}
                             />
                         </ScrollView>
+
+                        <Text style={styles.baseText}>Activities For Today:</Text>
+                        {/*{console.log("App.js: ", activities)}*/}
+                        {activities.length === 0 ? (
+                            <View style={[styles.activitiesContainer, { height: 40 }]}>
+                                <Text style={styles.baseText}>No activities for today!</Text>
+                            </View>
+                        ) : (
+                            <ScrollView style={[styles.activitiesContainer, { height: 120 }]}>
+                                {activities.map((activity, index) => (
+                                    <View key={index} style={styles.itemContainer}>
+                                        <Text style={styles.itemText}>
+                                            Activity: {activity.activity}
+                                            {'\n'}
+                                            Start Time: {activity.startTime}
+                                            {'\n'}
+                                            End Time: {activity.endTime}
+                                            {'\n'}
+                                            Selected Date: {activity.selectedDate}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        )}
                     </View>
                 </ScrollView>
             </View>
+            <View style={{ paddingBottom: 70 }} />
         </>
     );
 }
@@ -731,37 +750,31 @@ const styles = StyleSheet.create({
         marginTop: 22,
     },
 
-    textStyle: {
-        fontFamily: 'American Typewriter',
-        paddingTop: 20,
-        paddingBottom: 20,
-        fontSize: 35,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-
-    baseText: {
-        fontFamily: 'Avenir-Book',
-        fontSize: 20,
-        lineHeight: 40,
-        marginRight: 10,
-    },
-
     title: {
         fontSize: 24,
-        marginBottom: 10,
+        paddingBottom: 10,
         color: '#000000',
         fontWeight: 'bold',
         textAlign: 'center',
         fontFamily: 'American Typewriter',
     },
 
-    subtitle: {
+    baseText: {
         fontSize: 16,
         marginTop: 10,
         marginBottom: 10,
         color: '#000000',
         textAlign: 'center',
         fontFamily: 'American Typewriter',
-    }
+    },
+
+    activitiesContainer: {
+        backgroundColor: '#e0e0e0',
+        width: screenWidth,
+    },
+
+    itemText: {
+        fontFamily: 'American Typewriter', // Set the desired font family
+        fontSize: 16, // Set the desired font size
+    },
 });

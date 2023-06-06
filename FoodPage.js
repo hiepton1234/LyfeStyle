@@ -103,6 +103,7 @@ function FoodPage(props) {
 
     setMealList(newMealList);
   };
+  
   const saveFoods = () => {
     // store contents of profile page user inputs to firebase
     for (let i = 0; i < mealList.length; i++){
@@ -133,7 +134,7 @@ function FoodPage(props) {
   }, [currentSelectedDate]);
 
   const loadFoodEntries = () => {
-    console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate);
+    // console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate)
     database()
       .ref('user/' + props.user.uid + '/Food Entries/' + formatDate(currentSelectedDate))
       .once('value')
