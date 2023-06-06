@@ -41,9 +41,6 @@ function AddActivity({ setActivities }) {
         if (!activity || !startTime || !endTime || !selectedDate) {
             Alert.alert('Error!', 'Please fill in all fields');
             return;
-        } else {
-             // Replace this with the actual value of the added activity
-            Alert.alert('Success!', `Added Activity: ${activity}`);
         }
 
         // Convert selectedDate to a Date object
@@ -66,6 +63,8 @@ function AddActivity({ setActivities }) {
         // console.log('Start Time:', newActivity.startTime);
         // console.log('End Time:', newActivity.endTime);
         // console.log('Selected Date:', newActivity.selectedDate);
+
+        Alert.alert('Success!', `Added Activity: ${activity}`);
 
         // Clear the input fields
         setActivity('');

@@ -69,6 +69,20 @@ export default function App() {
     const [weight, setWeight] = useState(0);
     const [activities, setActivities] = useState([]);
 
+    useEffect(() => {
+        // Delete activities from yesterday
+        const currentDate = new Date();
+        const yesterday = new Date(currentDate);
+        yesterday.setDate(currentDate.getDate() - 1); // Subtract one day from the current date
+
+        setActivities((prevActivities) =>
+            prevActivities.filter((activity) => {
+                const selectedDate = activity.selectedDate;
+                return selectedDate.toDateString() !== yesterday.toDateString();
+            })
+        );
+    }, []);
+
     const lifescore_data = useMemo(() => ({
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         datasets: [{
@@ -81,20 +95,6 @@ export default function App() {
                 score(150, 100, 90, 100, 90, 100),]
         }]
     }), []);
-
-    const commitsData = [
-        { date: "2017-01-02", count: 1 },
-        { date: "2017-01-03", count: 2 },
-        { date: "2017-01-04", count: 3 },
-        { date: "2017-01-05", count: 4 },
-        { date: "2017-01-06", count: 5 },
-        { date: "2017-01-30", count: 2 },
-        { date: "2017-01-31", count: 3 },
-        { date: "2017-03-01", count: 2 },
-        { date: "2017-04-02", count: 4 },
-        { date: "2017-03-05", count: 2 },
-        { date: "2017-02-30", count: 4 }
-    ];
 
     RNFirebase()
 
