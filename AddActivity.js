@@ -43,8 +43,17 @@ function AddActivity({ setActivities }) {
             return;
         }
 
+        // Get the current date
+        const currentDate = new Date();
+
         // Convert selectedDate to a Date object
         const formattedDate = new Date(selectedDate);
+
+        // Check if the selected date is before the current date
+        if (formattedDate < currentDate) {
+            Alert.alert('Error!', 'Please select a future date');
+            return;
+        }
 
         // Create a new activity object
         const newActivity = {
