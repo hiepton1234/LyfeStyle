@@ -84,7 +84,7 @@ export default function App() {
     }, []);
 
     const lifescore_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{
             data: [score(100, 100, 100, 100, 100, 100),
                 score(50, 100, 75, 100, 90, 100),
