@@ -51,7 +51,7 @@ function AddActivity({ setActivities }) {
 
         // Check if the selected date is before the current date
         if (formattedDate < currentDate) {
-            Alert.alert('Error!', 'Please select a future date');
+            Alert.alert('Error!', 'Please select today\'s date or a future date');
             return;
         }
 
