@@ -1,29 +1,84 @@
 import axios, {CancelToken} from 'axios';
 import Geolocation from 'react-native-geolocation-service';
 import database from "@react-native-firebase/database";
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import {Text} from 'react-native'
 
 
 export function FoodRecs(props) {
+  const [recommendation, setRecommendation] = useState('');
+
+  useEffect(() => {
+    const calculateMedianTimes = () => {
+      const mealTimes = ['Breakfast', 'Lunch', 'Dinner'];
+      const medianTimes = {};
+
+      // Initialize an empty array for each meal time
+      for (const mealTime of mealTimes) {
+        medianTimes[mealTime] = [];
+      }
+
+      // Iterate over the dates in Food Entries
+      database()
+        .ref('user/' + props.user.uid + '/Food Entries')
+        .once('value')
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const foodEntries = snapshot.val();
+
+            for (const date in foodEntries) {
+              const meals = foodEntries[date];
+
+              // Iterate over each meal time for the current date
+              for (const mealTime of mealTimes) {
+                if (meals[mealTime]) {
+                  const hourRecorded = meals[mealTime].hour_recorded;
+                  const minuteRecorded = meals[mealTime].minute_recorded;
+
+                  // Push the recorded time to the array
+                  medianTimes[mealTime].push({ hour: hourRecorded, minute: minuteRecorded });
+                }
+              }
+            }
+
+            // Calculate the median for each meal time
+            for (const mealTime of mealTimes) {
+              const recordedTimes = medianTimes[mealTime];
+
+              if (recordedTimes.length > 0) {
+                // Sort the recorded times in ascending order
+                recordedTimes.sort((a, b) => {
+                  return a.hour - b.hour || a.minute - b.minute;
+                });
+
+                const medianIndex = Math.floor(recordedTimes.length / 2);
+                medianTimes[mealTime] = recordedTimes[medianIndex];
+              } else {
+                medianTimes[mealTime] = null;
+              }
+            }
+
+            const recommendation = makeRecommendation(medianTimes);
+            setRecommendation(recommendation);
+          }
+        });
+    };
+
+    calculateMedianTimes();
+  }, []);
+
   const makeRecommendation = (medianTimes) => {
     let d = new Date();
     let currentHour = d.getHours();
 
     // make recommendation for which meal time to record, depending on current time with 1 hour grace period
     switch (true) {
-      case (
-        currentHour >= medianTimes.Breakfast.hour - 1 &&
-        currentHour < medianTimes.Lunch.hour - 1
-      ):
-        return "Breakfast";
-      case (
-        currentHour >= medianTimes.Lunch.hour - 1 &&
-        currentHour < medianTimes.Dinner.hour - 1
-      ):
-        return "Lunch";
+      case currentHour >= (medianTimes?.Breakfast?.hour || 0) - 1 && currentHour < (medianTimes?.Lunch?.hour || 0) - 1:
+        return 'Breakfast';
+      case currentHour >= (medianTimes?.Lunch?.hour || 0) - 1 && currentHour < (medianTimes?.Dinner?.hour || 0) - 1:
+        return 'Lunch';
       default:
-        return "Dinner";
+        return 'Dinner';
     }
   };
 
@@ -141,7 +196,7 @@ export function FoodRecs(props) {
   let test = calculateMaintenanceCalories(avgEnergyBurned())
 
   return(
-    <Text>Recommended: </Text>
+    <Text>Recommended: {makeRecommendation()}</Text>
   )
 
 }

@@ -173,68 +173,6 @@ function FoodPage(props) {
   // commented right now to stop API calls
   // searchFoodItems('chicken breast')
 
-  const [recommendation, setRecommendation] = useState('');
-
-  useEffect(() => {
-    const calculateMedianTimes = () => {
-      const mealTimes = ["Breakfast", "Lunch", "Dinner"];
-      const medianTimes = {};
-
-      // Initialize an empty array for each meal time
-      for (const mealTime of mealTimes) {
-        medianTimes[mealTime] = [];
-      }
-
-      // Iterate over the dates in Food Entries
-      database()
-        .ref('user/' + props.user.uid + '/Food Entries')
-        .once('value')
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            const foodEntries = snapshot.val();
-
-            for (const date in foodEntries) {
-              const meals = foodEntries[date];
-
-              // Iterate over each meal time for the current date
-              for (const mealTime of mealTimes) {
-                if (meals[mealTime]) {
-                  const hourRecorded = meals[mealTime].hour_recorded;
-                  const minuteRecorded = meals[mealTime].minute_recorded;
-
-                  // Push the recorded time to the array
-                  medianTimes[mealTime].push({ hour: hourRecorded, minute: minuteRecorded });
-                }
-              }
-            }
-
-            // Calculate the median for each meal time
-            for (const mealTime of mealTimes) {
-              const recordedTimes = medianTimes[mealTime];
-
-              if (recordedTimes.length > 0) {
-                // Sort the recorded times in ascending order
-                recordedTimes.sort((a, b) => {
-                  return a.hour - b.hour || a.minute - b.minute;
-                });
-
-                const medianIndex = Math.floor(recordedTimes.length / 2);
-                medianTimes[mealTime] = recordedTimes[medianIndex];
-              } else {
-                medianTimes[mealTime] = null;
-              }
-            }
-            if (medianTimes){
-              const recommendation = makeRecommendation(medianTimes);
-              setRecommendation(recommendation);
-            }
-          }
-        });
-    };
-
-    calculateMedianTimes();
-  }, []);
-
   return (
     <View style={styles.centeredView}>
       <Modal
@@ -307,10 +245,10 @@ function FoodPage(props) {
                   ))}
                 </View>
                 {/* if date is today, give a recommendation for a meal, corresponding to appropriate time*/}
-                {isTodayOrYesterday(currentSelectedDate) === 'Today' && meal.meal === recommendation &&
-                  (
-                  <Text>{recommendation && `Recommended: ${recommendation}`}</Text>
-                )}
+                {/*{isTodayOrYesterday(currentSelectedDate) === 'Today' && meal.meal === recommendation &&*/}
+                {/*  (*/}
+                {/*  <Text>{recommendation && `Recommended: ${recommendation}`}</Text>*/}
+                {/*)}*/}
                 <FoodRecs
                   user={props.user}
                   age={props.age}
