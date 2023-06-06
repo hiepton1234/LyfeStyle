@@ -211,28 +211,28 @@ function FoodPage(props) {
 
             {/* if currentSelectedDate is today, disable next date button, still render or messes up View */}
             {isTodayOrYesterday(currentSelectedDate) === 'Today' ? (
-              <TouchableOpacity
-                disabled={true}
-                onPress={() => {
-                  const incrementedDate = new Date(currentSelectedDate);
-                  incrementedDate.setDate(incrementedDate.getDate() + 1);
-                  setCurrentSelectedDate(incrementedDate);
-                }}
-              >
-                <Text style={[{opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
-              </TouchableOpacity>
-            ) :
-            (
-            <TouchableOpacity
-              onPress={() => {
-                const incrementedDate = new Date(currentSelectedDate);
-                incrementedDate.setDate(incrementedDate.getDate() + 1);
-                setCurrentSelectedDate(incrementedDate);
-              }}
-            >
-              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇨'}</Text>
-            </TouchableOpacity>
-            )}
+                <TouchableOpacity
+                  disabled={true}
+                  onPress={() => {
+                    const incrementedDate = new Date(currentSelectedDate);
+                    incrementedDate.setDate(incrementedDate.getDate() + 1);
+                    setCurrentSelectedDate(incrementedDate);
+                  }}
+                >
+                  <Text style={[{opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
+                </TouchableOpacity>
+              ) :
+              (
+                <TouchableOpacity
+                  onPress={() => {
+                    const incrementedDate = new Date(currentSelectedDate);
+                    incrementedDate.setDate(incrementedDate.getDate() + 1);
+                    setCurrentSelectedDate(incrementedDate);
+                  }}
+                >
+                  <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇨'}</Text>
+                </TouchableOpacity>
+              )}
           </View>
 
           <View>
@@ -245,16 +245,13 @@ function FoodPage(props) {
                   ))}
                 </View>
                 {/* if date is today, give a recommendation for a meal, corresponding to appropriate time*/}
-                {/*{isTodayOrYesterday(currentSelectedDate) === 'Today' && meal.meal === recommendation &&*/}
-                {/*  (*/}
-                {/*  <Text>{recommendation && `Recommended: ${recommendation}`}</Text>*/}
-                {/*)}*/}
                 <FoodRecs
                   user={props.user}
                   age={props.age}
                   bio_sex={props.bio_sex}
                   height={props.height}
-                  weight={props.weight}>
+                  weight={props.weight}
+                  mealTime={meal.meal}> {/* Pass the meal time as a prop */}
                 </FoodRecs>
                 <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>

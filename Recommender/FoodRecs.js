@@ -6,7 +6,7 @@ import {Text} from 'react-native'
 
 
 export function FoodRecs(props) {
-  const [recommendation, setRecommendation] = useState('');
+  const [recommendedTime, setRecommendedTime] = useState('');
 
   useEffect(() => {
     const calculateMedianTimes = () => {
@@ -58,8 +58,8 @@ export function FoodRecs(props) {
               }
             }
 
-            const recommendation = makeRecommendation(medianTimes);
-            setRecommendation(recommendation);
+            const recommendedTime = calculateRecommendedTime(medianTimes);
+            setRecommendedTime(recommendedTime);
           }
         });
     };
@@ -67,11 +67,11 @@ export function FoodRecs(props) {
     calculateMedianTimes();
   }, []);
 
-  const makeRecommendation = (medianTimes) => {
+  const calculateRecommendedTime = (medianTimes) => {
     let d = new Date();
     let currentHour = d.getHours();
 
-    // make recommendation for which meal time to record, depending on current time with 1 hour grace period
+    // make recommendedTime for which meal time to record, depending on current time with 1 hour grace period
     switch (true) {
       case currentHour >= (medianTimes?.Breakfast?.hour || 0) - 1 && currentHour < (medianTimes?.Lunch?.hour || 0) - 1:
         return 'Breakfast';
@@ -138,7 +138,8 @@ export function FoodRecs(props) {
   };
 
 // calculate user's maintenance calories based on Mifflin-St Jeor Equation
-  function calculateMaintenanceCalories(avgEnergyBurntDaily) {
+  function calculateGoalCalories(avgEnergyBurntDaily) {
+
     let genderConstant = 5
     if (props.bio_sex === 'female')
       genderConstant = -161
@@ -146,7 +147,29 @@ export function FoodRecs(props) {
     console.log(props.weight)
 
     // increase basal metabolic rate by avg daily energy burnt from activity to obtain maintenance cals
-    return Math.round(BMR * avgEnergyBurntDaily / 15)
+    let maintenance_cals = BMR * avgEnergyBurntDaily / 15
+
+    // get weight gaol
+    const [weightGoal, setWeightGoal] = useState([])
+    database()
+      .ref('user/' + props.user.uid + '/goals/weightGoal')
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          setWeightGoal(snapshot.val());
+        }
+      })
+
+    let goalModifier = 1
+    if (weightGoal === 'lose')
+      goalModifier = 0.9
+    else if (weightGoal === 'gain')
+      goalModifier = 1.1
+
+    // goal calories = maintenance calories times a multiplier depending on weight goal. 0.9 and 1.1 for
+    // healthy and feasible weight loss rate of +/- 0.5 pound each week
+    let goal_cals = Math.round(maintenance_cals * goalModifier)
+    return goal_cals
   }
 
   function loadEnergyBurned() {
@@ -193,10 +216,10 @@ export function FoodRecs(props) {
 
   }
 
-  let test = calculateMaintenanceCalories(avgEnergyBurned())
+  let goalCalories = calculateGoalCalories(avgEnergyBurned())
 
   return(
-    <Text>Recommended: {makeRecommendation()}</Text>
+    <Text>{recommendedTime === props.mealTime && goalCalories}</Text>
   )
 
 }
