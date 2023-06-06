@@ -150,19 +150,19 @@ export {Profile};
 
 const styles = StyleSheet.create({
   baseText: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 20,
     lineHeight: 40,
     marginRight: 10,
   },
   sectionHeading: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontWeight: "bold",
     fontSize: 40,
     lineHeight: 50,
   },
   customButton: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 50,
     fontWeight: "600"
   },
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   input: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     flex: 1,
     textAlign: 'right',
     borderWidth: 1,

@@ -142,19 +142,19 @@ export {HealthGoals};
 
 const styles = StyleSheet.create({
   baseText: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 20,
     lineHeight: 40,
     marginRight: 10,
   },
   sectionHeading: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontWeight: "bold",
     fontSize: 40,
     lineHeight: 50,
   },
   customButton: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 35,
     fontWeight: "600",
     textAlign: "right",
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   goalInput: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     flex: 1,
     textAlign: 'center',
     borderWidth: 1,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   modalText: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 20,
     marginBottom: 10,
     textAlign: 'center',
