@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import {Alert, Modal, StyleSheet, Text, Pressable, View, TextInput, Dimensions} from 'react-native';
+import React, {useState} from 'react';
+import {Alert, Dimensions, Modal, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InteractiveCalendar from './InteractiveCalendar';
 
 const screenWidth = Dimensions.get('window').width;
 
-function AddActivity(props) {
+function AddActivity({ setActivities }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
     const [startTime, setStartTime] = useState('');
@@ -30,13 +30,28 @@ function AddActivity(props) {
     };
 
     const handleEndTimeChange = (time) => {
-        setEndTime(time);
+        // Manually add 1 minute to the selected end time
+        const adjustedEndTime = new Date(time);
+        adjustedEndTime.setMinutes(adjustedEndTime.getMinutes() + 1);
+        setEndTime(adjustedEndTime);
         setEndTimePickerVisible(false);
     };
 
     const handleAddActivity = () => {
         if (!activity || !startTime || !endTime || !selectedDate) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert('Error!', 'Please fill in all fields');
+            return;
+        }
+
+        // Get the current date
+        const currentDate = new Date();
+
+        // Convert selectedDate to a Date object
+        const formattedDate = new Date(selectedDate);
+
+        // Check if the selected date is before the current date
+        if (formattedDate < currentDate) {
+            Alert.alert('Error!', 'Please select today\'s date or a future date');
             return;
         }
 
@@ -45,20 +60,20 @@ function AddActivity(props) {
             activity: activity,
             startTime: startTime,
             endTime: endTime,
-            selectedDate: selectedDate,
+            selectedDate: formattedDate
         };
 
-        // Add the new activity to the activities array
-        props.activities.push(newActivity);
-        // Print the updated activities array
-        console.log("AddActivity.js:");
-        props.activities.forEach((activity) => {
-            console.log("Activity: " + activity.activity);
-            console.log("Start Time: " + activity.startTime);
-            console.log("End Time: " + activity.endTime);
-            console.log("Selected Date: " + activity.selectedDate);
-            console.log("------");
-        });
+        // Updating the activities array in the parent component
+        setActivities((prevActivities) => [...prevActivities, newActivity]);
+
+        // Print each element of newActivity separately
+        // console.log("ADDACTIVITY.JS")
+        // console.log('Activity:', newActivity.activity);
+        // console.log('Start Time:', newActivity.startTime);
+        // console.log('End Time:', newActivity.endTime);
+        // console.log('Selected Date:', newActivity.selectedDate);
+
+        Alert.alert('Success!', `Added Activity: ${activity}`);
 
         // Clear the input fields
         setActivity('');
@@ -155,7 +170,13 @@ function AddActivity(props) {
                         </Pressable>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
-                            onPress={() => setModalVisible(!modalVisible)}
+                            onPress={() => {
+                                setModalVisible(!modalVisible);
+                                // Clear the input fields
+                                setActivity('');
+                                setStartTime('');
+                                setEndTime('');
+                            }}
                         >
                             <Text style={styles.textStyle}>Back</Text>
                         </Pressable>

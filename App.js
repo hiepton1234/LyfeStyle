@@ -1,24 +1,19 @@
-import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
-import {useState, useMemo, useEffect} from "react";
-import {StyleSheet, Text, View, StatusBar, Dimensions, ScrollView} from 'react-native';
+import {BarChart, ContributionGraph, LineChart} from 'react-native-chart-kit';
+import {useEffect, useMemo, useState} from "react";
+import {Dimensions, ScrollView, StatusBar, StyleSheet, Text, View} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
-import { AddActivity } from './AddActivity';
+import {AddActivity} from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
-import * as Location from 'expo-location';
 import moment from "moment";
+import auth from '@react-native-firebase/auth'
+import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
+import AppleHealthKit, {HealthValue, HealthKitPermissions} from 'react-native-health'
 
 const screenWidth = Dimensions.get('window').width;
-
-import auth from '@react-native-firebase/auth'
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 
 GoogleSignin.configure({
   scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
@@ -32,11 +27,6 @@ GoogleSignin.configure({
   openIdRealm: '', // [iOS] The OpenID2 realm of the home web server. This allows Google to include the user's OpenID Identifier in the OpenID Connect ID token.
   profileImageSize: 120, // [iOS] The desired height (and width) of the profile image. Defaults to 120px
 });
-
-import AppleHealthKit, {
-  HealthValue,
-  HealthKitPermissions,
-} from 'react-native-health'
 
 /* Permission options */
 const permissions = {
@@ -59,12 +49,12 @@ const permissions = {
   },
 }
 
-export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
-    var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
-    var s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
-    var i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
+export function score(calories_burned, calories_burned_goal, sleep, sleep_goal, caloric_intake, caloric_intake_goal) {
+    const calories_burned_dev = 100 * Math.abs((calories_burned - calories_burned_goal) / calories_burned_goal);
+    const sleep_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
+    const caloric_intake_dev = 100 * Math.abs((caloric_intake - caloric_intake_goal) / caloric_intake_goal);
 
-    return 100 - a_dev - s_dev - i_dev;
+    return 100 - calories_burned_dev - sleep_dev - caloric_intake_dev;
 }
 
 // auth()
@@ -79,8 +69,22 @@ export default function App() {
     const [weight, setWeight] = useState(0);
     const [activities, setActivities] = useState([]);
 
+    useEffect(() => {
+        // Delete activities from yesterday
+        const currentDate = new Date();
+        const yesterday = new Date(currentDate);
+        yesterday.setDate(currentDate.getDate() - 1); // Subtract one day from the current date
+
+        setActivities((prevActivities) =>
+            prevActivities.filter((activity) => {
+                const selectedDate = activity.selectedDate;
+                return selectedDate.toDateString() !== yesterday.toDateString();
+            })
+        );
+    }, []);
+
     const lifescore_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{
             data: [score(100, 100, 100, 100, 100, 100),
                 score(50, 100, 75, 100, 90, 100),
@@ -91,20 +95,6 @@ export default function App() {
                 score(150, 100, 90, 100, 90, 100),]
         }]
     }), []);
-
-    const commitsData = [
-        { date: "2017-01-02", count: 1 },
-        { date: "2017-01-03", count: 2 },
-        { date: "2017-01-04", count: 3 },
-        { date: "2017-01-05", count: 4 },
-        { date: "2017-01-06", count: 5 },
-        { date: "2017-01-30", count: 2 },
-        { date: "2017-01-31", count: 3 },
-        { date: "2017-03-01", count: 2 },
-        { date: "2017-04-02", count: 4 },
-        { date: "2017-03-05", count: 2 },
-        { date: "2017-02-30", count: 4 }
-    ];
 
     RNFirebase()
 
@@ -468,7 +458,7 @@ export default function App() {
     AppleHealthKit.getBiologicalSex(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
         setBio_sex(result.value)
 
         newReference.child("Health Info")
@@ -481,7 +471,7 @@ export default function App() {
     AppleHealthKit.getLatestHeight(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
         setHeight(result.value)
 
         newReference.child("Health Info")
@@ -505,7 +495,7 @@ export default function App() {
     AppleHealthKit.getLatestWeight(
       options,
       (callBackError, result) => {
-        console.log(result)
+        // console.log(result)
         setWeight(result.value)
 
         newReference.child("Health Info")
@@ -518,7 +508,7 @@ export default function App() {
     AppleHealthKit.getDateOfBirth(
       options,
       (callbackError, result) => {
-        console.log(result)
+        // console.log(result)
         setDob(result.value.substring(0, 10))
         setAge(result.age)
         
@@ -627,7 +617,9 @@ export default function App() {
 
                     <WorkoutRec />
 
-                    <AddActivity activities={activities} />
+                    <AddActivity
+                        setActivities={setActivities}
+                    />
 
                     {/*Personicle*/}
                     <View style={styles.centeredView}>
@@ -700,51 +692,56 @@ export default function App() {
                             style={{ paddingBottom: 40 }}
                         />
 
-                        <Text style={styles.baseText}>Daily Activities</Text>
-                        <ScrollView horizontal={true}>
-                            <ContributionGraph
-                                values={commitsData}
-                                endDate={new Date("2017-04-01")}
-                                width={screenWidth + 280}
-                                height={220}
-                                showMonthLabels={true}
-                                chartConfig={{
-                                    backgroundGradientFrom: "#f0f0f0",
-                                    backgroundGradientTo: "#e0e0e0",
-                                    color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                style={{ paddingBottom: 40 }}
-                            />
-                        </ScrollView>
-
-                        <Text style={styles.baseText}>Activities For Today:</Text>
-                        {/*{console.log("App.js: ", activities)}*/}
+                        <Text style={[styles.baseText, { marginBottom: 5 }]}>Activities For Today</Text>
                         {activities.length === 0 ? (
-                            <View style={[styles.activitiesContainer, { height: 40 }]}>
-                                <Text style={styles.baseText}>No activities for today!</Text>
+                            <View style={styles.itemContainer}>
+                                <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
+                                    No Activities Registered!
+                                </Text>
                             </View>
                         ) : (
-                            <ScrollView style={[styles.activitiesContainer, { height: 120 }]}>
-                                {activities.map((activity, index) => (
-                                    <View key={index} style={styles.itemContainer}>
-                                        <Text style={styles.itemText}>
-                                            Activity: {activity.activity}
-                                            {'\n'}
-                                            Start Time: {activity.startTime}
-                                            {'\n'}
-                                            End Time: {activity.endTime}
-                                            {'\n'}
-                                            Selected Date: {activity.selectedDate}
-                                        </Text>
-                                    </View>
-                                ))}
+                            <ScrollView style={{ height: 170 }}>
+                                {(() => {
+                                    const filteredActivities = activities.filter((activity) => {
+                                        const today = new Date();
+                                        const selectedDate = activity.selectedDate;
+
+                                        today.setUTCHours(0, 0, 0, 0);
+                                        selectedDate.setUTCHours(0, 0, 0, 0);
+
+                                        return today.getTime() === selectedDate.getTime();
+                                    });
+
+                                    if (filteredActivities.length === 0) {
+                                        return (
+                                            <View style={styles.itemContainer}>
+                                                <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
+                                                    No activities for today!
+                                                </Text>
+                                            </View>
+                                        );
+                                    } else {
+                                        return filteredActivities.map((activity, index) => (
+                                            <View key={index} style={styles.itemContainer}>
+                                                <Text style={styles.itemText}>
+                                                    Activity: <Text style={{ fontWeight: 'bold' }}>{activity.activity}</Text>
+                                                    {'\n'}
+                                                    Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                    {'\n'}
+                                                    End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                    {/*{'\n'}*/}
+                                                    {/*Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>*/}
+                                                </Text>
+                                            </View>
+                                        ));
+                                    }
+                                })()}
                             </ScrollView>
                         )}
                     </View>
                 </ScrollView>
             </View>
-            <View style={{ paddingBottom: 70 }} />
+            <View style={{ paddingBottom: 50 }} />
         </>
     );
 }
@@ -778,6 +775,14 @@ const styles = StyleSheet.create({
     activitiesContainer: {
         backgroundColor: '#e0e0e0',
         width: screenWidth,
+    },
+
+    itemContainer: {
+        width: screenWidth,
+        backgroundColor: '#F2F2F2',
+        padding: 10,
+        marginVertical: 5,
+        borderRadius: 5,
     },
 
     itemText: {
