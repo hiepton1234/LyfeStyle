@@ -19,9 +19,14 @@ function AddNewFoodItem(props) {
   const [selectedLike, setSelectedLike] = useState('1');
   const like_scale = ['1', '2', '3', '4', '5']
   const [enteredFood, setEnteredFood] = useState('');
+  const [enteredCalories, setEnteredCalories] = useState('');
 
   const foodInputHandler = (enteredText) => {
     setEnteredFood(enteredText);
+  };
+
+  const caloriesInputHandler = (enteredText) => {
+    setEnteredCalories(enteredText);
   };
 
   const addFoodHandler = () => {
@@ -29,11 +34,12 @@ function AddNewFoodItem(props) {
       return;
     }
 
-    props.addNewFoodItem(props.index, enteredFood, selectedServings, selectedLike)
+    props.addNewFoodItem(props.index, enteredFood, enteredCalories, selectedServings, selectedLike)
 
     setEnteredFood('');
-    setSelectedServings('0.25')
-    setSelectedLike('1')
+    setEnteredCalories('');
+    setSelectedServings('0.25');
+    setSelectedLike('1');
   };
 
   return (
@@ -54,6 +60,14 @@ function AddNewFoodItem(props) {
                 placeholder={"Food name here"}
                 onChangeText={foodInputHandler}
                 value={enteredFood}
+              />
+            </View>
+            <View style={styles.item}>
+              <TextInput
+                style={styles.input}
+                placeholder={"Cals per serving"}
+                onChangeText={caloriesInputHandler}
+                value={enteredCalories}
               />
             </View>
             <View style={styles.pickerSection}>
@@ -111,25 +125,25 @@ export {AddNewFoodItem};
 
 const styles = StyleSheet.create({
   baseText: {
-    fontFamily: 'American Typewriter',
+    fontFamily: 'Avenir-Book',
     fontSize: 20,
     lineHeight: 40,
     marginRight: 10,
   },
   sectionHeading: {
-    fontFamily: 'American Typewriter',
+    fontFamily: 'Avenir-Book',
     fontWeight: "bold",
     fontSize: 40,
     lineHeight: 50,
   },
   customButton: {
-    fontFamily: 'American Typewriter',
+    fontFamily: 'Avenir-Book',
     fontSize: 35,
     fontWeight: "600",
     textAlign: "right",
   },
   appContainer: {
-    backgroundColor: '#ffff',
+    backgroundColor: '#edf7f5',
     flex: 1,
     paddingTop: 50,
     padding: 25,
@@ -151,7 +165,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   goalInput: {
-    fontFamily: 'American Typewriter',
+    fontFamily: 'Avenir-Book',
     flex: 1,
     textAlign: 'left',
     borderWidth: 1,
@@ -167,7 +181,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalText: {
-    fontFamily: 'American Typewriter',
+    fontFamily: 'Avenir-Book',
     fontWeight: 'bold',
     fontSize: 20,
     textAlign: 'center',
@@ -204,16 +218,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
-    fontFamily: 'American Typewriter',
   },
   mealSection: {
-    fontFamily: 'American Typewriter',
+    fontFamily: 'Avenir-Book',
     fontWeight: "bold",
     fontSize: 20,
     lineHeight: 25,
   },
   input: {
-    fontFamily: 'American Typewriter',
+    fontFamily: 'Avenir-Book',
     borderWidth: 1,
     borderRadius: 5,
     margin: 10,
