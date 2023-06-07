@@ -254,7 +254,9 @@ function FoodPage(props) {
                   age={props.age}
                   bio_sex={props.bio_sex}
                   height={props.height}
-                  weight={props.weight}>
+                  weight={props.weight}
+                  meal={meal.meal}
+                >
                 </FoodRecs>
                 <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>
