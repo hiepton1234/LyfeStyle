@@ -53,9 +53,13 @@ function WorkoutRec({ user }) {
         const workouts = [];
 
         snapshot.forEach((childSnapshot) => {
-            workouts.push(childSnapshot.val().Exercise);
+            const goals = childSnapshot.val().Goals;
+            if (goals.includes(weightGoal)) {
+                workouts.push(childSnapshot.key);
+            }
         });
 
+        console.log(workouts)
         return workouts;
     }
 
@@ -122,14 +126,24 @@ function WorkoutRec({ user }) {
                         ))}
                     </Picker>
 
-                    <Text style={[styles.baseText, { paddingTop: 40, paddingBottom: 10 }]}>Here Are Workouts From Your Selected Workout Type:</Text>
-                    <ScrollView style={{ height: 150 }}>
-                        {suggestedWorkouts.map((workout, index) => (
-                            <View key={index} style={styles.itemContainer}>
-                                <Text style={styles.itemText}>{workout}</Text>
+                    <Text style={[styles.baseText, { paddingTop: 40, paddingBottom: 10 }]}>
+                        Here Are Suggested Workouts{'\n'}For Your Weight Goal:
+                    </Text>
+                    { suggestedWorkouts.length > 0 ? (
+                        <ScrollView style={{ height: 150 }}>
+                            {suggestedWorkouts.map((workout, index) => (
+                                <View key={index} style={styles.itemContainer}>
+                                    <Text style={styles.itemText}>{workout}</Text>
+                                </View>
+                            ))}
+                        </ScrollView>
+                    ) : (
+                        <View style={{ height: 315 }}>
+                            <View style={styles.itemContainer}>
+                                <Text style={[styles.itemText, { textAlign: 'center' }]}>Sorry, there are no workouts{'\n'}for your weight goal</Text>
                             </View>
-                        ))}
-                    </ScrollView>
+                        </View>
+                    )}
 
                     <View style={{ paddingBottom: 20 }}></View>
 
