@@ -2,11 +2,55 @@ import axios, {CancelToken} from 'axios';
 import Geolocation from 'react-native-geolocation-service';
 import database from "@react-native-firebase/database";
 import {useEffect, useState} from 'react'
-import {Text} from 'react-native'
+import {StyleSheet, Text} from 'react-native'
+import qs from 'qs'
 
 
 export function FoodRecs(props) {
   const [recommendedTime, setRecommendedTime] = useState('');
+  const [recommendation, setRecommendation] = useState('')
+  const [foodSearchResults, setFoodSearchResults] = useState([])
+  const [preferences, setPreferences] = useState({
+    dietaryRestrictions: {
+      vegetarian: false,
+      vegan: false,
+      glutenFree: false,
+      dairyFree: false,
+    },
+    ethnicStyles: {
+      italian: false,
+      mexican: false,
+      indian: false,
+      chinese: false,
+    },
+    allergies: {
+      peanuts: false,
+      soy: false,
+      shellfish: false,
+      treeNuts: false,
+    },
+  });
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const snapshot = await database()
+          .ref('user/' + props.user.uid + '/Food Preferences')
+          .once('value');
+
+        if (snapshot.exists()) {
+          const preferencesData = snapshot.val();
+          setPreferences(preferencesData);
+          searchFoodItems('', preferencesData);
+          console.log(preferencesData); // Log the fetched preferences
+        }
+      } catch (error) {
+        console.error('Error fetching preferences: ', error);
+      }
+    };
+
+    fetchPreferences();
+  }, []);
 
   useEffect(() => {
     const calculateMedianTimes = () => {
@@ -66,6 +110,64 @@ export function FoodRecs(props) {
 
     calculateMedianTimes();
   }, []);
+
+  // Credentials for Edamam Food Database API
+  const APP_ID = '494db791';
+  const APP_KEY = '89d36b8cf6bc7b3dd26a06900ad6c473';
+  const searchFoodItems = async (query, preferences) => {
+
+    const truePreferences = Object.entries(preferences)
+      .flatMap(([category, preferenceObj]) =>
+        Object.entries(preferenceObj)
+          .filter(([preference, value]) => value === true)
+          .map(([preference, value]) => preference)
+      );
+    console.log(truePreferences)
+
+    // Convert preferences into the allowed format by the API
+    const convertedPreferences = truePreferences.map((preference) => {
+      // Perform any necessary conversions based on specific preference names
+      switch (preference) {
+        case 'glutenFree':
+          return 'gluten-free';
+        case 'dairyFree':
+          return 'dairy-free'
+        case 'peanuts':
+          return 'peanut-free'
+        case 'soy':
+          return 'soy-free'
+        case 'shellfish':
+          return 'shellfish-free'
+        case 'treeNuts':
+          return 'tree-nut-free'
+        // Add more cases for other preferences if needed
+        default:
+          return preference;
+      }
+    });
+
+    console.log(convertedPreferences)
+    let healthParams = qs.stringify({ health: convertedPreferences }, { indices: false });
+    console.log(healthParams)
+
+    try {
+      const response = await axios.get(
+        `https://api.edamam.com/api/food-database/v2/parser?ingr=${query}&app_id=${APP_ID}&app_key=${APP_KEY}&category=generic-meals&${healthParams}`
+      );
+
+      // Handle the response data here
+      response.data.hints.forEach((data_elem) => {
+        console.log(data_elem.food.knownAs)
+      })
+
+      let randomRec = Math.floor(Math.random() * response.data.hints.length);
+      setRecommendation(response.data.hints[randomRec].food.knownAs)
+
+    } catch (error) {
+      // Handle any errors
+      console.error(error);
+    }
+  };
 
   const calculateRecommendedTime = (medianTimes) => {
     let d = new Date();
@@ -218,7 +320,17 @@ export function FoodRecs(props) {
   let goalCalories = calculateGoalCalories(avgEnergyBurned())
 
   return(
-    <Text>{recommendedTime === props.meal && goalCalories}</Text>
+    <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
   )
 
 }
+
+const styles = StyleSheet.create({
+  baseText: {
+    fontFamily: 'Avenir-Book',
+    fontSize: 20,
+    lineHeight: 40,
+    marginRight: 10,
+    opacity: 0.2
+  },
+})

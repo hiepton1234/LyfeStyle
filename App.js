@@ -522,7 +522,7 @@ export default function App() {
         console.log(result)
         setDob(result.value.substring(0, 10))
         setAge(result.age)
-        
+
         newReference.child("Health Info")
           .update({
             dob: dob,
