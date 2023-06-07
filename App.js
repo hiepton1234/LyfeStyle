@@ -369,7 +369,7 @@ export default function App() {
                         // console.log('Sleep data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching sleep data:', error);
+                        console.log('Error fetching sleep data: ', error);
                     });
 
                 fetchCaloricData(user)
@@ -378,7 +378,7 @@ export default function App() {
                         // console.log('Caloric data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching caloric data:', error);
+                        console.log('Error fetching caloric data: ', error);
                     });
 
                 fetchCaloriesBurnedData(user)
@@ -387,16 +387,16 @@ export default function App() {
                         // console.log('Calories burned data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching calories burned data:', error);
+                        console.log('Error fetching calories burned data: ', error);
                     });
 
                 fetchWorkoutHoursData(user)
                     .then(() => {
-                        // Calories burned data fetching completed
+                        // Workout hours data fetching completed
                         // console.log('Workout hours data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching workout hours data:', error);
+                        console.log('Error fetching workout hours data: ', error);
                     });
             }
         };
@@ -623,7 +623,9 @@ export default function App() {
                       // personalModel = {personalModel} replace when we have one
                     />
 
-                    <WorkoutRec />
+                    <WorkoutRec
+                        user={user}
+                    />
 
                     <AddActivity
                         setActivities={setActivities}
