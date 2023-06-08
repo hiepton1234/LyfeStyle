@@ -77,22 +77,28 @@ function HealthGoals (props) {
           <View style={styles.goalContainer}>
             <Text style={styles.baseText}>I would like to </Text>
             <ModalSelector
-              data={possibleWeightGoals}
-              initValue="maintain"
-              accessible={true}
-              animationType={"fade"}
-              scrollViewAccessibilityLabel={'Scrollable options'}
-              cancelButtonAccessibilityLabel={'Cancel Button'}
-              onChange={(option)=>{setWeightGoal(option.label)}}>
+                data={possibleWeightGoals}
+                initValue="maintain"
+                accessible={true}
+                animationType={"fade"}
+                scrollViewAccessibilityLabel={'Scrollable options'}
+                cancelButtonAccessibilityLabel={'Cancel Button'}
+                optionTextStyle={{ fontFamily: 'American Typewriter' }}
+                cancelButtonStyle={{ fontFamily: 'American Typewriter' }}
+                onChange={(option) => { setWeightGoal(option.label) }}
+            >
 
               <TextInput
-                style={[styles.goalInput, { marginTop: 6.5 }]}
-                editable={false}
-                value={weightGoal} />
+                  style={[styles.goalInput, { marginTop: 6.5 }]}
+                  editable={false}
+                  placeholder="Select something yummy!"
+                  value={weightGoal}
+              />
 
             </ModalSelector>
             <Text style={styles.baseText}> weight</Text>
           </View>
+
 
           <View style={[styles.goalContainer, { paddingBottom: 20, paddingTop: 20 }]}>
             <Text style={styles.baseText}>Sleep earlier</Text>

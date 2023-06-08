@@ -248,10 +248,6 @@ const styles = StyleSheet.create({
         fontFamily: 'American Typewriter',
         fontSize: 18,
     },
-
-    scrollView: {
-        height: 'auto',
-    },
 });
 
 export { WorkoutRec };
