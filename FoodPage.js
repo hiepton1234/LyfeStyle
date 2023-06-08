@@ -25,8 +25,9 @@ import {
 import Geolocation from 'react-native-geolocation-service';
 
 class FoodEntry {
-  constructor(food_name, selectedServings, selectedLike) {
+  constructor(food_name, enteredCalories, selectedServings, selectedLike) {
     this.food_name = food_name
+    this.enteredCalories = enteredCalories
     this.selectedServings = selectedServings
     this.selectedLike = selectedLike
   }
@@ -88,12 +89,12 @@ function FoodPage(props) {
   const foodReference = database().ref('user/' + props.user.uid);
   // console.log('foodReference key: ', foodReference.key);
 
-  const addNewFoodItem = (index, enteredText, selectedServings, selectedLike) => {
+  const addNewFoodItem = (index, enteredText, enteredCalories, selectedServings, selectedLike) => {
     const d = new Date()
     let hour_recorded = d.getHours()
     let minute_recorded = d.getMinutes()
 
-    let newItem = new FoodEntry(enteredText, selectedServings, selectedLike)
+    let newItem = new FoodEntry(enteredText, enteredCalories, selectedServings, selectedLike)
 
     console.log(index + enteredText)
     const newMealList = [...mealList]
@@ -114,9 +115,10 @@ function FoodPage(props) {
       // for each food entry for a meal time
       for (let j = 0; j < mealList[i].data.length; j++) {
         const food = mealList[i].data[j];
-        const { food_name: foodName, selectedServings, selectedLike} = food;
+        const { food_name: foodName, enteredCalories, selectedServings, selectedLike} = food;
 
         const foodEntry = {
+          enteredCalories,
           selectedServings,
           selectedLike,
         };
@@ -143,14 +145,14 @@ function FoodPage(props) {
           const data = snapshot.val();
           setInfo(data);
 
-          // Update mealList array with data from info
-          const updatedMealList = mealList.map((elem) => {
+          const newMealList = emptyMealList.map((elem) => {
             if (elem.meal in data) {
               const mealData = data[elem.meal];
               const foodList = Object.entries(mealData.Items || {}).map(([foodName, foodEntry]) => {
-                const { selectedServings, selectedLike } = foodEntry;
+                const { enteredCalories, selectedServings, selectedLike } = foodEntry;
                 return {
                   food_name: foodName,
+                  enteredCalories,
                   selectedServings,
                   selectedLike,
                 };
@@ -160,7 +162,7 @@ function FoodPage(props) {
             return elem;
           });
 
-          setMealList(updatedMealList);
+          setMealList(newMealList);
         } else {
           setInfo("");
           setMealList(emptyMealList);
@@ -169,72 +171,11 @@ function FoodPage(props) {
   };
 
 
+
   // get menu items of restaurants nearby, used for possible recommendations
   // fetchNearbyRestaurants(props.latitude, props.longitude, yelpFusionApiKey)
   // commented right now to stop API calls
   // searchFoodItems('chicken breast')
-
-  const [recommendation, setRecommendation] = useState('');
-
-  useEffect(() => {
-    const calculateMedianTimes = () => {
-      const mealTimes = ["Breakfast", "Lunch", "Dinner"];
-      const medianTimes = {};
-
-      // Initialize an empty array for each meal time
-      for (const mealTime of mealTimes) {
-        medianTimes[mealTime] = [];
-      }
-
-      // Iterate over the dates in Food Entries
-      database()
-        .ref('user/' + props.user.uid + '/Food Entries')
-        .once('value')
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            const foodEntries = snapshot.val();
-
-            for (const date in foodEntries) {
-              const meals = foodEntries[date];
-
-              // Iterate over each meal time for the current date
-              for (const mealTime of mealTimes) {
-                if (meals[mealTime]) {
-                  const hourRecorded = meals[mealTime].hour_recorded;
-                  const minuteRecorded = meals[mealTime].minute_recorded;
-
-                  // Push the recorded time to the array
-                  medianTimes[mealTime].push({ hour: hourRecorded, minute: minuteRecorded });
-                }
-              }
-            }
-
-            // Calculate the median for each meal time
-            for (const mealTime of mealTimes) {
-              const recordedTimes = medianTimes[mealTime];
-
-              if (recordedTimes.length > 0) {
-                // Sort the recorded times in ascending order
-                recordedTimes.sort((a, b) => {
-                  return a.hour - b.hour || a.minute - b.minute;
-                });
-
-                const medianIndex = Math.floor(recordedTimes.length / 2);
-                medianTimes[mealTime] = recordedTimes[medianIndex];
-              } else {
-                medianTimes[mealTime] = null;
-              }
-            }
-            if (medianTimes){
-              const recommendation = makeRecommendation(medianTimes);
-              setRecommendation(recommendation);
-            }
-          }
-        });
-    };
-
-    calculateMedianTimes();
-  }, []);
 
   return (
     <View style={styles.centeredView}>
@@ -268,9 +209,9 @@ function FoodPage(props) {
               setCurrentSelectedDate(decrementedDate);
               loadFoodEntries()
             }}>
-              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇦'}</Text>
+              <Text style={[styles.modalText, {fontWeight: "bold"}]}>{'⇦'}</Text>
             </TouchableOpacity>
-            <Text style={styles.baseText}>{isTodayOrYesterday(currentSelectedDate)}</Text>
+            <Text style={styles.modalText}>{isTodayOrYesterday(currentSelectedDate)}</Text>
 
             {/* if currentSelectedDate is today, disable next date button, still render or messes up View */}
             {isTodayOrYesterday(currentSelectedDate) === 'Today' ? (
@@ -282,7 +223,7 @@ function FoodPage(props) {
                   setCurrentSelectedDate(incrementedDate);
                 }}
               >
-                <Text style={[{opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
+                <Text style={[styles.modalText, {opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
               </TouchableOpacity>
             ) :
             (
@@ -293,7 +234,7 @@ function FoodPage(props) {
                 setCurrentSelectedDate(incrementedDate);
               }}
             >
-              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇨'}</Text>
+              <Text style={[styles.modalText, {fontWeight: "bold"}]}>{'⇨'}</Text>
             </TouchableOpacity>
             )}
           </View>
@@ -308,17 +249,20 @@ function FoodPage(props) {
                   ))}
                 </View>
                 {/* if date is today, give a recommendation for a meal, corresponding to appropriate time*/}
-                {isTodayOrYesterday(currentSelectedDate) === 'Today' && meal.meal === recommendation &&
+                {isTodayOrYesterday(currentSelectedDate) === 'Today' && mealList[index].data.length === 0 &&
                   (
-                  <Text>{recommendation && `Recommended: ${recommendation}`}</Text>
+                    <FoodRecs
+                      user={props.user}
+                      age={props.age}
+                      bio_sex={props.bio_sex}
+                      height={props.height}
+                      weight={props.weight}
+                      meal={meal.meal}
+                      index={index}
+                      addNewFoodItem={addNewFoodItem}
+                    >
+                    </FoodRecs>
                 )}
-                <FoodRecs
-                  user={props.user}
-                  age={props.age}
-                  bio_sex={props.bio_sex}
-                  height={props.height}
-                  weight={props.weight}>
-                </FoodRecs>
                 <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>
             ))}
@@ -341,8 +285,8 @@ export {FoodPage};
 
 const styles = StyleSheet.create({
   baseText: {
-    fontFamily: 'American Typewriter',
-    fontSize: 20,
+    fontFamily: 'Avenir-Book',
+    fontSize: 18,
     lineHeight: 40,
     marginRight: 10,
   },
