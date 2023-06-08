@@ -54,15 +54,14 @@ function AddNewFoodItem(props) {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <View style={styles.item}>
+            <View style={[styles.item, { flexDirection: 'row', justifyContent: 'space-between' }]}>
               <TextInput
                 style={styles.input}
                 placeholder={"Food name here"}
                 onChangeText={foodInputHandler}
                 value={enteredFood}
               />
-            </View>
-            <View style={styles.item}>
+
               <TextInput
                 style={styles.input}
                 placeholder={"Cals per serving"}
