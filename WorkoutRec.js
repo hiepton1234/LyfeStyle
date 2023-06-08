@@ -55,11 +55,17 @@ function WorkoutRec({ user }) {
         snapshot.forEach((childSnapshot) => {
             const goals = childSnapshot.val().Goals;
             if (goals.includes(weightGoal)) {
-                workouts.push(childSnapshot.key);
+
+                const workout = {
+                    exercise: childSnapshot.key,
+                    intensity: childSnapshot.val().Intensity
+                };
+
+                workouts.push(workout);
             }
         });
 
-        console.log(workouts)
+        // console.log(workouts)
         return workouts;
     }
 
@@ -129,18 +135,21 @@ function WorkoutRec({ user }) {
                     <Text style={[styles.baseText, { paddingTop: 40, paddingBottom: 10 }]}>
                         Here Are Suggested Workouts{'\n'}For Your Weight Goal:
                     </Text>
-                    { suggestedWorkouts.length > 0 ? (
+                    {suggestedWorkouts.length > 0 ? (
                         <ScrollView style={{ height: 150 }}>
                             {suggestedWorkouts.map((workout, index) => (
                                 <View key={index} style={styles.itemContainer}>
-                                    <Text style={styles.itemText}>{workout}</Text>
+                                    <Text style={styles.itemText}>{workout.exercise}</Text>
+                                    <Text style={[styles.itemText, { textAlign: 'right' }]}>{workout.intensity}</Text>
                                 </View>
                             ))}
                         </ScrollView>
                     ) : (
                         <View style={{ height: 315 }}>
                             <View style={styles.itemContainer}>
-                                <Text style={[styles.itemText, { textAlign: 'center' }]}>Sorry, there are no workouts{'\n'}for your weight goal</Text>
+                                <Text style={[styles.itemText, { textAlign: 'center' }]}>
+                                    Sorry, there are no workouts{'\n'}for your weight goal
+                                </Text>
                             </View>
                         </View>
                     )}
@@ -222,6 +231,8 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 5,
         borderRadius: 5,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
     },
 
     itemText: {
