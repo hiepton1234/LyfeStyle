@@ -10,7 +10,7 @@ import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import auth from '@react-native-firebase/auth'
 import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
-import AppleHealthKit, {HealthValue, HealthKitPermissions} from 'react-native-health'
+import AppleHealthKit, {HealthValue, HealthKitPermissions, Health} from 'react-native-health'
 import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
@@ -439,7 +439,7 @@ export default function App() {
                 // AppleHealthKit.Constants.Permissions.AllergyRecord
               ],
               // writing data permissions here, add if needed
-              write: [],
+              write: [AppleHealthKit.Constants.Permissions.EnergyConsumed],
             },
           };
 

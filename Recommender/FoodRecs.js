@@ -10,6 +10,7 @@ import {Picker} from "@react-native-picker/picker";
 export function FoodRecs(props) {
   const [recommendedTime, setRecommendedTime] = useState('');
   const [recommendation, setRecommendation] = useState('')
+  const [recommendationCals, setRecommendationCals] = useState(0)
   const [energyBurned, setEnergyBurned] = useState([])
   const [goalCalories, setGoalCalories] = useState(0)
   const [weightGoal, setWeightGoal] = useState([])
@@ -169,11 +170,11 @@ export function FoodRecs(props) {
       );
 
       // Handle the response data here
-      const labels = response.data.hits.map((hit) => hit.recipe.label);
-      console.log(labels);
+      const recipes = response.data.hits.map((hit) => hit.recipe);
 
-      let randomRec = Math.floor(Math.random() * labels.length);
-      setRecommendation(labels[randomRec])
+      let randomRec = Math.floor(Math.random() * recipes.length);
+      setRecommendation(recipes[randomRec].label)
+      setRecommendationCals(Math.round(recipes[randomRec].calories / recipes[randomRec].yield))
 
     } catch (error) {
       // Handle any errors
@@ -351,18 +352,24 @@ export function FoodRecs(props) {
   const [selectedLike, setSelectedLike] = useState('1');
   const like_scale = ['1', '2', '3', '4', '5']
   const [enteredFood, setEnteredFood] = useState(recommendation);
+  const [enteredCalories, setEnteredCalories] = useState('');
 
   const foodInputHandler = (enteredText) => {
     setEnteredFood(enteredText);
   };
 
+  const caloriesInputHandler = (enteredText) => {
+    setEnteredCalories(enteredText);
+  };
+
   const addFoodHandler = () => {
 
-    props.addNewFoodItem(props.index, recommendation, selectedServings, selectedLike)
+    props.addNewFoodItem(props.index, recommendation, recommendationCals, selectedServings, selectedLike)
 
     setEnteredFood('');
-    setSelectedServings('0.25')
-    setSelectedLike('1')
+    setEnteredCalories('');
+    setSelectedServings('0.25');
+    setSelectedLike('1');
   };
 
   return (
@@ -379,12 +386,18 @@ export function FoodRecs(props) {
             }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-                <View style={styles.item}>
+                <View style={[styles.item, { flexDirection: 'row', justifyContent: 'space-between' }]}>
                   <TextInput
                     style={styles.input}
                     placeholder={"Food name here"}
                     onChangeText={foodInputHandler}
                     value={recommendation}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder={"Cals per serving"}
+                    onChangeText={caloriesInputHandler}
+                    value={recommendationCals.toString()}
                   />
                 </View>
                 <View style={styles.pickerSection}>
