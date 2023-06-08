@@ -25,8 +25,9 @@ import {
 import Geolocation from 'react-native-geolocation-service';
 
 class FoodEntry {
-  constructor(food_name, selectedServings, selectedLike) {
+  constructor(food_name, enteredCalories, selectedServings, selectedLike) {
     this.food_name = food_name
+    this.enteredCalories = enteredCalories
     this.selectedServings = selectedServings
     this.selectedLike = selectedLike
   }
@@ -88,12 +89,12 @@ function FoodPage(props) {
   const foodReference = database().ref('user/' + props.user.uid);
   // console.log('foodReference key: ', foodReference.key);
 
-  const addNewFoodItem = (index, enteredText, selectedServings, selectedLike) => {
+  const addNewFoodItem = (index, enteredText, enteredCalories, selectedServings, selectedLike) => {
     const d = new Date()
     let hour_recorded = d.getHours()
     let minute_recorded = d.getMinutes()
 
-    let newItem = new FoodEntry(enteredText, selectedServings, selectedLike)
+    let newItem = new FoodEntry(enteredText, enteredCalories, selectedServings, selectedLike)
 
     console.log(index + enteredText)
     const newMealList = [...mealList]
@@ -114,9 +115,10 @@ function FoodPage(props) {
       // for each food entry for a meal time
       for (let j = 0; j < mealList[i].data.length; j++) {
         const food = mealList[i].data[j];
-        const { food_name: foodName, selectedServings, selectedLike} = food;
+        const { food_name: foodName, enteredCalories, selectedServings, selectedLike} = food;
 
         const foodEntry = {
+          enteredCalories,
           selectedServings,
           selectedLike,
         };
@@ -148,9 +150,10 @@ function FoodPage(props) {
             if (elem.meal in data) {
               const mealData = data[elem.meal];
               const foodList = Object.entries(mealData.Items || {}).map(([foodName, foodEntry]) => {
-                const { selectedServings, selectedLike } = foodEntry;
+                const { enteredCalories, selectedServings, selectedLike } = foodEntry;
                 return {
                   food_name: foodName,
+                  enteredCalories,
                   selectedServings,
                   selectedLike,
                 };
