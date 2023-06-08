@@ -1,15 +1,15 @@
 import axios, {CancelToken} from 'axios';
 import Geolocation from 'react-native-geolocation-service';
 import database from "@react-native-firebase/database";
-import {useEffect, useState} from 'react'
-import {StyleSheet, Text} from 'react-native'
+import React, {useEffect, useState} from 'react'
+import {TouchableOpacity, StyleSheet, Text, View, Alert, TextInput, Pressable, Modal} from 'react-native'
 import qs from 'qs'
+import {Picker} from "@react-native-picker/picker";
 
 
 export function FoodRecs(props) {
   const [recommendedTime, setRecommendedTime] = useState('');
   const [recommendation, setRecommendation] = useState('')
-  const [foodSearchResults, setFoodSearchResults] = useState([])
   const [energyBurned, setEnergyBurned] = useState([])
   const [goalCalories, setGoalCalories] = useState(0)
   const [weightGoal, setWeightGoal] = useState([])
@@ -165,7 +165,7 @@ export function FoodRecs(props) {
 
     try {
       const response = await axios.get(
-        `https://api.edamam.com/api/recipes/v2?type=public&q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}&calories=200-${max_cals_each_serving}&${healthParams}`
+        `https://api.edamam.com/api/recipes/v2?type=public&q=${query}&app_id=${APP_ID}&${cuisineTypeParams}&app_key=${APP_KEY}&calories=200-${max_cals_each_serving}&${healthParams}`
       );
 
       // Handle the response data here
@@ -345,18 +345,216 @@ export function FoodRecs(props) {
     }
   }
 
-  return(
-    <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
-  )
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedServings, setSelectedServings] = useState('1');
+  const possible_num_servings = ['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75', '2']
+  const [selectedLike, setSelectedLike] = useState('1');
+  const like_scale = ['1', '2', '3', '4', '5']
+  const [enteredFood, setEnteredFood] = useState(recommendation);
+
+  const foodInputHandler = (enteredText) => {
+    setEnteredFood(enteredText);
+  };
+
+  const addFoodHandler = () => {
+
+    props.addNewFoodItem(props.index, recommendation, selectedServings, selectedLike)
+
+    setEnteredFood('');
+    setSelectedServings('0.25')
+    setSelectedLike('1')
+  };
+
+  return (
+    <>
+      {props.meal === recommendedTime && (
+        <View style={styles.recommendationView}>
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              Alert.alert('Modal has been closed.');
+              setModalVisible(!modalVisible);
+            }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.item}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={"Food name here"}
+                    onChangeText={foodInputHandler}
+                    value={recommendation}
+                  />
+                </View>
+                <View style={styles.pickerSection}>
+                  <View style={{flex: 1}}>
+                    <Text style={styles.modalText}># of Servings</Text>
+                  </View>
+                  <View style={{flex: 1}}>
+                    <Text style={styles.modalText}>Like Rating</Text>
+                  </View>
+                </View>
+                <View style={styles.pickerSection}>
+                  <Picker
+                    style={{ flex: 1 }}
+                    selectedValue={selectedServings}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setSelectedServings(itemValue)
+                    }>
+                    {possible_num_servings.map((item, index) => (
+                      <Picker.Item label={item} value={item} />
+                    ))}
+                  </Picker>
+                  <Picker
+                    style={{ flex: 1 }}
+                    selectedValue={selectedLike}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setSelectedLike(itemValue)
+                    }>
+                    {like_scale.map((item, index) => (
+                      <Picker.Item label={item} value={item} />
+                    ))}
+                  </Picker>
+                </View>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => {
+                    setModalVisible(!modalVisible)
+                    addFoodHandler()
+                  }
+                  }>
+                  <Text style={styles.modalText}>Add Food Entry</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </>
+  );
+
 
 }
 
 const styles = StyleSheet.create({
   baseText: {
     fontFamily: 'Avenir-Book',
-    fontSize: 20,
-    lineHeight: 40,
+    fontSize: 18,
+    lineHeight: 30,
     marginRight: 10,
-    opacity: 0.2
+    opacity: 0.4
+  },
+  recommendationView: {
+    backgroundColor: 'rgba(255,218,191,0.77)',
+    borderRadius: 10,
+    padding: 10
+  },
+  sectionHeading: {
+    fontFamily: 'Avenir-Book',
+    fontWeight: "bold",
+    fontSize: 40,
+    lineHeight: 50,
+  },
+  customButton: {
+    fontFamily: 'Avenir-Book',
+    fontSize: 35,
+    fontWeight: "600",
+    textAlign: "right",
+  },
+  appContainer: {
+    backgroundColor: '#edf7f5',
+    flex: 1,
+    paddingTop: 50,
+    padding: 25,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#cccccc",
+    // in most places where you can set size as num pixels, you can also use percentages passed as a string
+    // want this element to take up 80% of available width, defined by the container in which the element sits
+    width: '60%',
+    margin: 8,
+    padding: 8,
+    justifyContent: ''
+  },
+  item: {
+    flexDirection: "row",
+  },
+  pickerSection: {
+    flexDirection: "row",
+  },
+  goalInput: {
+    fontFamily: 'Avenir-Book',
+    flex: 1,
+    textAlign: 'left',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 20,
+  },
+  centeredView: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalText: {
+    fontFamily: 'Avenir-Book',
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  modalView: {
+    backgroundColor: 'white',
+    margin: 20,
+    flex: 1,
+    borderRadius: 20,
+    paddingTop: 35,
+    paddingBottom: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  buttonOpen: {
+    backgroundColor: '#2196F3',
+  },
+  buttonClose: {
+    backgroundColor: '#F194FF',
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    margin: 10,
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  mealSection: {
+    fontFamily: 'Avenir-Book',
+    fontWeight: "bold",
+    fontSize: 20,
+    lineHeight: 25,
+  },
+  input: {
+    fontFamily: 'Avenir-Book',
+    borderWidth: 1,
+    borderRadius: 5,
+    margin: 10,
+    padding: 10,
+    fontSize: 15,
+    flex: 1
   },
 })

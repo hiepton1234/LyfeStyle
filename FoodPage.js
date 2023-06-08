@@ -133,6 +133,7 @@ function FoodPage(props) {
   }, [currentSelectedDate]);
 
   const loadFoodEntries = () => {
+    console.log(mealList);
     console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate);
     database()
       .ref('user/' + props.user.uid + '/Food Entries/' + formatDate(currentSelectedDate))
@@ -142,8 +143,7 @@ function FoodPage(props) {
           const data = snapshot.val();
           setInfo(data);
 
-          // Update mealList array with data from info
-          const updatedMealList = mealList.map((elem) => {
+          const newMealList = emptyMealList.map((elem) => {
             if (elem.meal in data) {
               const mealData = data[elem.meal];
               const foodList = Object.entries(mealData.Items || {}).map(([foodName, foodEntry]) => {
@@ -159,13 +159,14 @@ function FoodPage(props) {
             return elem;
           });
 
-          setMealList(updatedMealList);
+          setMealList(newMealList);
         } else {
           setInfo("");
           setMealList(emptyMealList);
         }
       });
   };
+
 
 
   // get menu items of restaurants nearby, used for possible recommendations
@@ -205,9 +206,9 @@ function FoodPage(props) {
               setCurrentSelectedDate(decrementedDate);
               loadFoodEntries()
             }}>
-              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇦'}</Text>
+              <Text style={[styles.modalText, {fontWeight: "bold"}]}>{'⇦'}</Text>
             </TouchableOpacity>
-            <Text style={styles.baseText}>{isTodayOrYesterday(currentSelectedDate)}</Text>
+            <Text style={styles.modalText}>{isTodayOrYesterday(currentSelectedDate)}</Text>
 
             {/* if currentSelectedDate is today, disable next date button, still render or messes up View */}
             {isTodayOrYesterday(currentSelectedDate) === 'Today' ? (
@@ -219,7 +220,7 @@ function FoodPage(props) {
                   setCurrentSelectedDate(incrementedDate);
                 }}
               >
-                <Text style={[{opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
+                <Text style={[styles.modalText, {opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
               </TouchableOpacity>
             ) :
             (
@@ -230,7 +231,7 @@ function FoodPage(props) {
                 setCurrentSelectedDate(incrementedDate);
               }}
             >
-              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇨'}</Text>
+              <Text style={[styles.modalText, {fontWeight: "bold"}]}>{'⇨'}</Text>
             </TouchableOpacity>
             )}
           </View>
@@ -245,19 +246,20 @@ function FoodPage(props) {
                   ))}
                 </View>
                 {/* if date is today, give a recommendation for a meal, corresponding to appropriate time*/}
-                {/*{isTodayOrYesterday(currentSelectedDate) === 'Today' && meal.meal === recommendation &&*/}
-                {/*  (*/}
-                {/*  <Text>{recommendation && `Recommended: ${recommendation}`}</Text>*/}
-                {/*)}*/}
-                <FoodRecs
-                  user={props.user}
-                  age={props.age}
-                  bio_sex={props.bio_sex}
-                  height={props.height}
-                  weight={props.weight}
-                  meal={meal.meal}
-                >
-                </FoodRecs>
+                {isTodayOrYesterday(currentSelectedDate) === 'Today' && mealList[index].data.length === 0 &&
+                  (
+                    <FoodRecs
+                      user={props.user}
+                      age={props.age}
+                      bio_sex={props.bio_sex}
+                      height={props.height}
+                      weight={props.weight}
+                      meal={meal.meal}
+                      index={index}
+                      addNewFoodItem={addNewFoodItem}
+                    >
+                    </FoodRecs>
+                )}
                 <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>
             ))}
@@ -281,7 +283,7 @@ export {FoodPage};
 const styles = StyleSheet.create({
   baseText: {
     fontFamily: 'Avenir-Book',
-    fontSize: 20,
+    fontSize: 18,
     lineHeight: 40,
     marginRight: 10,
   },

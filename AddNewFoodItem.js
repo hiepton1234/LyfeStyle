@@ -4,14 +4,6 @@ import database from "@react-native-firebase/database";
 import {Picker} from "@react-native-picker/picker";
 import {FoodRecs} from "./Recommender/FoodRecs";
 
-class FoodItem {
-  constructor(name, serving_size, num_servings, calories) {
-    this.name = name
-    this.serving_size = serving_size
-    this.num_servings = num_servings
-    this.calories = calories
-  }
-}
 function AddNewFoodItem(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedServings, setSelectedServings] = useState('0.25');
