@@ -369,7 +369,7 @@ export default function App() {
                         // console.log('Sleep data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching sleep data:', error);
+                        console.log('Error fetching sleep data: ', error);
                     });
 
                 fetchCaloricData(user)
@@ -378,7 +378,7 @@ export default function App() {
                         // console.log('Caloric data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching caloric data:', error);
+                        console.log('Error fetching caloric data: ', error);
                     });
 
                 fetchCaloriesBurnedData(user)
@@ -387,16 +387,16 @@ export default function App() {
                         // console.log('Calories burned data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching calories burned data:', error);
+                        console.log('Error fetching calories burned data: ', error);
                     });
 
                 fetchWorkoutHoursData(user)
                     .then(() => {
-                        // Calories burned data fetching completed
+                        // Workout hours data fetching completed
                         // console.log('Workout hours data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching workout hours data:', error);
+                        console.log('Error fetching workout hours data: ', error);
                     });
             }
         };
@@ -623,7 +623,9 @@ export default function App() {
                       // personalModel = {personalModel} replace when we have one
                     />
 
-                    <WorkoutRec />
+                    <WorkoutRec
+                        user={user}
+                    />
 
                     <AddActivity
                         setActivities={setActivities}
@@ -730,7 +732,7 @@ export default function App() {
                                         );
                                     } else {
                                         return (
-                                            <ScrollView style={{ height: 135 }}>
+                                            <ScrollView style={[styles.scrollView, { maxHeight: 250 }]}>
                                                 {filteredActivities.map((activity, index) => (
                                                     <View key={index} style={styles.itemContainer}>
                                                         <Text style={styles.itemText}>
@@ -789,6 +791,10 @@ const styles = StyleSheet.create({
         fontFamily: 'American Typewriter',
     },
 
+    scrollView: {
+        height: 'auto',
+    },
+
     activitiesContainer: {
         backgroundColor: '#e0e0e0',
         width: screenWidth,
@@ -797,7 +803,7 @@ const styles = StyleSheet.create({
     itemContainer: {
         width: screenWidth,
         backgroundColor: '#F2F2F2',
-        padding: 10,
+        padding: 13,
         marginVertical: 5,
         borderRadius: 5,
     },
