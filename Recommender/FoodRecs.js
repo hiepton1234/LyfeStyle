@@ -10,6 +10,9 @@ export function FoodRecs(props) {
   const [recommendedTime, setRecommendedTime] = useState('');
   const [recommendation, setRecommendation] = useState('')
   const [foodSearchResults, setFoodSearchResults] = useState([])
+  const [energyBurned, setEnergyBurned] = useState([])
+  const [goalCalories, setGoalCalories] = useState(0)
+  const [weightGoal, setWeightGoal] = useState([])
   const [preferences, setPreferences] = useState({
     dietaryRestrictions: {
       vegetarian: false,
@@ -18,10 +21,10 @@ export function FoodRecs(props) {
       dairyFree: false,
     },
     ethnicStyles: {
-      italian: false,
-      mexican: false,
-      indian: false,
-      chinese: false,
+      Italian: false,
+      Mexican: false,
+      Indian: false,
+      Chinese: false,
     },
     allergies: {
       peanuts: false,
@@ -112,20 +115,22 @@ export function FoodRecs(props) {
   }, []);
 
   // Credentials for Edamam Food Database API
-  const APP_ID = '494db791';
-  const APP_KEY = '89d36b8cf6bc7b3dd26a06900ad6c473';
+  const APP_ID = 'b710f942';
+  const APP_KEY = '1530298d7ac2bc4f3fa1d89d8a7f6aba';
   const searchFoodItems = async (query, preferences) => {
+    const ethnicPreferences = Object.entries(preferences.ethnicStyles)
+      .filter(([ethnicStyle, value]) => value === true)
+      .map(([ethnicStyle, value]) => ethnicStyle);
 
-    const truePreferences = Object.entries(preferences)
+    const healthPreferences = Object.entries(preferences.dietaryRestrictions)
       .flatMap(([category, preferenceObj]) =>
         Object.entries(preferenceObj)
           .filter(([preference, value]) => value === true)
           .map(([preference, value]) => preference)
       );
-    console.log(truePreferences)
 
     // Convert preferences into the allowed format by the API
-    const convertedPreferences = truePreferences.map((preference) => {
+    const convertedHealthPreferences = healthPreferences.map((preference) => {
       // Perform any necessary conversions based on specific preference names
       switch (preference) {
         case 'glutenFree':
@@ -146,22 +151,29 @@ export function FoodRecs(props) {
       }
     });
 
-    console.log(convertedPreferences)
-    let healthParams = qs.stringify({ health: convertedPreferences }, { indices: false });
+    const goalCalories = await calculateGoalCalories(await avgEnergyBurned());
+    setGoalCalories(goalCalories);
+
+    let max_cals_each_serving = Math.round(goalCalories / 3) + 100
+    console.log(goalCalories)
+
+    let healthParams = qs.stringify({ health: convertedHealthPreferences }, { indices: false });
     console.log(healthParams)
+
+    let cuisineTypeParams = qs.stringify({ cuisineType: ethnicPreferences }, { indices: false });
+    console.log(cuisineTypeParams)
 
     try {
       const response = await axios.get(
-        `https://api.edamam.com/api/food-database/v2/parser?ingr=${query}&app_id=${APP_ID}&app_key=${APP_KEY}&category=generic-meals&${healthParams}`
+        `https://api.edamam.com/api/recipes/v2?type=public&q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}&calories=200-${max_cals_each_serving}&${healthParams}`
       );
 
       // Handle the response data here
-      response.data.hints.forEach((data_elem) => {
-        console.log(data_elem.food.knownAs)
-      })
+      const labels = response.data.hits.map((hit) => hit.recipe.label);
+      console.log(labels);
 
-      let randomRec = Math.floor(Math.random() * response.data.hints.length);
-      setRecommendation(response.data.hints[randomRec].food.knownAs)
+      let randomRec = Math.floor(Math.random() * labels.length);
+      setRecommendation(labels[randomRec])
 
     } catch (error) {
       // Handle any errors
@@ -240,7 +252,6 @@ export function FoodRecs(props) {
   };
 
   // get weight gaol
-  const [weightGoal, setWeightGoal] = useState([])
   database()
     .ref('user/' + props.user.uid + '/goals/weightGoal')
     .once('value')
@@ -251,73 +262,88 @@ export function FoodRecs(props) {
     })
 
 // calculate user's maintenance calories based on Mifflin-St Jeor Equation
-  function calculateGoalCalories(avgEnergyBurntDaily) {
+  async function calculateGoalCalories(avgEnergyBurntDaily) {
+    try {
+      console.log(avgEnergyBurntDaily);
 
-    let genderConstant = 5
-    if (props.bio_sex === 'female')
-      genderConstant = -161
-    let BMR = (10 * props.weight * 0.453592) + (6.25 * props.height * 2.54) - (5 * props.age) + genderConstant
+      let genderConstant = 5;
+      if (props.bio_sex === 'female')
+        genderConstant = -161;
+      let BMR = (10 * props.weight * 0.453592) + (6.25 * props.height * 2.54) - (5 * props.age) + genderConstant;
 
-    // increase basal metabolic rate by avg daily energy burnt from activity to obtain maintenance cals
-    let maintenance_cals = BMR * avgEnergyBurntDaily / 15
+      // increase basal metabolic rate by avg daily energy burnt from activity to obtain maintenance cals
+      let maintenance_cals = BMR * avgEnergyBurntDaily / 15;
 
-    let goalModifier = 1
-    if (weightGoal === 'lose')
-      goalModifier = 0.9
-    else if (weightGoal === 'gain')
-      goalModifier = 1.1
+      let goalModifier = 1;
+      if (weightGoal === 'lose')
+        goalModifier = 0.9;
+      else if (weightGoal === 'gain')
+        goalModifier = 1.1;
 
-    // goal calories = maintenance calories times a multiplier depending on weight goal. 0.9 and 1.1 for
-    // healthy and feasible weight loss rate of +/- 0.5 pound each week
-    let goal_cals = Math.round(maintenance_cals * goalModifier)
-    return goal_cals
+      // goal calories = maintenance calories times a multiplier depending on weight goal. 0.9 and 1.1 for
+      // healthy and feasible weight loss rate of +/- 0.5 pound each week
+      let goal_cals = Math.round(maintenance_cals * goalModifier);
+      return goal_cals;
+    } catch (error) {
+      console.error('Error calculating goal calories:', error);
+      return null; // Return null in case of an error
+    }
   }
+
 
   function loadEnergyBurned() {
-    const [energyBurned, setEnergyBurned] = useState([])
-    database()
-      .ref('user/' + props.user.uid + '/Health Info/Active Energy Burned/')
-      .once('value')
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          setEnergyBurned(snapshot.val());
-        }
-      });
-    return energyBurned
-  }
-
-  function avgEnergyBurned() {
-    // Assuming you have retrieved the energy burned data from Firebase as an array of objects
-    const energyBurnedData = loadEnergyBurned();
-
-    // Step 2: Group the energy burned records by endDate
-    const groupedData = energyBurnedData.reduce((result, record) => {
-      const { endDate, value } = record;
-      if (!result[endDate]) {
-        result[endDate] = [];
-      }
-      result[endDate].push(value);
-      return result;
-    }, {});
-
-    // Step 3: Calculate total energy burned for each day
-    const dailyTotals = Object.entries(groupedData).map(([endDate, energyBurnedValues]) => {
-      const totalEnergyBurned = energyBurnedValues.reduce((sum, value) => sum + value, 0);
-      return { endDate, totalEnergyBurned };
+    return new Promise((resolve, reject) => {
+      database()
+        .ref('user/' + props.user.uid + '/Health Info/Active Energy Burned/')
+        .once('value')
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            resolve(snapshot.val());
+          } else {
+            resolve([]); // Return an empty array if data doesn't exist
+          }
+        })
+        .catch((error) => {
+          console.error('Error loading energy burned:', error);
+          reject(error);
+        });
     });
-
-    // Step 4: Determine the number of days
-    const numberOfDays = dailyTotals.length;
-
-    // Step 5: Calculate average energy burned per day
-    const totalEnergyBurned = dailyTotals.reduce((sum, { totalEnergyBurned }) => sum + totalEnergyBurned, 0);
-    const averageEnergyBurnedPerDay = totalEnergyBurned / numberOfDays;
-
-    return (averageEnergyBurnedPerDay);
-
   }
 
-  let goalCalories = calculateGoalCalories(avgEnergyBurned())
+  async function avgEnergyBurned() {
+    try {
+      // Step 1: Load energy burned data from Firebase
+      const energyBurnedData = await loadEnergyBurned();
+
+      // Step 2: Group the energy burned records by endDate
+      const groupedData = energyBurnedData.reduce((result, record) => {
+        const { endDate, value } = record;
+        if (!result[endDate]) {
+          result[endDate] = [];
+        }
+        result[endDate].push(value);
+        return result;
+      }, {});
+
+      // Step 3: Calculate total energy burned for each day
+      const dailyTotals = Object.entries(groupedData).map(([endDate, energyBurnedValues]) => {
+        const totalEnergyBurned = energyBurnedValues.reduce((sum, value) => sum + value, 0);
+        return { endDate, totalEnergyBurned };
+      });
+
+      // Step 4: Determine the number of days
+      const numberOfDays = dailyTotals.length;
+
+      // Step 5: Calculate average energy burned per day
+      const totalEnergyBurned = dailyTotals.reduce((sum, { totalEnergyBurned }) => sum + totalEnergyBurned, 0);
+      const averageEnergyBurnedPerDay = totalEnergyBurned / numberOfDays;
+
+      return averageEnergyBurnedPerDay;
+    } catch (error) {
+      console.error('Error calculating average energy burned:', error);
+      return null; // Return null in case of an error
+    }
+  }
 
   return(
     <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>

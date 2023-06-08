@@ -249,15 +249,15 @@ function FoodPage(props) {
                 {/*  (*/}
                 {/*  <Text>{recommendation && `Recommended: ${recommendation}`}</Text>*/}
                 {/*)}*/}
-                {/*<FoodRecs*/}
-                {/*  user={props.user}*/}
-                {/*  age={props.age}*/}
-                {/*  bio_sex={props.bio_sex}*/}
-                {/*  height={props.height}*/}
-                {/*  weight={props.weight}*/}
-                {/*  meal={meal.meal}*/}
-                {/*>*/}
-                {/*</FoodRecs>*/}
+                <FoodRecs
+                  user={props.user}
+                  age={props.age}
+                  bio_sex={props.bio_sex}
+                  height={props.height}
+                  weight={props.weight}
+                  meal={meal.meal}
+                >
+                </FoodRecs>
                 <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>
             ))}

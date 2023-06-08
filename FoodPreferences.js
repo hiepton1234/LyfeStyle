@@ -34,10 +34,10 @@ export function FoodPreferences(props) {
       dairyFree: false,
     },
     ethnicStyles: {
-      italian: false,
-      mexican: false,
-      indian: false,
-      chinese: false,
+      Italian: false,
+      Mexican: false,
+      Indian: false,
+      Chinese: false,
     },
     allergies: {
       peanuts: false,
