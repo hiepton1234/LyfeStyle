@@ -56,6 +56,8 @@ function AddActivity({ setActivities }) {
         currentDate.setUTCHours(0, 0, 0, 0);
         formattedDate.setUTCHours(0, 0, 0, 0);
 
+        // console.log(formattedDate.getTime() < currentDate.getTime())
+
         // Compare the timestamps of formattedDate and currentDate
         if (formattedDate.getTime() < currentDate.getTime()) {
             Alert.alert('Error!', 'Please select today\'s date or a future date');

@@ -138,7 +138,7 @@ function WorkoutRec({ user }) {
                     {suggestedWorkouts.length > 0 ? (
                         <ScrollView style={{ height: 150 }}>
                             {suggestedWorkouts.map((workout, index) => (
-                                <View key={index} style={styles.itemContainer}>
+                                <View key={index} style={[styles.itemContainer, { flexDirection: 'row', justifyContent: 'space-between' }]}>
                                     <Text style={styles.itemText}>{workout.exercise}</Text>
                                     <Text style={[styles.itemText, { textAlign: 'right' }]}>{workout.intensity}</Text>
                                 </View>
@@ -228,11 +228,9 @@ const styles = StyleSheet.create({
 
     itemContainer: {
         backgroundColor: '#F2F2F2',
-        padding: 10,
+        padding: 13,
         marginVertical: 5,
         borderRadius: 5,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
     },
 
     itemText: {
@@ -243,6 +241,10 @@ const styles = StyleSheet.create({
     pickerItem: {
         fontFamily: 'American Typewriter',
         fontSize: 18,
+    },
+
+    scrollView: {
+        height: 'auto',
     },
 });
 

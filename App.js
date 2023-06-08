@@ -732,7 +732,7 @@ export default function App() {
                                         );
                                     } else {
                                         return (
-                                            <ScrollView style={{ height: 135 }}>
+                                            <ScrollView style={[styles.scrollView, { maxHeight: 250 }]}>
                                                 {filteredActivities.map((activity, index) => (
                                                     <View key={index} style={styles.itemContainer}>
                                                         <Text style={styles.itemText}>
@@ -791,6 +791,10 @@ const styles = StyleSheet.create({
         fontFamily: 'American Typewriter',
     },
 
+    scrollView: {
+        height: 'auto',
+    },
+
     activitiesContainer: {
         backgroundColor: '#e0e0e0',
         width: screenWidth,
@@ -799,7 +803,7 @@ const styles = StyleSheet.create({
     itemContainer: {
         width: screenWidth,
         backgroundColor: '#F2F2F2',
-        padding: 10,
+        padding: 13,
         marginVertical: 5,
         borderRadius: 5,
     },
