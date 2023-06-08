@@ -455,7 +455,7 @@ export function FoodRecs(props) {
 
 const styles = StyleSheet.create({
   baseText: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 18,
     lineHeight: 30,
     marginRight: 10,
@@ -467,13 +467,13 @@ const styles = StyleSheet.create({
     padding: 10
   },
   sectionHeading: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontWeight: "bold",
     fontSize: 40,
     lineHeight: 50,
   },
   customButton: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 35,
     fontWeight: "600",
     textAlign: "right",
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   goalInput: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     flex: 1,
     textAlign: 'left',
     borderWidth: 1,
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalText: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontWeight: 'bold',
     fontSize: 20,
     textAlign: 'center',
@@ -556,13 +556,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   mealSection: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontWeight: "bold",
     fontSize: 20,
     lineHeight: 25,
   },
   input: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     borderWidth: 1,
     borderRadius: 5,
     margin: 10,
