@@ -1,24 +1,10 @@
 import {useEffect, useState} from "react";
-import {
-  Alert,
-  StyleSheet,
-  Modal,
-  Text,
-  View,
-  ScrollView,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Button, FlatList, Switch
-} from 'react-native';
-import {AddNewGoal} from './AddNewGoal'
+import {Alert, Modal, Pressable, StyleSheet, Switch, Text, TextInput, View} from 'react-native';
 import database from "@react-native-firebase/database";
-import {Picker} from "@react-native-picker/picker";
 import ModalSelector from 'react-native-modal-selector'
 
 function HealthGoals (props) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [goalList, setGoalList] = useState([]);
   const [info, setInfo] = useState("");
   const [weightGoal, setWeightGoal] = useState("maintain")
   const possibleWeightGoals = [
@@ -38,16 +24,16 @@ function HealthGoals (props) {
       .once('value')
       .then((snapshot) => {
         if (snapshot.exists()) {
-          let updatedGoalList = []
+          let updatedGoalList = {};
 
-          // Update the GoalList array with the respective data from info
           snapshot.forEach((childSnapshot) => {
-            // const goalKey = childSnapshot.key;
-            const goalValue = childSnapshot.val();
-            updatedGoalList.push(goalValue)
+            const goalKey = childSnapshot.key;
+            updatedGoalList[goalKey] = childSnapshot.val();
           });
 
-          setGoalList(updatedGoalList);
+          setWeightGoal(updatedGoalList.weightGoal);
+          setSleepEarlier(updatedGoalList.sleepEarlier);
+          setBetterSleep(updatedGoalList.betterSleep);
         }
       })
   };
@@ -130,7 +116,7 @@ function HealthGoals (props) {
         style={[styles.button, styles.buttonOpen]}
         onPress={() => {
           setModalVisible(true)
-          // loadHealthGoals()
+          loadHealthGoals()
         }}>
         <Text style={styles.textStyle}>Health Goals</Text>
       </Pressable>
