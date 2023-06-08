@@ -1,23 +1,19 @@
-import {LineChart, BarChart, ContributionGraph} from 'react-native-chart-kit';
-import {useState, useMemo, useEffect} from "react";
-import {StyleSheet, Text, View, StatusBar, Dimensions, ScrollView} from 'react-native';
+import {BarChart, LineChart} from 'react-native-chart-kit';
+import {useEffect, useMemo, useRef, useState} from "react";
+import {Dimensions, Pressable, ScrollView, StatusBar, StyleSheet, Text, View} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
 import {FoodPage} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
+import {AddActivity} from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
-import * as Location from 'expo-location';
+import auth from '@react-native-firebase/auth'
+import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
+import AppleHealthKit, {HealthValue, HealthKitPermissions} from 'react-native-health'
 import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
-
-import auth from '@react-native-firebase/auth'
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 
 GoogleSignin.configure({
   scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
@@ -31,11 +27,6 @@ GoogleSignin.configure({
   openIdRealm: '', // [iOS] The OpenID2 realm of the home web server. This allows Google to include the user's OpenID Identifier in the OpenID Connect ID token.
   profileImageSize: 120, // [iOS] The desired height (and width) of the profile image. Defaults to 120px
 });
-
-import AppleHealthKit, {
-  HealthValue,
-  HealthKitPermissions,
-} from 'react-native-health'
 
 /* Permission options */
 const permissions = {
@@ -58,15 +49,12 @@ const permissions = {
   },
 }
 
+export function score(calories_burned, calories_burned_goal, sleep, sleep_goal, caloric_intake, caloric_intake_goal) {
+    const calories_burned_dev = 100 * Math.abs((calories_burned - calories_burned_goal) / calories_burned_goal);
+    const sleep_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
+    const caloric_intake_dev = 100 * Math.abs((caloric_intake - caloric_intake_goal) / caloric_intake_goal);
 
-
-
-export function score(activity, activity_goal, sleep, sleep_goal, intake, intake_goal) {
-    var a_dev = 100 * Math.abs((activity - activity_goal) / activity_goal);
-    var s_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
-    var i_dev = 100 * Math.abs((intake - intake_goal) / intake_goal);
-
-    return 100 - a_dev - s_dev - i_dev;
+    return 100 - calories_burned_dev - sleep_dev - caloric_intake_dev;
 }
 
 // auth()
@@ -79,9 +67,29 @@ export default function App() {
     const [age, setAge] = useState(0);
     const [bio_sex, setBio_sex] = useState("");
     const [weight, setWeight] = useState(0);
+    const [activities, setActivities] = useState([]);
+    const scrollViewRef = useRef(null);
+
+    const scrollToTop = () => {
+        scrollViewRef.current.scrollTo({ y: 0, animated: true });
+    };
+
+    useEffect(() => {
+        // Delete activities from yesterday
+        const currentDate = new Date();
+        const yesterday = new Date(currentDate);
+        yesterday.setDate(currentDate.getDate() - 1); // Subtract one day from the current date
+
+        setActivities((prevActivities) =>
+            prevActivities.filter((activity) => {
+                const selectedDate = activity.selectedDate;
+                return selectedDate.toDateString() !== yesterday.toDateString();
+            })
+        );
+    }, []);
 
     const lifescore_data = useMemo(() => ({
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{
             data: [score(100, 100, 100, 100, 100, 100),
                 score(50, 100, 75, 100, 90, 100),
@@ -92,20 +100,6 @@ export default function App() {
                 score(150, 100, 90, 100, 90, 100),]
         }]
     }), []);
-
-    const commitsData = [
-        { date: "2017-01-02", count: 1 },
-        { date: "2017-01-03", count: 2 },
-        { date: "2017-01-04", count: 3 },
-        { date: "2017-01-05", count: 4 },
-        { date: "2017-01-06", count: 5 },
-        { date: "2017-01-30", count: 2 },
-        { date: "2017-01-31", count: 3 },
-        { date: "2017-03-01", count: 2 },
-        { date: "2017-04-02", count: 4 },
-        { date: "2017-03-05", count: 2 },
-        { date: "2017-02-30", count: 4 }
-    ];
 
     RNFirebase()
 
@@ -372,37 +366,37 @@ export default function App() {
                 fetchSleepData(user)
                     .then(() => {
                         // Sleep data fetching completed
-                        console.log('Sleep data fetched');
+                        // console.log('Sleep data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching sleep data:', error);
+                        console.log('Error fetching sleep data: ', error);
                     });
 
                 fetchCaloricData(user)
                     .then(() => {
                         // Caloric data fetching completed
-                        console.log('Caloric data fetched');
+                        // console.log('Caloric data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching caloric data:', error);
+                        console.log('Error fetching caloric data: ', error);
                     });
 
                 fetchCaloriesBurnedData(user)
                     .then(() => {
                         // Calories burned data fetching completed
-                        console.log('Calories burned data fetched');
+                        // console.log('Calories burned data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching calories burned data:', error);
+                        console.log('Error fetching calories burned data: ', error);
                     });
 
                 fetchWorkoutHoursData(user)
                     .then(() => {
-                        // Calories burned data fetching completed
-                        console.log('Workout hours data fetched');
+                        // Workout hours data fetching completed
+                        // console.log('Workout hours data fetched');
                     })
                     .catch((error) => {
-                        console.log('Error fetching workout hours data:', error);
+                        console.log('Error fetching workout hours data: ', error);
                     });
             }
         };
@@ -421,7 +415,6 @@ export default function App() {
         subscriber(); // unsubscribe on unmount
       };
     }, []);
-
 
   useEffect(() => {
     const fetchHealthData = async (currentUser) => {
@@ -579,9 +572,6 @@ export default function App() {
             console.log('Apple HealthKit authorization denied');
           }
 
-          // Fetch and update other health data
-          // ...
-
         } else {
           console.log('User not logged in');
         }
@@ -590,11 +580,7 @@ export default function App() {
       }
     };
 
-    // ...
-
     fetchHealthData(user);
-
-    // ...
   }, [user]);
 
   if (!user) {
@@ -617,11 +603,14 @@ export default function App() {
         <>
             <StatusBar barStyle="dark-content" />
             <View style={styles.centeredView}>
-                <Text style={styles.textStyle}>Lyfestyle</Text>
+                <Text style={[styles.title, { paddingTop: 20, paddingBottom: 10, fontSize: 35 }]}>Lyfestyle</Text>
 
-                <ScrollView contentContainerStyle={styles.scrollView}>
+                <ScrollView
+                    ref={scrollViewRef}
+                    contentContainerStyle={styles.scrollView}
+                >
                     <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
-                    <Text style={styles.subtitle}>Current Week's Lifestyle Scores</Text>
+                    <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
                         data={lifescore_data}
                         width={screenWidth}
@@ -638,19 +627,20 @@ export default function App() {
                     />
 
                     <Profile
-                    user = {user}
-                    age={age}
-                    dob={dob}
-                    bio_sex={bio_sex}
-                    height={height}
+                        user={user}
+                        age={age}
+                        dob={dob}
+                        bio_sex={bio_sex}
+                        height={height}
                     />
                     {/*{console.log(calculateMaintenanceCalories(age, bio_sex, height, weight))}*/}
                     <HealthGoals
-                    user = {user}
-                    age={age}
-                    dob={dob}
-                    bio_sex={bio_sex}
-                    height={height}/>
+                        user={user}
+                        age={age}
+                        dob={dob}
+                        bio_sex={bio_sex}
+                        height={height}
+                    />
 
                     <FoodPage
                       user = {user}
@@ -664,6 +654,11 @@ export default function App() {
                     />
 
                     <WorkoutRec
+                        user={user}
+                    />
+
+                    <AddActivity
+                        setActivities={setActivities}
                     />
 
                     {/*Personicle*/}
@@ -671,7 +666,7 @@ export default function App() {
                         <Text style={styles.title}>Personicle</Text>
 
                         {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
-                        <Text style={styles.subtitle}>Sleep</Text>
+                        <Text style={styles.baseText}>Sleep</Text>
                         <BarChart
                             data={sleep_chart_data}
                             width={screenWidth}
@@ -688,7 +683,7 @@ export default function App() {
                             style={{ paddingBottom: 30 }}
                         />
 
-                        <Text style={styles.subtitle}>Caloric Intake</Text>
+                        <Text style={styles.baseText}>Caloric Intake</Text>
                         <LineChart
                             data={caloric_chart_data}
                             width={screenWidth}
@@ -704,7 +699,7 @@ export default function App() {
                             style={{ paddingBottom: 20}}
                         />
 
-                        <Text style={styles.subtitle}>Calories Burned</Text>
+                        <Text style={styles.baseText}>Calories Burned</Text>
                         <LineChart
                             data={calories_burned_chart_data}
                             width={screenWidth}
@@ -720,7 +715,7 @@ export default function App() {
                             style={{ paddingBottom: 20 }}
                         />
 
-                        <Text style={styles.subtitle}>Workout Hours</Text>
+                        <Text style={styles.baseText}>Workout Hours</Text>
                         <BarChart
                             data={workout_hours_chart_data}
                             width={screenWidth}
@@ -737,26 +732,65 @@ export default function App() {
                             style={{ paddingBottom: 40 }}
                         />
 
-                        <Text style={styles.subtitle}>Daily Activities</Text>
-                        <ScrollView horizontal={true}>
-                            <ContributionGraph
-                                values={commitsData}
-                                endDate={new Date("2017-04-01")}
-                                width={screenWidth + 280}
-                                height={220}
-                                showMonthLabels={true}
-                                chartConfig={{
-                                    backgroundGradientFrom: "#f0f0f0",
-                                    backgroundGradientTo: "#e0e0e0",
-                                    color: (opacity = 1) => `rgba(5, 105, 107, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                style={{ paddingBottom: 50 }}
-                            />
-                        </ScrollView>
+                        <Text style={[styles.baseText, { marginBottom: 5 }]}>Activities For Today</Text>
+                        {activities.length === 0 ? (
+                            <View style={styles.itemContainer}>
+                                <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
+                                    No Activities Registered!
+                                </Text>
+                            </View>
+                        ) : (
+                            <>
+                                {(() => {
+                                    const filteredActivities = activities.filter((activity) => {
+                                        const today = new Date();
+                                        const selectedDate = activity.selectedDate;
+
+                                        today.setUTCHours(0, 0, 0, 0);
+                                        selectedDate.setUTCHours(0, 0, 0, 0);
+
+                                        return today.getTime() === selectedDate.getTime();
+                                    });
+
+                                    if (filteredActivities.length === 0) {
+                                        return (
+                                            <View style={styles.itemContainer}>
+                                                <Text style={[styles.itemText, { textAlign: 'center', fontWeight: 'bold' }]}>
+                                                    No Activities For Today!
+                                                </Text>
+                                            </View>
+                                        );
+                                    } else {
+                                        return (
+                                            <ScrollView style={[styles.scrollView, { maxHeight: 250 }]}>
+                                                {filteredActivities.map((activity, index) => (
+                                                    <View key={index} style={styles.itemContainer}>
+                                                        <Text style={styles.itemText}>
+                                                            Activity: <Text style={{ fontWeight: 'bold' }}>{activity.activity}</Text>
+                                                            {'\n'}
+                                                            Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                            {'\n'}
+                                                            End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                            {/*{'\n'}*/}
+                                                            {/*Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>*/}
+                                                        </Text>
+                                                    </View>
+                                                ))}
+                                            </ScrollView>
+                                        );
+                                    }
+                                })()}
+                            </>
+                        )}
+
+                        {/* "Back to Top" button */}
+                        <Pressable style={styles.button} onPress={scrollToTop}>
+                            <Text style={styles.textStyle}>Back to Top</Text>
+                        </Pressable>
                     </View>
                 </ScrollView>
             </View>
+            <View style={{ paddingBottom: 50 }} />
         </>
     );
 }
@@ -769,37 +803,57 @@ const styles = StyleSheet.create({
         marginTop: 22,
     },
 
-    textStyle: {
-        fontFamily: 'American Typewriter',
-        paddingTop: 20,
-        paddingBottom: 20,
-        fontSize: 35,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-
-    baseText: {
-        fontFamily: 'Avenir-Book',
-        fontSize: 20,
-        lineHeight: 40,
-        marginRight: 10,
-    },
-
     title: {
         fontSize: 24,
-        marginBottom: 10,
+        paddingBottom: 10,
         color: '#000000',
         fontWeight: 'bold',
         textAlign: 'center',
         fontFamily: 'American Typewriter',
     },
 
-    subtitle: {
+    baseText: {
         fontSize: 16,
         marginTop: 10,
         marginBottom: 10,
         color: '#000000',
         textAlign: 'center',
         fontFamily: 'American Typewriter',
-    }
+    },
+
+    scrollView: {
+        height: 'auto',
+    },
+
+    activitiesContainer: {
+        backgroundColor: '#e0e0e0',
+        width: screenWidth,
+    },
+
+    itemContainer: {
+        width: screenWidth,
+        backgroundColor: '#F2F2F2',
+        padding: 13,
+        marginVertical: 5,
+        borderRadius: 5,
+    },
+
+    itemText: {
+        fontFamily: 'American Typewriter', // Set the desired font family
+        fontSize: 16, // Set the desired font size
+    },
+
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+        backgroundColor: '#64D2FF',
+        width: screenWidth - 50,
+        marginTop: 40,
+    },
+
+    textStyle: {
+        fontFamily: 'American Typewriter',
+        textAlign: 'center',
+    },
 });

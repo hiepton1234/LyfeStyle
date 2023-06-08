@@ -25,8 +25,9 @@ import {
 import Geolocation from 'react-native-geolocation-service';
 
 class FoodEntry {
-  constructor(food_name, selectedServings, selectedLike) {
+  constructor(food_name, enteredCalories, selectedServings, selectedLike) {
     this.food_name = food_name
+    this.enteredCalories = enteredCalories
     this.selectedServings = selectedServings
     this.selectedLike = selectedLike
   }
@@ -86,14 +87,14 @@ function FoodPage(props) {
   }
 
   const foodReference = database().ref('user/' + props.user.uid);
-  console.log('foodReference key: ', foodReference.key);
+  // console.log('foodReference key: ', foodReference.key);
 
-  const addNewFoodItem = (index, enteredText, selectedServings, selectedLike) => {
+  const addNewFoodItem = (index, enteredText, enteredCalories, selectedServings, selectedLike) => {
     const d = new Date()
     let hour_recorded = d.getHours()
     let minute_recorded = d.getMinutes()
 
-    let newItem = new FoodEntry(enteredText, selectedServings, selectedLike)
+    let newItem = new FoodEntry(enteredText, enteredCalories, selectedServings, selectedLike)
 
     console.log(index + enteredText)
     const newMealList = [...mealList]
@@ -103,6 +104,7 @@ function FoodPage(props) {
 
     setMealList(newMealList);
   };
+  
   const saveFoods = () => {
     // store contents of profile page user inputs to firebase
     for (let i = 0; i < mealList.length; i++){
@@ -113,9 +115,10 @@ function FoodPage(props) {
       // for each food entry for a meal time
       for (let j = 0; j < mealList[i].data.length; j++) {
         const food = mealList[i].data[j];
-        const { food_name: foodName, selectedServings, selectedLike} = food;
+        const { food_name: foodName, enteredCalories, selectedServings, selectedLike} = food;
 
         const foodEntry = {
+          enteredCalories,
           selectedServings,
           selectedLike,
         };
@@ -133,8 +136,7 @@ function FoodPage(props) {
   }, [currentSelectedDate]);
 
   const loadFoodEntries = () => {
-    console.log(mealList);
-    console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate);
+    // console.log("CURRENT SELECTED DATE FROM LOAD " + currentSelectedDate)
     database()
       .ref('user/' + props.user.uid + '/Food Entries/' + formatDate(currentSelectedDate))
       .once('value')
@@ -147,9 +149,10 @@ function FoodPage(props) {
             if (elem.meal in data) {
               const mealData = data[elem.meal];
               const foodList = Object.entries(mealData.Items || {}).map(([foodName, foodEntry]) => {
-                const { selectedServings, selectedLike } = foodEntry;
+                const { enteredCalories, selectedServings, selectedLike } = foodEntry;
                 return {
                   food_name: foodName,
+                  enteredCalories,
                   selectedServings,
                   selectedLike,
                 };
@@ -288,19 +291,19 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   sectionHeading: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontWeight: "bold",
     fontSize: 40,
     lineHeight: 50,
   },
   customButton: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 35,
     fontWeight: "600",
     textAlign: "right",
   },
   appContainer: {
-    backgroundColor: '#edf7f5',
+    backgroundColor: '#ffff',
     flex: 1,
     paddingTop: 50,
     padding: 25,
@@ -321,14 +324,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
   },
   item: {
-    backgroundColor: '#edf7f5',
+    backgroundColor: '#ffff',
     borderColor: 'gray',
     borderWidth: 1,
     padding: 10,
     marginVertical: 8,
   },
   goalInput: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     flex: 1,
     textAlign: 'left',
     borderWidth: 1,
@@ -343,7 +346,7 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   modalText: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontWeight: 'bold',
     fontSize: 20,
     marginBottom: 5,
@@ -364,7 +367,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   mealSection: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontWeight: "bold",
     fontSize: 20,
     lineHeight: 25,

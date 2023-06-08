@@ -3,11 +3,12 @@ import { Alert, Modal, StyleSheet, Text, Pressable, View, ScrollView, Platform }
 import { Picker } from "@react-native-picker/picker";
 import database from "@react-native-firebase/database";
 
-function WorkoutRec() {
+function WorkoutRec({ user }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedWorkoutType, setSelectedWorkoutType] = useState('');
     const [possibleWorkoutTypes, setPossibleWorkoutTypes] = useState([]);
     const [suggestedWorkouts, setSuggestedWorkouts] = useState([]);
+    const [weightGoal, setWeightGoal] = useState('');
 
     useEffect(() => {
         fetchWorkoutTypes()
@@ -52,14 +53,52 @@ function WorkoutRec() {
         const workouts = [];
 
         snapshot.forEach((childSnapshot) => {
-            if (childSnapshot.val() != null && childSnapshot.val() !== "") {
-                workouts.push(childSnapshot.val());
-                // console.log("WORKOUT: " + childSnapshot.val())
+            const goals = childSnapshot.val().Goals;
+            if (goals.includes(weightGoal)) {
+
+                const workout = {
+                    exercise: childSnapshot.key,
+                    intensity: childSnapshot.val().Intensity
+                };
+
+                workouts.push(workout);
             }
         });
-        // console.log("WORKOUT ARRAY: " + workouts)
+
+        // console.log(workouts)
         return workouts;
     }
+
+    useEffect(() => {
+        const fetchWeightGoal = async (user) => {
+            try {
+                const newReference = database().ref('user/' + user.uid + '/goals/weightGoal');
+                newReference.on('value', (snapshot) => {
+                    const goal = snapshot.val();
+                    setWeightGoal(goal); // Update the state with the fetched goal value
+                });
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING USER'S WEIGHT GOAL: " + error);
+            }
+        };
+
+        fetchWeightGoal(user)
+            .then(() => {
+                // Handle the resolution here if needed
+                // console.log("Weight goal fetch completed.");
+            })
+            .catch((error) => {
+                // Handle any errors that occurred during the fetch
+                console.log("Error fetching weight goal: " + error);
+            });
+
+        // Cleanup function to detach the event listener when the component unmounts
+        return () => {
+            const newReference = database().ref('user/' + user.uid + '/goals/weightGoal');
+            newReference.off('value');
+        };
+    }, []);
+
 
     return (
         <View style={styles.centeredView}>
@@ -74,7 +113,12 @@ function WorkoutRec() {
             >
                 <View style={styles.appContainer}>
                     <Text style={styles.title}>Workouts</Text>
-                    <Text style={[styles.baseText, { paddingBottom: 10 }]}>What Workout Type?:</Text>
+                    <Text style={[styles.baseText, { paddingBottom: 5 }]}>
+                        Weight Goal:
+                        <Text style={{ fontWeight: 'bold' }}> {weightGoal}</Text>
+                    </Text>
+
+                    <Text style={styles.baseText}>Workout Type:</Text>
                     <Picker
                         style={{ flex: 1 }}
                         selectedValue={selectedWorkoutType}
@@ -88,14 +132,27 @@ function WorkoutRec() {
                         ))}
                     </Picker>
 
-                    <Text style={[styles.baseText, { paddingTop: 10, paddingBottom: 20 }]}>Here Are Your{"\n"}Suggested Workouts:</Text>
-                    <ScrollView style={{ height: 120 }}>
-                        {suggestedWorkouts.map((workout, index) => (
-                            <View key={index} style={styles.itemContainer}>
-                                <Text style={styles.itemText}>{workout}</Text>
+                    <Text style={[styles.baseText, { paddingTop: 40, paddingBottom: 10 }]}>
+                        Here Are Suggested Workouts{'\n'}For Your Weight Goal:
+                    </Text>
+                    {suggestedWorkouts.length > 0 ? (
+                        <ScrollView style={{ height: 150 }}>
+                            {suggestedWorkouts.map((workout, index) => (
+                                <View key={index} style={[styles.itemContainer, { flexDirection: 'row', justifyContent: 'space-between' }]}>
+                                    <Text style={styles.itemText}>{workout.exercise}</Text>
+                                    <Text style={[styles.itemText, { textAlign: 'right' }]}>{workout.intensity}</Text>
+                                </View>
+                            ))}
+                        </ScrollView>
+                    ) : (
+                        <View style={{ height: 315 }}>
+                            <View style={styles.itemContainer}>
+                                <Text style={[styles.itemText, { textAlign: 'center' }]}>
+                                    Sorry, there are no workouts{'\n'}for your weight goal
+                                </Text>
                             </View>
-                        ))}
-                    </ScrollView>
+                        </View>
+                    )}
 
                     <View style={{ paddingBottom: 20 }}></View>
 
@@ -171,7 +228,7 @@ const styles = StyleSheet.create({
 
     itemContainer: {
         backgroundColor: '#F2F2F2',
-        padding: 10,
+        padding: 13,
         marginVertical: 5,
         borderRadius: 5,
     },
@@ -184,6 +241,10 @@ const styles = StyleSheet.create({
     pickerItem: {
         fontFamily: 'American Typewriter',
         fontSize: 18,
+    },
+
+    scrollView: {
+        height: 'auto',
     },
 });
 

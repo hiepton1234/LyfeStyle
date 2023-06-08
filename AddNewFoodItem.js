@@ -4,6 +4,14 @@ import database from "@react-native-firebase/database";
 import {Picker} from "@react-native-picker/picker";
 import {FoodRecs} from "./Recommender/FoodRecs";
 
+class FoodItem {
+  constructor(name, serving_size, num_servings, calories) {
+    this.name = name
+    this.serving_size = serving_size
+    this.num_servings = num_servings
+    this.calories = calories
+  }
+}
 function AddNewFoodItem(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedServings, setSelectedServings] = useState('0.25');
@@ -11,9 +19,14 @@ function AddNewFoodItem(props) {
   const [selectedLike, setSelectedLike] = useState('1');
   const like_scale = ['1', '2', '3', '4', '5']
   const [enteredFood, setEnteredFood] = useState('');
+  const [enteredCalories, setEnteredCalories] = useState('');
 
   const foodInputHandler = (enteredText) => {
     setEnteredFood(enteredText);
+  };
+
+  const caloriesInputHandler = (enteredText) => {
+    setEnteredCalories(enteredText);
   };
 
   const addFoodHandler = () => {
@@ -21,11 +34,12 @@ function AddNewFoodItem(props) {
       return;
     }
 
-    props.addNewFoodItem(props.index, enteredFood, selectedServings, selectedLike)
+    props.addNewFoodItem(props.index, enteredFood, enteredCalories, selectedServings, selectedLike)
 
     setEnteredFood('');
-    setSelectedServings('0.25')
-    setSelectedLike('1')
+    setEnteredCalories('');
+    setSelectedServings('0.25');
+    setSelectedLike('1');
   };
 
   return (
@@ -40,12 +54,19 @@ function AddNewFoodItem(props) {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <View style={styles.item}>
+            <View style={[styles.item, { flexDirection: 'row', justifyContent: 'space-between' }]}>
               <TextInput
                 style={styles.input}
                 placeholder={"Food name here"}
                 onChangeText={foodInputHandler}
                 value={enteredFood}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder={"Cals per serving"}
+                onChangeText={caloriesInputHandler}
+                value={enteredCalories}
               />
             </View>
             <View style={styles.pickerSection}>
