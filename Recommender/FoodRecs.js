@@ -490,43 +490,47 @@ export function FoodRecs(props) {
   return (
     <>
       {props.meal === recommendedTime && (
-        <View style={styles.recommendationView}>
-          <FoodRecModal
-            setModalVisible={setModalVisible}
-            modalVisible={modalVisible}
-            foodInputHandler={foodInputHandler}
-            recommendation={recommendation}
-            caloriesInputHandler={caloriesInputHandler}
-            recommendationCals={recommendationCals}
-            setSelectedServings={setSelectedServings}
-            selectedServings={selectedServings}
-            possible_num_servings={possible_num_servings}
-            setSelectedLike={setSelectedLike}
-            selectedLike={selectedLike}
-            like_scale={like_scale}
-            addFoodHandler={addFoodHandler}
-          ></FoodRecModal>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
-          </TouchableOpacity>
-          <FoodRecModal
-            setModalVisible={setPrevModalVisible}
-            modalVisible={prevModalVisible}
-            foodInputHandler={foodInputHandler}
-            recommendation={previousRecommendation}
-            caloriesInputHandler={caloriesInputHandler}
-            recommendationCals={previousRecommendationCals}
-            setSelectedServings={setSelectedServings}
-            selectedServings={selectedServings}
-            possible_num_servings={possible_num_servings}
-            setSelectedLike={setSelectedLike}
-            selectedLike={selectedLike}
-            like_scale={like_scale}
-            addFoodHandler={addFoodHandler}
-          ></FoodRecModal>
-          <TouchableOpacity onPress={() => setPrevModalVisible(true)}>
-            <Text style={styles.baseText}>{recommendedTime === props.meal && previousRecommendation}</Text>
-          </TouchableOpacity>
+        <View>
+          <View style={styles.recommendationView}>
+            <FoodRecModal
+              setModalVisible={setModalVisible}
+              modalVisible={modalVisible}
+              foodInputHandler={foodInputHandler}
+              recommendation={recommendation}
+              caloriesInputHandler={caloriesInputHandler}
+              recommendationCals={recommendationCals}
+              setSelectedServings={setSelectedServings}
+              selectedServings={selectedServings}
+              possible_num_servings={possible_num_servings}
+              setSelectedLike={setSelectedLike}
+              selectedLike={selectedLike}
+              like_scale={like_scale}
+              addFoodHandler={addFoodHandler}
+            ></FoodRecModal>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.recommendationView}>
+            <FoodRecModal
+              setModalVisible={setPrevModalVisible}
+              modalVisible={prevModalVisible}
+              foodInputHandler={foodInputHandler}
+              recommendation={previousRecommendation}
+              caloriesInputHandler={caloriesInputHandler}
+              recommendationCals={previousRecommendationCals}
+              setSelectedServings={setSelectedServings}
+              selectedServings={selectedServings}
+              possible_num_servings={possible_num_servings}
+              setSelectedLike={setSelectedLike}
+              selectedLike={selectedLike}
+              like_scale={like_scale}
+              addFoodHandler={addFoodHandler}
+            ></FoodRecModal>
+            <TouchableOpacity onPress={() => setPrevModalVisible(true)}>
+              <Text style={styles.baseText}>{recommendedTime === props.meal && previousRecommendation}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </>
@@ -541,7 +545,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 30,
     marginRight: 10,
-    opacity: 0.4
+    opacity: 0.4,
   },
   recommendationView: {
     backgroundColor: 'rgba(255,218,191,0.77)',
