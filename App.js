@@ -368,7 +368,7 @@ export default function App() {
                     // console.log(activityArr)
                 });
 
-                console.log("Activities reading done!")
+                // console.log("Activities reading done!")
                 setActivities(activityArr);
             } catch (error) {
                 console.log("ERROR DETECTED FETCHING ACTIVITIES SAMPLES: " + error)
@@ -418,7 +418,7 @@ export default function App() {
                 fetchActivitiesData(user)
                     .then(() => {
                         // Activities data fetching completed
-                        console.log('Activities data fetched');
+                        // console.log('Activities data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching workout hours data: ', error);
