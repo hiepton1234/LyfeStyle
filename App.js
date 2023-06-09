@@ -651,7 +651,6 @@ export default function App() {
 
                     <AddActivity
                         user={user}
-                        // fetchActivitiesData={fetchActivitiesData}
                     />
 
                     {/*Personicle*/}
