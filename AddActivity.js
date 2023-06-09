@@ -90,12 +90,12 @@ function AddActivity({ setActivities, user }) {
         const ref = database().ref(`user/${user.uid}/Activities`);
 
         // Generate the next sequential key
-        console.log(activityCounter)
+        // console.log(activityCounter)
         const activityKey = String(activityCounter);
 
         // Increment the counter for the next activity
         activityCounter++;
-        console.log(activityCounter)
+        // console.log(activityCounter)
 
         // Save the activity under the generated key
         ref.child(activityKey).set({
