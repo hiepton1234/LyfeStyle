@@ -113,6 +113,7 @@ function FoodPage(props) {
         .child(mealList[i].meal);
 
       // for each food entry for a meal time
+      let totalCalsForMeal = 0
       for (let j = 0; j < mealList[i].data.length; j++) {
         const food = mealList[i].data[j];
         const { food_name: foodName, enteredCalories, selectedServings, selectedLike} = food;
@@ -122,9 +123,9 @@ function FoodPage(props) {
           selectedServings,
           selectedLike,
         };
-        console.log(foodName)
+        totalCalsForMeal += Math.floor(enteredCalories * selectedServings)
 
-        mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded})
+        mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded, totalCalsForMeal: totalCalsForMeal})
         mealReference.child('Items/' + foodName).update(foodEntry)
           .then(() => console.log('Food updated.'));
       }
