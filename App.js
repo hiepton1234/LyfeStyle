@@ -347,31 +347,28 @@ export default function App() {
 
         const fetchActivitiesData = async (currentUser) => {
             try {
-                const newReference = database().ref('user/' + currentUser.uid + '/Activities');
-                const snapshot = await newReference.once('value');
-                // console.log(currentUser)
+                const newReference = database().ref(
+                    'user/' + currentUser.uid + '/Activities'
+                );
 
-                // Array for sleep hours
-                let activityArr = [];
+                newReference.on('value', (snapshot) => {
+                    let activityArr = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const newActivity = {
+                            activity: childSnapshot.val().activity,
+                            startTime: childSnapshot.val().startTime,
+                            endTime: childSnapshot.val().endTime,
+                            selectedDate: childSnapshot.val().selectedDate
+                        };
 
-                snapshot.forEach((childSnapshot) => {
-                    // Create a new activity object
-                    const newActivity = {
-                        activity: childSnapshot.val().activity,
-                        startTime: childSnapshot.val().startTime,
-                        endTime: childSnapshot.val().endTime,
-                        selectedDate: childSnapshot.val().selectedDate
-                    };
+                        activityArr.push(newActivity);
+                    });
 
-                    // console.log(newActivity)
-                    activityArr.push(newActivity)
-                    // console.log(activityArr)
+                    setActivities(activityArr);
+                    console.log("Activities updated!");
                 });
-
-                // console.log("Activities reading done!")
-                setActivities(activityArr);
             } catch (error) {
-                console.log("ERROR DETECTED FETCHING ACTIVITIES SAMPLES: " + error)
+                console.log("ERROR DETECTED FETCHING ACTIVITIES SAMPLES: " + error);
             }
         };
 
@@ -418,7 +415,7 @@ export default function App() {
                 fetchActivitiesData(user)
                     .then(() => {
                         // Activities data fetching completed
-                        // console.log('Activities data fetched');
+                        console.log('Activities data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching workout hours data: ', error);
@@ -654,6 +651,7 @@ export default function App() {
 
                     <AddActivity
                         user={user}
+                        // fetchActivitiesData={fetchActivitiesData}
                     />
 
                     {/*Personicle*/}

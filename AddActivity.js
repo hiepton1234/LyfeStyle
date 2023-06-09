@@ -1,11 +1,11 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Alert, Dimensions, Modal, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InteractiveCalendar from './InteractiveCalendar';
 import database from "@react-native-firebase/database";
 
 const screenWidth = Dimensions.get('window').width;
-let activityCounter = 0; // Counter variable to generate sequential keys
+// let activityCounter = 0; // Counter variable to generate sequential keys
 
 function AddActivity({ user }) {
     const [modalVisible, setModalVisible] = useState(false);
@@ -88,10 +88,11 @@ function AddActivity({ user }) {
 
         // Generate the next sequential key
         // console.log(activityCounter)
-        const activityKey = String(activityCounter);
+        // const activityKey = String(activityCounter);
+        const activityKey = ref.push().key;
 
         // Increment the counter for the next activity
-        activityCounter++;
+        // activityCounter++;
         // console.log(activityCounter)
 
         // Save the activity under the generated key
