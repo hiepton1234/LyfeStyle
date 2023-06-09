@@ -365,7 +365,7 @@ export default function App() {
                     });
 
                     setActivities(activityArr);
-                    console.log("Activities updated!");
+                    // console.log("Activities updated!");
                 });
             } catch (error) {
                 console.log("ERROR DETECTED FETCHING ACTIVITIES SAMPLES: " + error);
@@ -415,7 +415,7 @@ export default function App() {
                 fetchActivitiesData(user)
                     .then(() => {
                         // Activities data fetching completed
-                        console.log('Activities data fetched');
+                        // console.log('Activities data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching workout hours data: ', error);
