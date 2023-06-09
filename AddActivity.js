@@ -15,6 +15,7 @@ function AddActivity({ user }) {
     const [selectedDate, setSelectedDate] = useState('');
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
     const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
+    const [initialEndTime, setInitialEndTime] = useState('');
 
     const handleActivityChange = (text) => {
         setActivity(text);
@@ -123,6 +124,7 @@ function AddActivity({ user }) {
     };
 
     const showEndTimePicker = () => {
+        setInitialEndTime(startTime);
         setEndTimePickerVisible(true);
     };
 
@@ -182,6 +184,7 @@ function AddActivity({ user }) {
                         <DateTimePickerModal
                             isVisible={isEndTimePickerVisible}
                             mode="time"
+                            date={initialEndTime || undefined}
                             onConfirm={handleEndTimeChange}
                             onCancel={hideEndTimePicker}
                         />
