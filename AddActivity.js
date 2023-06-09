@@ -2,10 +2,12 @@ import React, {useState} from 'react';
 import {Alert, Dimensions, Modal, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InteractiveCalendar from './InteractiveCalendar';
+import database from "@react-native-firebase/database";
 
 const screenWidth = Dimensions.get('window').width;
+let activityCounter = 0; // Counter variable to generate sequential keys
 
-function AddActivity({ setActivities }) {
+function AddActivity({ user }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
     const [startTime, setStartTime] = useState('');
@@ -13,7 +15,6 @@ function AddActivity({ setActivities }) {
     const [selectedDate, setSelectedDate] = useState('');
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
     const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
-    const [minEndTime, setMinEndTime] = useState(null);
 
     const handleActivityChange = (text) => {
         setActivity(text);
@@ -22,18 +23,10 @@ function AddActivity({ setActivities }) {
     const handleStartTimeChange = (time) => {
         setStartTime(time);
         setStartTimePickerVisible(false);
-
-        // Calculate the minimum end time by adding 1 minute to the start time
-        const minEndTime = new Date(time);
-        minEndTime.setMinutes(minEndTime.getMinutes() + 1);
-        setMinEndTime(minEndTime);
     };
 
     const handleEndTimeChange = (time) => {
-        // Manually add 1 minute to the selected end time
-        const adjustedEndTime = new Date(time);
-        adjustedEndTime.setMinutes(adjustedEndTime.getMinutes() + 1);
-        setEndTime(adjustedEndTime);
+        setEndTime(time);
         setEndTimePickerVisible(false);
     };
 
@@ -72,8 +65,8 @@ function AddActivity({ setActivities }) {
             selectedDate: formattedDate
         };
 
-        // Updating the activities array in the parent component
-        setActivities((prevActivities) => [...prevActivities, newActivity]);
+        // Save the activity to Firebase
+        saveActivity(newActivity);
 
         // Print each element of newActivity separately
         // console.log("ADDACTIVITY.JS")
@@ -88,6 +81,32 @@ function AddActivity({ setActivities }) {
         setActivity('');
         setStartTime('');
         setEndTime('');
+    };
+
+    const saveActivity = (activity) => {
+        const ref = database().ref(`user/${user.uid}/Activities`);
+
+        // Generate the next sequential key
+        // console.log(activityCounter)
+        const activityKey = String(activityCounter);
+
+        // Increment the counter for the next activity
+        activityCounter++;
+        // console.log(activityCounter)
+
+        // Save the activity under the generated key
+        ref.child(activityKey).set({
+            activity: activity.activity,
+            startTime: activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            endTime: activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            selectedDate: activity.selectedDate.toISOString()
+        })
+            .then(() => {
+                console.log('Activity saved successfully');
+            })
+            .catch((error) => {
+                console.error('Failed to save activity:', error);
+            });
     };
 
     const handleDateSelect = (date) => {
@@ -164,7 +183,6 @@ function AddActivity({ setActivities }) {
                             mode="time"
                             onConfirm={handleEndTimeChange}
                             onCancel={hideEndTimePicker}
-                            minimumDate={minEndTime} // Set the minimum end time
                         />
                     )}
                     <View style={{ paddingBottom: 20 }} />
