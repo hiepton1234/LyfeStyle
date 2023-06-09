@@ -5,6 +5,7 @@ import InteractiveCalendar from './InteractiveCalendar';
 import database from "@react-native-firebase/database";
 
 const screenWidth = Dimensions.get('window').width;
+let activityCounter = 0; // Counter variable to generate sequential keys
 
 function AddActivity({ setActivities, user }) {
     const [modalVisible, setModalVisible] = useState(false);
@@ -14,9 +15,6 @@ function AddActivity({ setActivities, user }) {
     const [selectedDate, setSelectedDate] = useState('');
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
     const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
-    const [minEndTime, setMinEndTime] = useState(null);
-
-    let activityCounter = 0; // Counter variable to generate sequential keys
 
     const handleActivityChange = (text) => {
         setActivity(text);
@@ -25,18 +23,10 @@ function AddActivity({ setActivities, user }) {
     const handleStartTimeChange = (time) => {
         setStartTime(time);
         setStartTimePickerVisible(false);
-
-        // Calculate the minimum end time by adding 1 minute to the start time
-        const minEndTime = new Date(time);
-        minEndTime.setMinutes(minEndTime.getMinutes() + 1);
-        setMinEndTime(minEndTime);
     };
 
     const handleEndTimeChange = (time) => {
-        // Manually add 1 minute to the selected end time
-        const adjustedEndTime = new Date(time);
-        adjustedEndTime.setMinutes(adjustedEndTime.getMinutes() + 1);
-        setEndTime(adjustedEndTime);
+        setEndTime(time);
         setEndTimePickerVisible(false);
     };
 
@@ -105,13 +95,14 @@ function AddActivity({ setActivities, user }) {
 
         // Increment the counter for the next activity
         activityCounter++;
+        console.log(activityCounter)
 
         // Save the activity under the generated key
         ref.child(activityKey).set({
             activity: activity.activity,
             startTime: activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             endTime: activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            selectedDate: activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })
+            selectedDate: activity.selectedDate.toISOString()
         })
             .then(() => {
                 console.log('Activity saved successfully');
@@ -195,7 +186,6 @@ function AddActivity({ setActivities, user }) {
                             mode="time"
                             onConfirm={handleEndTimeChange}
                             onCancel={hideEndTimePicker}
-                            minimumDate={minEndTime} // Set the minimum end time
                         />
                     )}
                     <View style={{ paddingBottom: 20 }} />
