@@ -372,6 +372,50 @@ export function FoodRecs(props) {
     setSelectedLike('1');
   };
 
+  const [previousRecommendation, setPreviousRecommendation] = useState('')
+  const [previousRecommendationCals, setPreviousRecommendationCals] = useState(0)
+
+  useEffect(() => {
+    const loadFoodItems = async () => {
+      try {
+        const snapshot = await database()
+          .ref('user/' + props.user.uid + '/Food Entries')
+          .once('value');
+
+        if (snapshot.exists()) {
+          const foodEntries = snapshot.val();
+          const foodItems = [];
+
+          for (const date in foodEntries) {
+            const meals = foodEntries[date];
+
+            if (meals[props.meal] && meals[props.meal].Items) {
+              const items = meals[props.meal].Items;
+              Object.keys(items).forEach(itemKey => {
+                const foodItem = items[itemKey];
+                foodItems.push({ name: itemKey, ...foodItem });
+              });
+            }
+          }
+
+          const likedFoodItems = foodItems.filter(item => item.selectedLike >= 3);
+
+          if (likedFoodItems.length > 0) {
+            const randomRec = Math.floor(Math.random() * likedFoodItems.length);
+            console.log(randomRec);
+            setPreviousRecommendation(likedFoodItems[randomRec].name);
+            setPreviousRecommendationCals(likedFoodItems[randomRec].enteredCalories);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading food items:', error);
+      }
+    };
+
+    loadFoodItems();
+  }, [props.meal, props.user.uid]);
+
+
   return (
     <>
       {props.meal === recommendedTime && (
@@ -443,7 +487,11 @@ export function FoodRecs(props) {
             </View>
           </Modal>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
+            {Math.random() < 0.5 ? (
+              <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
+            ) : (
+              <Text style={styles.baseText}>{recommendedTime === props.meal && previousRecommendation}</Text>
+            )}
           </TouchableOpacity>
         </View>
       )}
