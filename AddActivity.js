@@ -58,6 +58,11 @@ function AddActivity({ user }) {
             return;
         }
 
+        if (startTime >= endTime) {
+            Alert.alert('Error!', 'The start time cannot be after or equal to the end time');
+            return;
+        }
+
         // Create a new activity object
         const newActivity = {
             activity: activity,
