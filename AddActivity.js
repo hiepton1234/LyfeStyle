@@ -129,7 +129,11 @@ function AddActivity({ user }) {
     };
 
     const showEndTimePicker = () => {
-        setInitialEndTime(startTime);
+        if (startTime) {
+            const startTimeObj = new Date(startTime);
+            startTimeObj.setMinutes(startTimeObj.getMinutes() + 1);
+            setInitialEndTime(startTimeObj);
+        }
         setEndTimePickerVisible(true);
     };
 
