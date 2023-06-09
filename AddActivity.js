@@ -7,7 +7,7 @@ import database from "@react-native-firebase/database";
 const screenWidth = Dimensions.get('window').width;
 let activityCounter = 0; // Counter variable to generate sequential keys
 
-function AddActivity({ setActivities, user }) {
+function AddActivity({ user }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [activity, setActivity] = useState('');
     const [startTime, setStartTime] = useState('');
@@ -64,9 +64,6 @@ function AddActivity({ setActivities, user }) {
             endTime: endTime,
             selectedDate: formattedDate
         };
-
-        // Updating the activities array in the parent component
-        setActivities((prevActivities) => [...prevActivities, newActivity]);
 
         // Save the activity to Firebase
         saveActivity(newActivity);
