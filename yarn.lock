@@ -1945,6 +1945,11 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@kingstinct/react-native-healthkit@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@kingstinct/react-native-healthkit/-/react-native-healthkit-7.0.0.tgz#5e9772c7cd03b217275858928b2b112b4cdfa828"
+  integrity sha512-KXCMTvD573AQ7ML8yVk5NfXCG48a6WwvfgQhwXoGxPy1nzB0NMkd2EvSgA70ZgIXzOaV/wXVPwvLOOnO2LABfw==
+
 "@koale/useworker@^4.0.2":
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/@koale/useworker/-/useworker-4.0.2.tgz#cb540a2581cd6025307c3ca6685bc60748773e58"
@@ -6512,6 +6517,11 @@ react-native-health@^1.14.0:
   integrity sha512-7s8YKqcfPLtIp/3cTAGKzhZxHypiZkCGr3zByjnmnNTXGyUZKzjS5ySvpHac/2saBYYlJctk0qq2/MWZv8LnWw==
   dependencies:
     "@expo/config-plugins" "^4.1.5"
+
+react-native-healthkit@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-healthkit/-/react-native-healthkit-0.0.1.tgz#1ec1d2caf4191cb695b32440c216b21312262afa"
+  integrity sha512-qZinFwswSS6iA3ydsF83nG8sI8Af7X4S5661DXPNXdDwy0rKZSk6mKWnY0lCD9oGEN+k1AmsTytFPaupIrXqGg==
 
 react-native-modal-datetime-picker@^15.0.1:
   version "15.0.1"
