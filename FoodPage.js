@@ -23,10 +23,17 @@ import {
   makeRecommendation, FoodRecs
 } from "./Recommender/FoodRecs";
 import Geolocation from 'react-native-geolocation-service';
+import HealthKit, {
+  HKUnit,
+  HKQuantityTypeIdentifier,
+  useHealthkitAuthorization, HKUnits,
+} from '@kingstinct/react-native-healthkit';
+import AppleHealthKit from "react-native-health";
 
 class FoodEntry {
-  constructor(food_name, selectedServings, selectedLike) {
+  constructor(food_name, enteredCalories, selectedServings, selectedLike) {
     this.food_name = food_name
+    this.enteredCalories = enteredCalories
     this.selectedServings = selectedServings
     this.selectedLike = selectedLike
   }
@@ -39,6 +46,62 @@ function FoodPage(props) {
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const yelpFusionApiKey = '3YfmZ-MolZrxxP2KBnefV1eepEw034xAmxOleosjvwytWvLjAeXb0mf1emgb0rnhLD-2_Pwz97JW5JFU_c7xGcfglxG51N5RWp9MM3DZTuW2ORSngo6OtS_wExx3ZHYx'
 
+  const writeEnergyConsumedSamples = async (energyConsumed, mealtime, energyConsumedSamps, currentSelectedDate, fetchCaloricData, readEnergyConsumedSamples, option, newReference) => {
+    const isAvailable = await HealthKit.isHealthDataAvailable();
+
+
+    try {
+      await HealthKit.requestAuthorization(
+        [HKQuantityTypeIdentifier.dietaryEnergyConsumed],
+        [HKQuantityTypeIdentifier.dietaryEnergyConsumed]
+      );
+
+      const energySample = {
+        type: 'DietaryEnergyConsumed',
+        value: energyConsumed,
+        unit: 'kcal',
+      };
+
+      const options = {
+        startDate: new Date(0), // Retrieve samples from the beginning of time
+        endDate: new Date(), // Retrieve samples up to the current date
+        limit: 0, // Retrieve all matching samples
+        ascending: false, // Sort the samples in descending order by date
+        type: HKQuantityTypeIdentifier.dietaryEnergyConsumed, // Specify the desired data type
+        sourceName: 'LyfeStyle', // Filter by the specified source name
+        unit: 'kcal' // Specify the desired unit
+      };
+
+      // DELETE RECORDS
+      // const uuids = energyConsumedSamps.map(sample => sample.id);
+      //
+      // for (let i = 0; i < 7; i++)
+      //   await HealthKit.deleteQuantitySample(HKQuantityTypeIdentifier.dietaryEnergyConsumed, uuids[i]);
+      //console.log(currentSelectedDate)
+
+      const valueExists = energyConsumedSamps.some(sample => ((sample.value === energyConsumed) && sample.sourceName === 'LyfeStyle'));
+
+      // If energyConsumed does not exist, save the quantity sample
+      if (!valueExists) {
+        await HealthKit.saveQuantitySample(
+          HKQuantityTypeIdentifier.dietaryEnergyConsumed,
+          'kcal',
+          energyConsumed,
+          {
+            metadata: {
+              meal: mealtime,
+            }
+          }
+        );
+        console.log('Quantity sample saved successfully!');
+      }
+
+      // await readEnergyConsumedSamples(option, newReference)
+      // await fetchCaloricData(props.user)
+    } catch (error) {
+      console.error('Error writing energy consumed samples:', error);
+    }
+  };
 
   let emptyMealList = [
     {
@@ -88,12 +151,12 @@ function FoodPage(props) {
   const foodReference = database().ref('user/' + props.user.uid);
   // console.log('foodReference key: ', foodReference.key);
 
-  const addNewFoodItem = (index, enteredText, selectedServings, selectedLike) => {
+  const addNewFoodItem = (index, enteredText, enteredCalories, selectedServings, selectedLike) => {
     const d = new Date()
     let hour_recorded = d.getHours()
     let minute_recorded = d.getMinutes()
 
-    let newItem = new FoodEntry(enteredText, selectedServings, selectedLike)
+    let newItem = new FoodEntry(enteredText, enteredCalories, selectedServings, selectedLike)
 
     console.log(index + enteredText)
     const newMealList = [...mealList]
@@ -103,8 +166,9 @@ function FoodPage(props) {
 
     setMealList(newMealList);
   };
-  
-  const saveFoods = () => {
+
+  const newReference = database().ref('user/' + props.user.uid)
+  const saveFoods = async () => {
     // store contents of profile page user inputs to firebase
     for (let i = 0; i < mealList.length; i++){
       const mealReference = foodReference
@@ -112,17 +176,22 @@ function FoodPage(props) {
         .child(mealList[i].meal);
 
       // for each food entry for a meal time
+      let totalCalsForMeal = 0
       for (let j = 0; j < mealList[i].data.length; j++) {
         const food = mealList[i].data[j];
-        const { food_name: foodName, selectedServings, selectedLike} = food;
+        const { food_name: foodName, enteredCalories, selectedServings, selectedLike} = food;
 
         const foodEntry = {
+          enteredCalories,
           selectedServings,
           selectedLike,
         };
-        console.log(foodName)
+        totalCalsForMeal += Math.floor(enteredCalories * selectedServings)
+        console.log(totalCalsForMeal)
 
-        mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded})
+        writeEnergyConsumedSamples(totalCalsForMeal, mealList[i].meal, props.energyConsumedSamps, currentSelectedDate, props.fetchCaloricData, props.readEnergyConsumedSamples, props.options, newReference)
+
+        await mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded, totalCalsForMeal: totalCalsForMeal})
         mealReference.child('Items/' + foodName).update(foodEntry)
           .then(() => console.log('Food updated.'));
       }
@@ -143,14 +212,14 @@ function FoodPage(props) {
           const data = snapshot.val();
           setInfo(data);
 
-          // Update mealList array with data from info
-          const updatedMealList = mealList.map((elem) => {
+          const newMealList = emptyMealList.map((elem) => {
             if (elem.meal in data) {
               const mealData = data[elem.meal];
               const foodList = Object.entries(mealData.Items || {}).map(([foodName, foodEntry]) => {
-                const { selectedServings, selectedLike } = foodEntry;
+                const { enteredCalories, selectedServings, selectedLike } = foodEntry;
                 return {
                   food_name: foodName,
+                  enteredCalories,
                   selectedServings,
                   selectedLike,
                 };
@@ -160,7 +229,7 @@ function FoodPage(props) {
             return elem;
           });
 
-          setMealList(updatedMealList);
+          setMealList(newMealList);
         } else {
           setInfo("");
           setMealList(emptyMealList);
@@ -169,72 +238,11 @@ function FoodPage(props) {
   };
 
 
+
   // get menu items of restaurants nearby, used for possible recommendations
   // fetchNearbyRestaurants(props.latitude, props.longitude, yelpFusionApiKey)
   // commented right now to stop API calls
   // searchFoodItems('chicken breast')
-
-  const [recommendation, setRecommendation] = useState('');
-
-  useEffect(() => {
-    const calculateMedianTimes = () => {
-      const mealTimes = ["Breakfast", "Lunch", "Dinner"];
-      const medianTimes = {};
-
-      // Initialize an empty array for each meal time
-      for (const mealTime of mealTimes) {
-        medianTimes[mealTime] = [];
-      }
-
-      // Iterate over the dates in Food Entries
-      database()
-        .ref('user/' + props.user.uid + '/Food Entries')
-        .once('value')
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            const foodEntries = snapshot.val();
-
-            for (const date in foodEntries) {
-              const meals = foodEntries[date];
-
-              // Iterate over each meal time for the current date
-              for (const mealTime of mealTimes) {
-                if (meals[mealTime]) {
-                  const hourRecorded = meals[mealTime].hour_recorded;
-                  const minuteRecorded = meals[mealTime].minute_recorded;
-
-                  // Push the recorded time to the array
-                  medianTimes[mealTime].push({ hour: hourRecorded, minute: minuteRecorded });
-                }
-              }
-            }
-
-            // Calculate the median for each meal time
-            for (const mealTime of mealTimes) {
-              const recordedTimes = medianTimes[mealTime];
-
-              if (recordedTimes.length > 0) {
-                // Sort the recorded times in ascending order
-                recordedTimes.sort((a, b) => {
-                  return a.hour - b.hour || a.minute - b.minute;
-                });
-
-                const medianIndex = Math.floor(recordedTimes.length / 2);
-                medianTimes[mealTime] = recordedTimes[medianIndex];
-              } else {
-                medianTimes[mealTime] = null;
-              }
-            }
-            if (medianTimes){
-              const recommendation = makeRecommendation(medianTimes);
-              setRecommendation(recommendation);
-            }
-          }
-        });
-    };
-
-    calculateMedianTimes();
-  }, []);
 
   return (
     <View style={styles.centeredView}>
@@ -251,6 +259,8 @@ function FoodPage(props) {
             onPress={() => {
               setModalVisible(!modalVisible)
               saveFoods()
+              props.readEnergyConsumedSamples(props.options, newReference)
+              props.fetchCaloricData(props.user)
             }}
             style={({pressed}) => [{opacity : pressed ? 0.3 : 1}]}>
             <Text style={styles.customButton}>❌</Text>
@@ -268,9 +278,9 @@ function FoodPage(props) {
               setCurrentSelectedDate(decrementedDate);
               loadFoodEntries()
             }}>
-              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇦'}</Text>
+              <Text style={[styles.modalText, {fontWeight: "bold"}]}>{'⇦'}</Text>
             </TouchableOpacity>
-            <Text style={styles.baseText}>{isTodayOrYesterday(currentSelectedDate)}</Text>
+            <Text style={styles.modalText}>{isTodayOrYesterday(currentSelectedDate)}</Text>
 
             {/* if currentSelectedDate is today, disable next date button, still render or messes up View */}
             {isTodayOrYesterday(currentSelectedDate) === 'Today' ? (
@@ -282,7 +292,7 @@ function FoodPage(props) {
                   setCurrentSelectedDate(incrementedDate);
                 }}
               >
-                <Text style={[{opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
+                <Text style={[styles.modalText, {opacity: 0, fontWeight: "bold"}]}>{'⇨'}</Text>
               </TouchableOpacity>
             ) :
             (
@@ -293,7 +303,7 @@ function FoodPage(props) {
                 setCurrentSelectedDate(incrementedDate);
               }}
             >
-              <Text style={[styles.baseText, {fontWeight: "bold"}]}>{'⇨'}</Text>
+              <Text style={[styles.modalText, {fontWeight: "bold"}]}>{'⇨'}</Text>
             </TouchableOpacity>
             )}
           </View>
@@ -308,17 +318,20 @@ function FoodPage(props) {
                   ))}
                 </View>
                 {/* if date is today, give a recommendation for a meal, corresponding to appropriate time*/}
-                {isTodayOrYesterday(currentSelectedDate) === 'Today' && meal.meal === recommendation &&
+                {isTodayOrYesterday(currentSelectedDate) === 'Today' && mealList[index].data.length === 0 &&
                   (
-                  <Text>{recommendation && `Recommended: ${recommendation}`}</Text>
+                    <FoodRecs
+                      user={props.user}
+                      age={props.age}
+                      bio_sex={props.bio_sex}
+                      height={props.height}
+                      weight={props.weight}
+                      meal={meal.meal}
+                      index={index}
+                      addNewFoodItem={addNewFoodItem}
+                    >
+                    </FoodRecs>
                 )}
-                <FoodRecs
-                  user={props.user}
-                  age={props.age}
-                  bio_sex={props.bio_sex}
-                  height={props.height}
-                  weight={props.weight}>
-                </FoodRecs>
                 <AddNewFoodItem index={index} addNewFoodItem={addNewFoodItem}/>
               </View>
             ))}
@@ -342,7 +355,7 @@ export {FoodPage};
 const styles = StyleSheet.create({
   baseText: {
     fontFamily: 'American Typewriter',
-    fontSize: 20,
+    fontSize: 18,
     lineHeight: 40,
     marginRight: 10,
   },

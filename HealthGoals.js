@@ -1,24 +1,10 @@
-import {useEffect, useState} from "react";
-import {
-  Alert,
-  StyleSheet,
-  Modal,
-  Text,
-  View,
-  ScrollView,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Button, FlatList, Switch
-} from 'react-native';
-import {AddNewGoal} from './AddNewGoal'
+import React, {useEffect, useState} from "react";
+import {Alert, Modal, Pressable, StyleSheet, Switch, Text, TextInput, View} from 'react-native';
 import database from "@react-native-firebase/database";
-import {Picker} from "@react-native-picker/picker";
 import ModalSelector from 'react-native-modal-selector'
 
 function HealthGoals (props) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [goalList, setGoalList] = useState([]);
   const [info, setInfo] = useState("");
   const [weightGoal, setWeightGoal] = useState("maintain")
   const possibleWeightGoals = [
@@ -27,6 +13,7 @@ function HealthGoals (props) {
     {key: 2, label: "gain"},]
   const [sleepEarlier, setSleepEarlier] = useState(true)
   const [betterSleep, setBetterSleep] = useState(true)
+  const [stepCountGoal, setStepCountGoal] = useState('')
 
   useEffect(() => {
     loadHealthGoals();
@@ -38,16 +25,17 @@ function HealthGoals (props) {
       .once('value')
       .then((snapshot) => {
         if (snapshot.exists()) {
-          let updatedGoalList = []
+          let updatedGoalList = {};
 
-          // Update the GoalList array with the respective data from info
           snapshot.forEach((childSnapshot) => {
-            // const goalKey = childSnapshot.key;
-            const goalValue = childSnapshot.val();
-            updatedGoalList.push(goalValue)
+            const goalKey = childSnapshot.key;
+            updatedGoalList[goalKey] = childSnapshot.val();
           });
 
-          setGoalList(updatedGoalList);
+          setWeightGoal(updatedGoalList.weightGoal);
+          setSleepEarlier(updatedGoalList.sleepEarlier);
+          setBetterSleep(updatedGoalList.betterSleep);
+          setStepCountGoal(updatedGoalList.stepCountGoalGoal.toString())
         }
       })
   };
@@ -58,6 +46,7 @@ function HealthGoals (props) {
     newReference.update({weightGoal: weightGoal}).then(() => console.log("Updated weight goal"))
     newReference.update({sleepEarlier: sleepEarlier}).then(() => console.log("Saved sleep earlier"))
     newReference.update({betterSleep: betterSleep}).then(() => console.log("Saved sleep quality"))
+    newReference.update({stepCountGoalGoal: Number(stepCountGoal)}).then(() => console.log("Saved Step Count Goal"))
   }
 
   return (
@@ -85,42 +74,56 @@ function HealthGoals (props) {
             ]}>
             <Text style={styles.customButton}>❌</Text>
           </Pressable>
-          <Text style={styles.sectionHeading}>
-            My Health Goals
+          <Text style={styles.title}>
+            Health Goals
           </Text>
           <View style={styles.goalContainer}>
-            <Text style={styles.modalText}>I would like to </Text>
+            <Text style={styles.baseText}>I would like to </Text>
             <ModalSelector
-              data={possibleWeightGoals}
-              initValue="maintain"
-              accessible={true}
-              animationType={"fade"}
-              scrollViewAccessibilityLabel={'Scrollable options'}
-              cancelButtonAccessibilityLabel={'Cancel Button'}
-              onChange={(option)=>{setWeightGoal(option.label)}}>
+                data={possibleWeightGoals}
+                initValue="maintain"
+                accessible={true}
+                animationType={"fade"}
+                scrollViewAccessibilityLabel={'Scrollable options'}
+                cancelButtonAccessibilityLabel={'Cancel Button'}
+                optionTextStyle={{ fontFamily: 'American Typewriter' }}
+                cancelButtonStyle={{ fontFamily: 'American Typewriter' }}
+                onChange={(option) => { setWeightGoal(option.label) }}
+            >
 
               <TextInput
-                style={styles.goalInput}
+                style={[styles.goalInput, {marginTop: 6.5}]}
                 editable={false}
-                placeholder="Select something yummy!"
+                placeholder="lose"
                 value={weightGoal} />
 
             </ModalSelector>
-            <Text style={styles.modalText}> weight</Text>
+            <Text style={styles.baseText}> weight</Text>
           </View>
-          <View style={styles.goalContainer}>
-            <Text style={styles.modalText}>Sleep earlier</Text>
+
+
+          <View style={[styles.goalContainer, { paddingBottom: 20, paddingTop: 20 }]}>
+            <Text style={styles.baseText}>Sleep earlier</Text>
             <Switch value={sleepEarlier} onValueChange={setSleepEarlier}></Switch>
           </View>
           <View style={styles.goalContainer}>
-            <Text style={styles.modalText}>Improve sleep quality</Text>
+            <Text style={styles.baseText}>Improve sleep quality</Text>
             <Switch value={betterSleep} onValueChange={setBetterSleep}></Switch>
+          </View>
+          <View style={styles.goalContainer}>
+            <Text style={[styles.modalText, { flex: 3 }]}>Steps goal: </Text>
+            <TextInput
+              style={styles.input}
+              keyboardType={'number-pad'}
+              placeholder={"10000"}
+              value={stepCountGoal}
+              onChangeText={newText => setStepCountGoal(newText)}/>
           </View>
           {/*<FlatList*/}
           {/*  data={goalList}*/}
           {/*  renderItem={(itemData) => (*/}
           {/*    <View style={styles.goalItem}>*/}
-          {/*      <Text style={styles.modalText}>{itemData.item}</Text>*/}
+          {/*      <Text style={styles.baseText}>{itemData.item}</Text>*/}
           {/*    </View>*/}
           {/*  )}*/}
           {/*/>*/}
@@ -130,7 +133,7 @@ function HealthGoals (props) {
         style={[styles.button, styles.buttonOpen]}
         onPress={() => {
           setModalVisible(true)
-          // loadHealthGoals()
+          loadHealthGoals()
         }}>
         <Text style={styles.textStyle}>Health Goals</Text>
       </Pressable>
@@ -141,17 +144,18 @@ function HealthGoals (props) {
 export {HealthGoals};
 
 const styles = StyleSheet.create({
+  title: {
+    fontFamily: 'American Typewriter',
+    paddingBottom: 10,
+    fontSize: 35,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   baseText: {
     fontFamily: 'American Typewriter',
     fontSize: 20,
-    lineHeight: 40,
-    marginRight: 10,
-  },
-  sectionHeading: {
-    fontFamily: 'American Typewriter',
-    fontWeight: "bold",
-    fontSize: 40,
-    lineHeight: 50,
+    textAlign: 'center',
+    paddingTop: 10,
   },
   customButton: {
     fontFamily: 'American Typewriter',
@@ -207,8 +211,9 @@ const styles = StyleSheet.create({
   modalText: {
     fontFamily: 'American Typewriter',
     fontSize: 20,
+    lineHeight: 40,
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   buttonOpen: {
     backgroundColor: '#64D2FF',
@@ -224,5 +229,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: 'space-between',
     padding: 5,
-  }
+  },
+  input: {
+    fontFamily: 'American Typewriter',
+    flex: 1,
+    textAlign: 'right',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 20,
+  },
 });

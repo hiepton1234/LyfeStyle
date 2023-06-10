@@ -136,19 +136,25 @@ function WorkoutRec({ user }) {
                         Here Are Suggested Workouts{'\n'}For Your Weight Goal:
                     </Text>
                     {suggestedWorkouts.length > 0 ? (
-                        <ScrollView style={{ height: 150 }}>
-                            {suggestedWorkouts.map((workout, index) => (
-                                <View key={index} style={[styles.itemContainer, { flexDirection: 'row', justifyContent: 'space-between' }]}>
-                                    <Text style={styles.itemText}>{workout.exercise}</Text>
-                                    <Text style={[styles.itemText, { textAlign: 'right' }]}>{workout.intensity}</Text>
-                                </View>
-                            ))}
-                        </ScrollView>
+                        <>
+                            <View style={[styles.itemContainer, { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent', paddingBottom: 0, paddingTop: 0 }]}>
+                                <Text style={[styles.itemText, { fontWeight: 'bold' }]}>Exercise</Text>
+                                <Text style={[styles.itemText, { fontWeight: 'bold', textAlign: 'right' }]}>Intensity</Text>
+                            </View>
+                            <ScrollView style={{ height: 115 }}>
+                                {suggestedWorkouts.map((workout, index) => (
+                                    <View key={index} style={[styles.itemContainer, { flexDirection: 'row', justifyContent: 'space-between' }]}>
+                                        <Text style={styles.itemText}>{workout.exercise}</Text>
+                                        <Text style={[styles.itemText, { textAlign: 'right' }]}>{workout.intensity}</Text>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        </>
                     ) : (
-                        <View style={{ height: 315 }}>
+                        <View style={{ height: 312 }}>
                             <View style={styles.itemContainer}>
                                 <Text style={[styles.itemText, { textAlign: 'center' }]}>
-                                    Sorry, there are no workouts{'\n'}for your weight goal
+                                    Sorry, there are no workouts{'\n'}from this workout type that{'\n'}meet your weight goal
                                 </Text>
                             </View>
                         </View>
@@ -241,10 +247,6 @@ const styles = StyleSheet.create({
     pickerItem: {
         fontFamily: 'American Typewriter',
         fontSize: 18,
-    },
-
-    scrollView: {
-        height: 'auto',
     },
 });
 

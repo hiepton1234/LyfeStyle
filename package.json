@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@kingstinct/react-native-healthkit": "^7.0.0",
     "@react-native-community/async-storage": "^1.12.1",
     "@react-native-community/datetimepicker": "6.7.3",
     "@react-native-firebase/app": "^17.5.0",
@@ -31,6 +32,7 @@
     "expo-updates": "~0.16.4",
     "firebase": "^9.22.0",
     "moment": "^2.29.4",
+    "qs": "^6.11.2",
     "react": "18.2.0",
     "react-native": "0.71.6",
     "react-native-calendars": "^1.1298.0",
@@ -38,11 +40,12 @@
     "react-native-fs": "^2.20.0",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-health": "^1.14.0",
+    "react-native-healthkit": "^0.0.1",
     "react-native-modal-datetime-picker": "^15.0.1",
     "react-native-modal-selector": "^2.1.2",
     "react-native-picker": "^4.3.7",
-    "react-native-popup-confirm-toast": "^2.3.2",
     "react-native-picker-select": "^8.0.4",
+    "react-native-popup-confirm-toast": "^2.3.2",
     "react-native-svg": "13.4.0"
   },
   "devDependencies": {

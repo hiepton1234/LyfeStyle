@@ -3,14 +3,14 @@ import {useEffect, useMemo, useRef, useState} from "react";
 import {Dimensions, Pressable, ScrollView, StatusBar, StyleSheet, Text, View} from 'react-native';
 import {Profile} from './Profile'
 import {HealthGoals} from "./HealthGoals";
-import {FoodPage} from "./FoodPage";
+import {FoodPage, writeEnergyConsumedSamples} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
 import {AddActivity} from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import auth from '@react-native-firebase/auth'
-import {GoogleSignin, GoogleSigninButton} from '@react-native-google-signin/google-signin';
-import AppleHealthKit from 'react-native-health'
+import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
+import AppleHealthKit, {HealthValue, HealthKitPermissions, Health} from 'react-native-health'
 import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
@@ -67,6 +67,7 @@ export default function App() {
     const [age, setAge] = useState(0);
     const [bio_sex, setBio_sex] = useState("");
     const [weight, setWeight] = useState(0);
+    const [energyConsumedSamps, setEnergyConsumedSamps] = useState([])
     const [activities, setActivities] = useState([]);
     const scrollViewRef = useRef(null);
 
@@ -125,8 +126,8 @@ export default function App() {
 
     // Handle user state changes
     function onAuthStateChanged(user) {
-    setUser(user);
-    if (initializing) setInitializing(false);
+      setUser(user);
+      if (initializing) setInitializing(false);
     }
 
   // const [location, setLocation] = useState(null)
@@ -170,6 +171,43 @@ export default function App() {
         "Friday": 5,
         "Saturday": 6
     };
+
+  const fetchCaloricData = async (currentUser) => {
+    try {
+      const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Energy Consumed Samples');
+      const snapshot = await newReference.once('value');
+      // console.log(currentUser)
+
+      // Array for sleep hours
+      let daysOfWeek = Array(7).fill(0);
+
+      snapshot.forEach((childSnapshot) => {
+        // Step 1: Parse the timestamp into a Date object
+        const start = new Date(childSnapshot.val().startDate);
+        // console.log("START DATE: " + start)
+        // console.log("TODAY: " + new Date())
+
+        // console.log(inSameWeek(start, new Date()))
+        // Determining if the day is on the same week
+        if (inSameWeek(start, new Date())) {
+          // Step 2: Get the day from the start date
+          const options = { weekday: 'long' };
+          const day = start.toLocaleDateString('en-US', options).split(',')[0];
+          // console.log("DAY: " + day)
+
+          // Adding calories to respective day
+          daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+          // console.log("Calories: " + childSnapshot.val().value);
+          // console.log("daysOfWeek: " + daysOfWeek);
+        } else { return true; }
+      });
+
+      // console.log("Calorie reading done!")
+      setCaloricChartData(daysOfWeek);
+    } catch (error) {
+      console.log("ERROR DETECTED FETCHING CALORIC SAMPLES: " + error)
+    }
+  };
 
     useEffect(() => {
         const fetchSleepData = async (currentUser) => {
@@ -215,43 +253,6 @@ export default function App() {
                 setSleepChartData(daysOfWeek);
             } catch (error) {
                 console.log("ERROR DETECTED FETCHING SLEEP SAMPLES: " + error)
-            }
-        };
-
-        const fetchCaloricData = async (currentUser) => {
-            try {
-                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Energy Consumed Samples');
-                const snapshot = await newReference.once('value');
-                // console.log(currentUser)
-
-                // Array for sleep hours
-                let daysOfWeek = Array(7).fill(0);
-
-                snapshot.forEach((childSnapshot) => {
-                    // Step 1: Parse the timestamp into a Date object
-                    const start = new Date(childSnapshot.val().startDate);
-                    // console.log("START DATE: " + start)
-                    // console.log("TODAY: " + new Date())
-
-                    // console.log(inSameWeek(start, new Date()))
-                    // Determining if the day is on the same week
-                    if (inSameWeek(start, new Date())) {
-                        // Step 2: Get the day from the start date
-                        const options = { weekday: 'long' };
-                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
-                        // console.log("DAY: " + day)
-
-                        // Adding calories to respective day
-                        daysOfWeek[daysDict[day]] += childSnapshot.val().value;
-                        // console.log("Calories: " + childSnapshot.val().value);
-                        // console.log("daysOfWeek: " + daysOfWeek);
-                    } else { return true; }
-                });
-
-                // console.log("Calorie reading done!")
-                setCaloricChartData(daysOfWeek);
-            } catch (error) {
-                console.log("ERROR DETECTED FETCHING CALORIC SAMPLES: " + error)
             }
         };
 
@@ -493,163 +494,198 @@ export default function App() {
 
         const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
 
-        return () => {
-            subscriber(); // unsubscribe on unmount
-        };
+      return () => {
+        subscriber(); // unsubscribe on unmount
+      };
     }, []);
 
-    if (initializing) return null;
+  const options = {
+    startDate: new Date(2020, 1, 1).toISOString(),
+    endDate: new Date().toISOString(), // optional; default now
+    type: 'AllergyRecord',
+  }
 
-    if (!user) {
-        return (
-            <View style={styles.centeredView}>
-            <Text style={styles.baseText}>Please Login</Text>
-            <GoogleSigninButton
-                style={{ width: 192, height: 48 }}
-                size={GoogleSigninButton.Size.Wide}
-                color={GoogleSigninButton.Color.Dark}
-                onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
-            />
-            </View>
-        );
-    }
-
-    // GoogleSignin.getCurrentUser()
-    const newReference = database().ref('user/' + user.uid)
-
-    AppleHealthKit.initHealthKit(permissions, (error) => {
-        /* Called after we receive a response from the system */
-
-        if (error) {
-            console.log('[ERROR] Cannot grant permissions!')
-        }
-
-        /* Can now read or write to HealthKit */
-
-    const options = {
-        startDate: new Date(2020, 1, 1).toISOString(),
-        endDate: new Date().toISOString(), // optional; default now
-        type: 'AllergyRecord',
-    }
-
-    AppleHealthKit.getSleepSamples(
+    const readEnergyConsumedSamples = (options, userRef) => {
+      AppleHealthKit.getEnergyConsumedSamples(
         options,
         (callbackError, result) => {
-        /* Samples are now collected from HealthKit */
-        // console.log(result[0])
-        newReference.child("Health Info/Sleep Samples")
-            .set(result)
-        },
-    )
+          // writeEnergyConsumedSamples(result)
+          setEnergyConsumedSamps(result)
 
-    AppleHealthKit.getBiologicalSex(
-      options,
-      (callBackError, result) => {
-        // console.log(result)
-        setBio_sex(result.value)
-
-        newReference.child("Health Info")
-            .update({
-            bio_sex: bio_sex
-            })
+          userRef.child("Health Info/Energy Consumed Samples")
+            .set(
+              result
+            )
         }
-    )
-
-    AppleHealthKit.getLatestHeight(
-      options,
-      (callBackError, result) => {
-        // console.log(result)
-        setHeight(result.value)
-
-        newReference.child("Health Info")
-            .update({
-            height: height
-            })
-      }
-    )
-
-    AppleHealthKit.getDailyStepCountSamples(
-      options,
-      (callBackError, result) => {
-        // console.log(result[0])
-        newReference.child("Health Info/Step Counts")
-          .set(
-            result.slice(0, 90)
-          )
-      }
-    )
-
-    AppleHealthKit.getLatestWeight(
-      options,
-      (callBackError, result) => {
-        // console.log(result)
-        setWeight(result.value)
-
-        newReference.child("Health Info")
-          .update({
-            weight: result
-          })
-      }
-    )
-
-    AppleHealthKit.getDateOfBirth(
-      options,
-      (callbackError, result) => {
-        // console.log(result)
-        setDob(result.value.substring(0, 10))
-        setAge(result.age)
-
-        newReference.child("Health Info")
-          .update({
-            dob: dob,
-            age: age
-          })
-      }
-    )
-
-    AppleHealthKit.getActiveEnergyBurned(
-      options,
-      (callbackError, result) => {
-        // console.log(result[0])
-        newReference.child("Health Info/Active Energy Burned")
-          .set(
-            result
-          )
-      }
-    )
-
-    AppleHealthKit.getEnergyConsumedSamples(
-      options,
-      (callbackError, result) => {
-        // console.log(result[0])
-
-        newReference.child("Health Info/Energy Consumed Samples")
-          .set(
-            result
-          )
-      }
-    )
-
-    AppleHealthKit.getProteinSamples(
-      options,
-      (callbackError, result) => {
-        // console.log(result[0])
-
-        newReference.child("Health Info/Protein Samples")
-          .set(
-            result
-          )
-      }
-    )
+      )
     }
-    )
 
-    // AppleHealthKit.getClinicalRecords(
-    //     options,
-    //     (callbackError, result) => {
-    //         console.log(result[0])
-    //     }
-    // )
+  useEffect(() => {
+    const fetchHealthData = async (currentUser) => {
+      try {
+        if (currentUser) {
+          // GoogleSignin.getCurrentUser()
+          const newReference = database().ref('user/' + user.uid)
+
+          const permissions = {
+            permissions: {
+              read: [
+                AppleHealthKit.Constants.Permissions.HeartRate,
+                AppleHealthKit.Constants.Permissions.ActiveEnergyBurned,
+                AppleHealthKit.Constants.Permissions.Height,
+                AppleHealthKit.Constants.Permissions.Weight,
+                AppleHealthKit.Constants.Permissions.StepCount,
+                AppleHealthKit.Constants.Permissions.DateOfBirth,
+                AppleHealthKit.Constants.Permissions.BiologicalSex,
+                AppleHealthKit.Constants.Permissions.SleepAnalysis,
+                AppleHealthKit.Constants.Permissions.EnergyConsumed,
+                AppleHealthKit.Constants.Permissions.Protein,
+                // AppleHealthKit.Constants.Permissions.AllergyRecord
+              ],
+              // writing data permissions here, add if needed
+              write: [AppleHealthKit.Constants.Permissions.EnergyConsumed],
+            },
+          };
+
+          await AppleHealthKit.initHealthKit(permissions, (error) => {
+            if (error) {
+              console.log('[ERROR] Cannot grant permissions!')
+            }
+
+            /* Can now read or write to HealthKit */
+
+            AppleHealthKit.getSleepSamples(
+              options,
+              (callbackError, result) => {
+                /* Samples are now collected from HealthKit */
+                // console.log(result[0])
+                newReference.child("Health Info/Sleep Samples")
+                  .set(result)
+              },
+            )
+
+            AppleHealthKit.getBiologicalSex(
+              options,
+              (callBackError, result) => {
+                console.log(result)
+                setBio_sex(result.value)
+
+                newReference.child("Health Info")
+                  .update({
+                    bio_sex: bio_sex
+                  })
+              }
+            )
+
+            AppleHealthKit.getLatestHeight(
+              options,
+              (callBackError, result) => {
+                console.log(result)
+                setHeight(result.value)
+
+                newReference.child("Health Info")
+                  .update({
+                    height: height
+                  })
+              }
+            )
+
+            AppleHealthKit.getDailyStepCountSamples(
+              options,
+              (callBackError, result) => {
+                // console.log(result[0])
+                newReference.child("Health Info/Step Counts")
+                  .set(
+                    result.slice(0, 90)
+                  )
+              }
+            )
+
+            AppleHealthKit.getLatestWeight(
+              options,
+              (callBackError, result) => {
+                console.log(result)
+                setWeight(result.value)
+
+                newReference.child("Health Info")
+                  .update({
+                    weight: result
+                  })
+              }
+            )
+
+            AppleHealthKit.getDateOfBirth(
+              options,
+              (callbackError, result) => {
+                console.log(result)
+                setDob(result.value.substring(0, 10))
+                setAge(result.age)
+
+                newReference.child("Health Info")
+                  .update({
+                    dob: dob,
+                    age: age
+                  })
+              }
+            )
+
+            AppleHealthKit.getActiveEnergyBurned(
+              options,
+              (callbackError, result) => {
+                // console.log(result[0])
+                newReference.child("Health Info/Active Energy Burned")
+                  .set(
+                    result
+                  )
+              }
+            )
+
+            readEnergyConsumedSamples(options, newReference)
+
+            AppleHealthKit.getProteinSamples(
+              options,
+              (callbackError, result) => {
+                // console.log(result[0])
+
+                newReference.child("Health Info/Protein Samples")
+                  .set(
+                    result
+                  )
+              }
+            )
+          });
+          if (authorized) {
+            console.log('Apple HealthKit initialized successfully');
+          } else {
+            console.log('Apple HealthKit authorization denied');
+          }
+
+        } else {
+          console.log('User not logged in');
+        }
+      } catch (error) {
+        console.log('Error initializing Apple HealthKit:', error);
+      }
+    };
+
+    fetchHealthData(user);
+  }, [user]);
+
+  if (!user) {
+    return (
+      <View style={styles.centeredView}>
+        <Text style={styles.subtitle}>Please Login</Text>
+        <GoogleSigninButton
+          style={{ width: 192, height: 48 }}
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
+        />
+      </View>
+    );
+  }
+
+    if (initializing || user === null) return null;
 
     return (
         <>
@@ -700,6 +736,10 @@ export default function App() {
                       bio_sex={bio_sex}
                       height={height}
                       weight ={weight}
+                      energyConsumedSamps={energyConsumedSamps}
+                      fetchCaloricData={fetchCaloricData}
+                      readEnergyConsumedSamples={readEnergyConsumedSamples}
+                      options={options}
                       // latitude = {location.coords.latitude}
                       // longitude = {location.coords.longitude}
                       // personalModel = {personalModel} replace when we have one
