@@ -406,9 +406,8 @@ export default function App() {
 
                 // Save the activity under the generated key
                 newReference.child(lifescoreKey).set({
-                    activity: activity.activity,
-                    startTime: activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    selectedDate: activity.selectedDate.toISOString()
+                    lifescore: calculate_lifescore(0, 0, 0, 0, 0, 0),
+                    startTime: new Date()
                 })
                     .then(() => {
                         console.log('Lifescore saved successfully');
