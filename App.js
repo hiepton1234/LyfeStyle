@@ -71,10 +71,26 @@ export default function App() {
     const [energyConsumedSamps, setEnergyConsumedSamps] = useState([])
     const [activities, setActivities] = useState([]);
     const scrollViewRef = useRef(null);
+    let stepGoal = 0;
 
     const scrollToTop = () => {
         scrollViewRef.current.scrollTo({ y: 0, animated: true });
     };
+
+    const lifescore_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{
+            data: [
+                calculate_lifescore(50, 100, 75, 100, 100, 100),
+                calculate_lifescore(50, 100, 75, 100, 90, 100),
+                calculate_lifescore(60, 100, 85, 100, 120, 100),
+                calculate_lifescore(100, 100, 75, 100, 90, 100),
+                calculate_lifescore(90, 100, 105, 100, 110, 100),
+                calculate_lifescore(100, 100, 100, 100, 100, 100),
+                calculate_lifescore(150, 100, 90, 100, 90, 100),
+            ]
+        }]
+    }), []);
 
     RNFirebase()
 
@@ -85,7 +101,8 @@ export default function App() {
     const [caloricChartData, setCaloricChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [caloriesBurnedChartData, setCaloriesBurnedChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [workoutHoursChartData, setWorkoutHoursChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
-    const [lifescoreChartData, setLifescoreChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [steps, setSteps] = useState([0, 0, 0, 0, 0, 0, 0]);
+    // const [lifescoreChartData, setLifescoreChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
 
     const sleep_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -107,10 +124,10 @@ export default function App() {
         datasets: [{ data: workoutHoursChartData }],
     }), [workoutHoursChartData]);
 
-    const lifescore_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{ data: lifescoreChartData }]
-    }), [lifescoreChartData]);
+    // const lifescore_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{ data: lifescoreChartData }]
+    // }), [lifescoreChartData]);
 
     async function onGoogleButtonPress() {
         // Check if your device supports Google Play
@@ -340,6 +357,57 @@ export default function App() {
             }
         };
 
+        const fetchStepCountData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Health Info/Step Counts');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    const end = new Date(childSnapshot.val().endDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("END DATE: " + end)
+                    // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
+
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
+
+                        // Adding steps to respective day
+                        daysOfWeek[daysDict[day]] += childSnapshot.val().value;
+                    } else { return true; }
+                });
+
+                // console.log("Step count reading done!")
+                // console.log(daysOfWeek)
+                setSteps(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING STEP COUNT SAMPLES: " + error)
+            }
+        };
+
+        const fetchStepCountGoal = (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/goals');
+
+                // Add listener for 'value' event
+                newReference.on('value', (snapshot) => {
+                    const stepGoal = snapshot.val().stepCountGoalGoal;
+                    console.log("STEP GOAL: ", stepGoal);
+                });
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING STEP COUNT GOAL: " + error);
+            }
+        };
+
         const fetchActivitiesData = async (currentUser) => {
             try {
                 const newReference = database().ref('user/' + currentUser.uid + '/Activities');
@@ -365,65 +433,39 @@ export default function App() {
             }
         };
 
-        const fetchLifescoreData = async (currentUser) => {
-            try {
-                const newReference = database().ref('user/' + currentUser.uid + '/Lifescore');
-                const snapshot = await newReference.once('value');
-                // console.log(currentUser)
-
-                // Array for sleep hours
-                let daysOfWeek = Array(7).fill(0);
-
-                snapshot.forEach((childSnapshot) => {
-                    // Step 1: Parse the timestamp into a Date object
-                    const start = new Date(childSnapshot.val().startDate);
-                    const end = new Date(childSnapshot.val().endDate);
-                    // console.log("START DATE: " + start)
-                    // console.log("END DATE: " + end)
-                    // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
-
-                    // Determining if the day is on the same week
-                    if (inSameWeek(start, new Date())) {
-                        // Step 2: Get the day from the start date
-                        const options = { weekday: 'long' };
-                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
-                        // console.log("DAY: " + day)
-
-                        daysOfWeek[daysDict[day]] = childSnapshot.val();
-                    } else { return true; }
-                });
-
-                // console.log("Workout hours reading done!")
-                setLifescoreChartData(daysOfWeek);
-            } catch (error) {
-                console.log("ERROR DETECTED FETCHING LIFESCORE SAMPLES: " + error)
-            }
-        };
-
-        const saveLifescoreData = async (currentUser) => {
-            try {
-                const newReference = database().ref('user/' + currentUser.uid + '/Lifescore');
-
-                const lifescoreKey = newReference.push().key;
-
-                // Save the activity under the generated key
-                newReference.child(lifescoreKey).set({
-                    lifescore: calculate_lifescore(0, 0, 0, 0, 0, 0),
-                    startTime: new Date()
-                })
-                    .then(() => {
-                        console.log('Lifescore saved successfully');
-                    })
-                    .catch((error) => {
-                        console.error('Failed to save lifescore:', error);
-                    });
-
-                // console.log("Workout hours reading done!")
-                setLifescoreChartData(daysOfWeek);
-            } catch (error) {
-                console.log("ERROR DETECTED FETCHING LIFESCORE SAMPLES: " + error)
-            }
-        };
+        // const fetchLifescoreData = async (currentUser) => {
+        //     try {
+        //         const newReference = database().ref('user/' + currentUser.uid + '/Lifescore');
+        //         const snapshot = await newReference.once('value');
+        //         // console.log(currentUser)
+        //
+        //         // Array for sleep hours
+        //         let daysOfWeek = Array(7).fill(0);
+        //
+        //         snapshot.forEach((childSnapshot) => {
+        //             // Step 1: Parse the timestamp into a Date object
+        //             const start = new Date(childSnapshot.val().startDate);
+        //             // console.log("START DATE: " + start)
+        //             // console.log("END DATE: " + end)
+        //             // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
+        //
+        //             // Determining if the day is on the same week
+        //             if (inSameWeek(start, new Date())) {
+        //                 // Step 2: Get the day from the start date
+        //                 const options = { weekday: 'long' };
+        //                 const day = start.toLocaleDateString('en-US', options).split(',')[0];
+        //                 // console.log("DAY: " + day)
+        //
+        //                 daysOfWeek[daysDict[day]] = childSnapshot.val();
+        //             } else { return true; }
+        //         });
+        //
+        //         // console.log("Workout hours reading done!")
+        //         setLifescoreChartData(daysOfWeek);
+        //     } catch (error) {
+        //         console.log("ERROR DETECTED FETCHING LIFESCORE SAMPLES: " + error)
+        //     }
+        // };
 
         const onAuthStateChanged = (user) => {
             setUser(user);
@@ -465,6 +507,24 @@ export default function App() {
                         console.log('Error fetching workout hours data: ', error);
                     });
 
+                fetchStepCountData(user)
+                    .then(() => {
+                        // Step count data fetching completed
+                        // console.log('Step count data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching step count data: ', error);
+                    });
+
+                // fetchStepCountGoal(user)
+                //     .then(() => {
+                //         // Step count goal fetching completed
+                //         // console.log('Step count goal fetched');
+                //     })
+                //     .catch((error) => {
+                //         console.log('Error fetching step count goal: ', error);
+                //     });
+
                 fetchActivitiesData(user)
                     .then(() => {
                         // Activities data fetching completed
@@ -474,14 +534,14 @@ export default function App() {
                         console.log('Error fetching workout hours data: ', error);
                     });
 
-                fetchLifescoreData(user)
-                    .then(() => {
-                        // Lifescore data fetching completed
-                        console.log('Lifescore data fetched');
-                    })
-                    .catch((error) => {
-                        console.log('Error fetching lifescore data: ', error);
-                    });
+                // fetchLifescoreData(user)
+                //     .then(() => {
+                //         // Lifescore data fetching completed
+                //         // console.log('Lifescore data fetched');
+                //     })
+                //     .catch((error) => {
+                //         console.log('Error fetching lifescore data: ', error);
+                //     });
             }
         };
 
@@ -500,11 +560,11 @@ export default function App() {
       };
     }, []);
 
-  const options = {
+    const options = {
     startDate: new Date(2020, 1, 1).toISOString(),
     endDate: new Date().toISOString(), // optional; default now
     type: 'AllergyRecord',
-  }
+    }
 
     const readEnergyConsumedSamples = (options, userRef) => {
       AppleHealthKit.getEnergyConsumedSamples(
@@ -520,6 +580,27 @@ export default function App() {
         }
       )
     }
+
+    const saveLifescoreData = async (currentUser) => {
+        const newReference = database().ref('user/' + currentUser.uid + '/Lifescore');
+
+        const lifescoreKey = newReference.push().key;
+        const options = {weekday: 'long'};
+        const day = new Date().toLocaleDateString('en-US', options).split(',')[0];
+        console.log(day)
+
+        // Save the activity under the generated key
+        newReference.child(lifescoreKey).set({
+            lifescore: calculate_lifescore(steps[day], stepGoal, sleep_chart_data[day], 0, caloric_chart_data[day], 0),
+            startTime: new Date()
+        })
+            .then(() => {
+                console.log('Lifescore saved successfully');
+            })
+            .catch((error) => {
+                console.error('Failed to save lifescore:', error);
+            });
+    };
 
   useEffect(() => {
     const fetchHealthData = async (currentUser) => {
@@ -568,7 +649,7 @@ export default function App() {
             AppleHealthKit.getBiologicalSex(
               options,
               (callBackError, result) => {
-                console.log(result)
+                // console.log(result)
                 setBio_sex(result.value)
 
                 newReference.child("Health Info")
@@ -581,7 +662,7 @@ export default function App() {
             AppleHealthKit.getLatestHeight(
               options,
               (callBackError, result) => {
-                console.log(result)
+                // console.log(result)
                 setHeight(result.value)
 
                 newReference.child("Health Info")
@@ -605,7 +686,7 @@ export default function App() {
             AppleHealthKit.getLatestWeight(
               options,
               (callBackError, result) => {
-                console.log(result)
+                // console.log(result)
                 setWeight(result.value)
 
                 newReference.child("Health Info")
@@ -618,7 +699,7 @@ export default function App() {
             AppleHealthKit.getDateOfBirth(
               options,
               (callbackError, result) => {
-                console.log(result)
+                // console.log(result)
                 setDob(result.value.substring(0, 10))
                 setAge(result.age)
 
@@ -699,7 +780,9 @@ export default function App() {
                     contentContainerStyle={styles.scrollView}
                 >
                     <Text style={styles.title}>Today's Lifestyle Score: {calculate_lifescore(100,100,100,100,100,100)}</Text>
+
                     <Text style={styles.title}>Sleep at {sleep(user)}</Text>
+
                     <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
                         data={lifescore_chart_data}
