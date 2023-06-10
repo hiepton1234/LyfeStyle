@@ -354,7 +354,7 @@ export {FoodPage};
 
 const styles = StyleSheet.create({
   baseText: {
-    fontFamily: 'Avenir-Book',
+    fontFamily: 'American Typewriter',
     fontSize: 18,
     lineHeight: 40,
     marginRight: 10,

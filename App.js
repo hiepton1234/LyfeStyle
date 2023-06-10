@@ -75,20 +75,6 @@ export default function App() {
         scrollViewRef.current.scrollTo({ y: 0, animated: true });
     };
 
-    useEffect(() => {
-        // Delete activities from yesterday
-        const currentDate = new Date();
-        const yesterday = new Date(currentDate);
-        yesterday.setDate(currentDate.getDate() - 1); // Subtract one day from the current date
-
-        setActivities((prevActivities) =>
-            prevActivities.filter((activity) => {
-                const selectedDate = activity.selectedDate;
-                return selectedDate.toDateString() !== yesterday.toDateString();
-            })
-        );
-    }, []);
-
     const lifescore_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{
@@ -360,6 +346,36 @@ export default function App() {
             }
         };
 
+        const fetchActivitiesData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Activities');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let activityArr = [];
+
+                snapshot.forEach((childSnapshot) => {
+                    // Create a new activity object
+                    const newActivity = {
+                        activity: childSnapshot.val().activity,
+                        startTime: childSnapshot.val().startTime,
+                        endTime: childSnapshot.val().endTime,
+                        selectedDate: childSnapshot.val().selectedDate
+                    };
+
+                    // console.log(newActivity)
+                    activityArr.push(newActivity)
+                    // console.log(activityArr)
+                });
+
+                // console.log("Activities reading done!")
+                setActivities(activityArr);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING ACTIVITIES SAMPLES: " + error)
+            }
+        };
+
         const onAuthStateChanged = (user) => {
             setUser(user);
             if (initializing) setInitializing(false);
@@ -395,6 +411,15 @@ export default function App() {
                     .then(() => {
                         // Workout hours data fetching completed
                         // console.log('Workout hours data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching workout hours data: ', error);
+                    });
+
+                fetchActivitiesData(user)
+                    .then(() => {
+                        // Activities data fetching completed
+                        // console.log('Activities data fetched');
                     })
                     .catch((error) => {
                         console.log('Error fetching workout hours data: ', error);
@@ -668,7 +693,7 @@ export default function App() {
                     />
 
                     <AddActivity
-                        setActivities={setActivities}
+                        user={user}
                     />
 
                     {/*Personicle*/}
@@ -754,11 +779,15 @@ export default function App() {
                                 {(() => {
                                     const filteredActivities = activities.filter((activity) => {
                                         const today = new Date();
-                                        const selectedDate = activity.selectedDate;
+                                        const selectedDate = new Date(activity.selectedDate);
+                                        
+                                        // console.log("TODAY: ", today)
+                                        // console.log("SELECTED DATE: ", selectedDate)
 
                                         today.setUTCHours(0, 0, 0, 0);
                                         selectedDate.setUTCHours(0, 0, 0, 0);
 
+                                        // console.log("IS SAME DAY?: " + (today.getTime() === selectedDate.getTime()))
                                         return today.getTime() === selectedDate.getTime();
                                     });
 
@@ -778,9 +807,9 @@ export default function App() {
                                                         <Text style={styles.itemText}>
                                                             Activity: <Text style={{ fontWeight: 'bold' }}>{activity.activity}</Text>
                                                             {'\n'}
-                                                            Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                            Start Time: <Text style={{ fontWeight: 'bold' }}>{activity.startTime}</Text>
                                                             {'\n'}
-                                                            End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                            End Time: <Text style={{ fontWeight: 'bold' }}>{activity.endTime}</Text>
                                                             {/*{'\n'}*/}
                                                             {/*Selected Date: <Text style={{ fontWeight: 'bold' }}>{activity.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</Text>*/}
                                                         </Text>
