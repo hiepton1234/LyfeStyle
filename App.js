@@ -7,6 +7,7 @@ import {FoodPage, writeEnergyConsumedSamples} from "./FoodPage";
 import {WorkoutRec} from "./WorkoutRec"
 import {AddActivity} from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
+import {sleep} from "./SleepRec";
 import database from "@react-native-firebase/database";
 import auth from '@react-native-firebase/auth'
 import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
@@ -779,6 +780,9 @@ export default function App() {
                     contentContainerStyle={styles.scrollView}
                 >
                     <Text style={styles.title}>Today's Lifestyle Score: {calculate_lifescore(100,100,100,100,100,100)}</Text>
+
+                    <Text style={styles.title}>Sleep at {sleep(user)}</Text>
+
                     <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
                         data={lifescore_chart_data}
@@ -918,7 +922,7 @@ export default function App() {
                                     const filteredActivities = activities.filter((activity) => {
                                         const today = new Date();
                                         const selectedDate = new Date(activity.selectedDate);
-                                        
+
                                         // console.log("TODAY: ", today)
                                         // console.log("SELECTED DATE: ", selectedDate)
 
