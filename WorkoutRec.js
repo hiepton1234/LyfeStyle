@@ -118,7 +118,7 @@ function WorkoutRec({ user }) {
                         <Text style={{ fontWeight: 'bold' }}> {weightGoal}</Text>
                     </Text>
 
-                    <Text style={styles.baseText}>Workout Type:</Text>
+                    <Text style={styles.baseText}>Exercise Type:</Text>
                     <Picker
                         style={{ flex: 1 }}
                         selectedValue={selectedWorkoutType}
@@ -133,7 +133,7 @@ function WorkoutRec({ user }) {
                     </Picker>
 
                     <Text style={[styles.baseText, { paddingTop: 40, paddingBottom: 10 }]}>
-                        Here Are Suggested Workouts{'\n'}For Your Weight Goal:
+                        Here Are Suggested Exercises{'\n'}For Your Weight Goal:
                     </Text>
                     {suggestedWorkouts.length > 0 ? (
                         <>
@@ -154,7 +154,7 @@ function WorkoutRec({ user }) {
                         <View style={{ height: 312 }}>
                             <View style={styles.itemContainer}>
                                 <Text style={[styles.itemText, { textAlign: 'center' }]}>
-                                    Sorry, there are no workouts{'\n'}from this workout type that{'\n'}meet your weight goal
+                                    Sorry, there are no exercises{'\n'}from this exercises type that{'\n'}meet your weight goal
                                 </Text>
                             </View>
                         </View>
