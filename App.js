@@ -697,7 +697,7 @@ export default function App() {
                     ref={scrollViewRef}
                     contentContainerStyle={styles.scrollView}
                 >
-                    <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
+                    <Text style={styles.title}>Today's Lifestyle Score: {calculate_lifescore(100,100,100,100,100,100)}</Text>
                     <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
                         data={lifescore_chart_data}
