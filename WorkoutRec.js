@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View, ScrollView, Platform } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, Pressable, View, ScrollView } from 'react-native';
 import { Picker } from "@react-native-picker/picker";
 import database from "@react-native-firebase/database";
 

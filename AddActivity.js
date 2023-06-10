@@ -1,11 +1,11 @@
-import React, {useState} from 'react';
+import React, { useState} from 'react';
 import {Alert, Dimensions, Modal, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InteractiveCalendar from './InteractiveCalendar';
 import database from "@react-native-firebase/database";
 
 const screenWidth = Dimensions.get('window').width;
-let activityCounter = 0; // Counter variable to generate sequential keys
+// let activityCounter = 0; // Counter variable to generate sequential keys
 
 function AddActivity({ user }) {
     const [modalVisible, setModalVisible] = useState(false);
@@ -15,6 +15,7 @@ function AddActivity({ user }) {
     const [selectedDate, setSelectedDate] = useState('');
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
     const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
+    const [initialEndTime, setInitialEndTime] = useState('');
 
     const handleActivityChange = (text) => {
         setActivity(text);
@@ -57,6 +58,11 @@ function AddActivity({ user }) {
             return;
         }
 
+        if (startTime >= endTime) {
+            Alert.alert('Error!', 'The start time cannot be after or equal to the end time');
+            return;
+        }
+
         // Create a new activity object
         const newActivity = {
             activity: activity,
@@ -88,10 +94,11 @@ function AddActivity({ user }) {
 
         // Generate the next sequential key
         // console.log(activityCounter)
-        const activityKey = String(activityCounter);
+        // const activityKey = String(activityCounter);
+        const activityKey = ref.push().key;
 
         // Increment the counter for the next activity
-        activityCounter++;
+        // activityCounter++;
         // console.log(activityCounter)
 
         // Save the activity under the generated key
@@ -122,6 +129,11 @@ function AddActivity({ user }) {
     };
 
     const showEndTimePicker = () => {
+        if (startTime) {
+            const startTimeObj = new Date(startTime);
+            startTimeObj.setMinutes(startTimeObj.getMinutes() + 1);
+            setInitialEndTime(startTimeObj);
+        }
         setEndTimePickerVisible(true);
     };
 
@@ -181,6 +193,7 @@ function AddActivity({ user }) {
                         <DateTimePickerModal
                             isVisible={isEndTimePickerVisible}
                             mode="time"
+                            date={initialEndTime || undefined}
                             onConfirm={handleEndTimeChange}
                             onCancel={hideEndTimePicker}
                         />
