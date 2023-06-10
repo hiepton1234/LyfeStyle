@@ -114,7 +114,7 @@ function HealthGoals (props) {
             <Text style={styles.baseText}>Improve sleep quality</Text>
             <Switch value={betterSleep} onValueChange={setBetterSleep}></Switch>
           </View>
-          <View style={styles.goalContainer}>
+          <View style={[styles.goalContainer, { paddingBottom: 20, paddingTop: 20 }]}>
             <Text style={[styles.modalText, { flex: 3 }]}>Steps goal: </Text>
             <TextInput
               style={styles.input}
