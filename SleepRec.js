@@ -112,7 +112,7 @@ async function loadModel() {
   const model = await tf
     .loadLayersModel(bundleResourceIO(modelJSON, modelWeights))
     .catch(e => console.log(e));
-//  console.log("Model loaded!");
+  console.log("Model loaded!");
   return model;
 };
 
