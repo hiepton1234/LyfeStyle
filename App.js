@@ -221,6 +221,7 @@ export default function App() {
       });
 
       // console.log("Calorie reading done!")
+      console.log(daysOfWeek)
       setCaloricChartData(daysOfWeek);
     } catch (error) {
       console.log("ERROR DETECTED FETCHING CALORIC SAMPLES: " + error)
