@@ -23,6 +23,12 @@ import {
   makeRecommendation, FoodRecs
 } from "./Recommender/FoodRecs";
 import Geolocation from 'react-native-geolocation-service';
+import HealthKit, {
+  HKUnit,
+  HKQuantityTypeIdentifier,
+  useHealthkitAuthorization, HKUnits,
+} from '@kingstinct/react-native-healthkit';
+import AppleHealthKit from "react-native-health";
 
 class FoodEntry {
   constructor(food_name, enteredCalories, selectedServings, selectedLike) {
@@ -40,6 +46,62 @@ function FoodPage(props) {
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const yelpFusionApiKey = '3YfmZ-MolZrxxP2KBnefV1eepEw034xAmxOleosjvwytWvLjAeXb0mf1emgb0rnhLD-2_Pwz97JW5JFU_c7xGcfglxG51N5RWp9MM3DZTuW2ORSngo6OtS_wExx3ZHYx'
 
+  const writeEnergyConsumedSamples = async (energyConsumed, mealtime, energyConsumedSamps, currentSelectedDate, fetchCaloricData, readEnergyConsumedSamples, option, newReference) => {
+    const isAvailable = await HealthKit.isHealthDataAvailable();
+
+
+    try {
+      await HealthKit.requestAuthorization(
+        [HKQuantityTypeIdentifier.dietaryEnergyConsumed],
+        [HKQuantityTypeIdentifier.dietaryEnergyConsumed]
+      );
+
+      const energySample = {
+        type: 'DietaryEnergyConsumed',
+        value: energyConsumed,
+        unit: 'kcal',
+      };
+
+      const options = {
+        startDate: new Date(0), // Retrieve samples from the beginning of time
+        endDate: new Date(), // Retrieve samples up to the current date
+        limit: 0, // Retrieve all matching samples
+        ascending: false, // Sort the samples in descending order by date
+        type: HKQuantityTypeIdentifier.dietaryEnergyConsumed, // Specify the desired data type
+        sourceName: 'LyfeStyle', // Filter by the specified source name
+        unit: 'kcal' // Specify the desired unit
+      };
+
+      // DELETE RECORDS
+      // const uuids = energyConsumedSamps.map(sample => sample.id);
+      //
+      // for (let i = 0; i < 7; i++)
+      //   await HealthKit.deleteQuantitySample(HKQuantityTypeIdentifier.dietaryEnergyConsumed, uuids[i]);
+      //console.log(currentSelectedDate)
+
+      const valueExists = energyConsumedSamps.some(sample => ((sample.value === energyConsumed) && sample.sourceName === 'LyfeStyle'));
+
+      // If energyConsumed does not exist, save the quantity sample
+      if (!valueExists) {
+        await HealthKit.saveQuantitySample(
+          HKQuantityTypeIdentifier.dietaryEnergyConsumed,
+          'kcal',
+          energyConsumed,
+          {
+            metadata: {
+              meal: mealtime,
+            }
+          }
+        );
+        console.log('Quantity sample saved successfully!');
+      }
+
+      // await readEnergyConsumedSamples(option, newReference)
+      // await fetchCaloricData(props.user)
+    } catch (error) {
+      console.error('Error writing energy consumed samples:', error);
+    }
+  };
 
   let emptyMealList = [
     {
@@ -104,8 +166,9 @@ function FoodPage(props) {
 
     setMealList(newMealList);
   };
-  
-  const saveFoods = () => {
+
+  const newReference = database().ref('user/' + props.user.uid)
+  const saveFoods = async () => {
     // store contents of profile page user inputs to firebase
     for (let i = 0; i < mealList.length; i++){
       const mealReference = foodReference
@@ -113,6 +176,7 @@ function FoodPage(props) {
         .child(mealList[i].meal);
 
       // for each food entry for a meal time
+      let totalCalsForMeal = 0
       for (let j = 0; j < mealList[i].data.length; j++) {
         const food = mealList[i].data[j];
         const { food_name: foodName, enteredCalories, selectedServings, selectedLike} = food;
@@ -122,9 +186,12 @@ function FoodPage(props) {
           selectedServings,
           selectedLike,
         };
-        console.log(foodName)
+        totalCalsForMeal += Math.floor(enteredCalories * selectedServings)
+        console.log(totalCalsForMeal)
 
-        mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded})
+        writeEnergyConsumedSamples(totalCalsForMeal, mealList[i].meal, props.energyConsumedSamps, currentSelectedDate, props.fetchCaloricData, props.readEnergyConsumedSamples, props.options, newReference)
+
+        await mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded, totalCalsForMeal: totalCalsForMeal})
         mealReference.child('Items/' + foodName).update(foodEntry)
           .then(() => console.log('Food updated.'));
       }
@@ -192,6 +259,8 @@ function FoodPage(props) {
             onPress={() => {
               setModalVisible(!modalVisible)
               saveFoods()
+              props.readEnergyConsumedSamples(props.options, newReference)
+              props.fetchCaloricData(props.user)
             }}
             style={({pressed}) => [{opacity : pressed ? 0.3 : 1}]}>
             <Text style={styles.customButton}>❌</Text>

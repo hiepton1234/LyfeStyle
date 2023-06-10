@@ -13,6 +13,7 @@ function HealthGoals (props) {
     {key: 2, label: "gain"},]
   const [sleepEarlier, setSleepEarlier] = useState(true)
   const [betterSleep, setBetterSleep] = useState(true)
+  const [stepCountGoal, setStepCountGoal] = useState('')
 
   useEffect(() => {
     loadHealthGoals();
@@ -34,6 +35,7 @@ function HealthGoals (props) {
           setWeightGoal(updatedGoalList.weightGoal);
           setSleepEarlier(updatedGoalList.sleepEarlier);
           setBetterSleep(updatedGoalList.betterSleep);
+          setStepCountGoal(updatedGoalList.stepCountGoalGoal.toString())
         }
       })
   };
@@ -44,6 +46,7 @@ function HealthGoals (props) {
     newReference.update({weightGoal: weightGoal}).then(() => console.log("Updated weight goal"))
     newReference.update({sleepEarlier: sleepEarlier}).then(() => console.log("Saved sleep earlier"))
     newReference.update({betterSleep: betterSleep}).then(() => console.log("Saved sleep quality"))
+    newReference.update({stepCountGoalGoal: Number(stepCountGoal)}).then(() => console.log("Saved Step Count Goal"))
   }
 
   return (
@@ -89,11 +92,10 @@ function HealthGoals (props) {
             >
 
               <TextInput
-                  style={[styles.goalInput, { marginTop: 6.5 }]}
-                  editable={false}
-                  placeholder="Select something yummy!"
-                  value={weightGoal}
-              />
+                style={[styles.goalInput, {marginTop: 6.5}]}
+                editable={false}
+                placeholder="lose"
+                value={weightGoal} />
 
             </ModalSelector>
             <Text style={styles.baseText}> weight</Text>
@@ -107,6 +109,15 @@ function HealthGoals (props) {
           <View style={styles.goalContainer}>
             <Text style={styles.baseText}>Improve sleep quality</Text>
             <Switch value={betterSleep} onValueChange={setBetterSleep}></Switch>
+          </View>
+          <View style={styles.goalContainer}>
+            <Text style={[styles.modalText, { flex: 3 }]}>Steps goal: </Text>
+            <TextInput
+              style={styles.input}
+              keyboardType={'number-pad'}
+              placeholder={"10000"}
+              value={stepCountGoal}
+              onChangeText={newText => setStepCountGoal(newText)}/>
           </View>
           {/*<FlatList*/}
           {/*  data={goalList}*/}
@@ -197,6 +208,13 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 2,
   },
+  modalText: {
+    fontFamily: 'American Typewriter',
+    fontSize: 20,
+    lineHeight: 40,
+    marginBottom: 10,
+    textAlign: 'left',
+  },
   buttonOpen: {
     backgroundColor: '#64D2FF',
   },
@@ -211,5 +229,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: 'space-between',
     padding: 5,
-  }
+  },
+  input: {
+    fontFamily: 'American Typewriter',
+    flex: 1,
+    textAlign: 'right',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 20,
+  },
 });

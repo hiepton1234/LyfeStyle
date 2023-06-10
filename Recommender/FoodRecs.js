@@ -6,6 +6,76 @@ import {TouchableOpacity, StyleSheet, Text, View, Alert, TextInput, Pressable, M
 import qs from 'qs'
 import {Picker} from "@react-native-picker/picker";
 
+function FoodRecModal(props) {
+  return(
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={props.modalVisible}
+      onRequestClose={() => {
+        Alert.alert('Modal has been closed.');
+        props.setModalVisible(!props.modalVisible);
+      }}>
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <View style={[styles.item, { flexDirection: 'row', justifyContent: 'space-between' }]}>
+            <TextInput
+              style={styles.input}
+              placeholder={"Food name here"}
+              onChangeText={props.foodInputHandler}
+              value={props.recommendation}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={"Cals per serving"}
+              onChangeText={props.caloriesInputHandler}
+              value={props.recommendationCals.toString()}
+            />
+          </View>
+          <View style={styles.pickerSection}>
+            <View style={{flex: 1}}>
+              <Text style={styles.modalText}># of Servings</Text>
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={styles.modalText}>Like Rating</Text>
+            </View>
+          </View>
+          <View style={styles.pickerSection}>
+            <Picker
+              style={{ flex: 1 }}
+              selectedValue={props.selectedServings}
+              onValueChange={(itemValue, itemIndex) =>
+                props.setSelectedServings(itemValue)
+              }>
+              {props.possible_num_servings.map((item, index) => (
+                <Picker.Item label={item} value={item} />
+              ))}
+            </Picker>
+            <Picker
+              style={{ flex: 1 }}
+              selectedValue={props.selectedLike}
+              onValueChange={(itemValue, itemIndex) =>
+                props.setSelectedLike(itemValue)
+              }>
+              {props.like_scale.map((item, index) => (
+                <Picker.Item label={item} value={item} />
+              ))}
+            </Picker>
+          </View>
+          <Pressable
+            style={[styles.button, styles.buttonClose]}
+            onPress={() => {
+              props.setModalVisible(!props.modalVisible)
+              props.addFoodHandler(props.recommendation, props.recommendationCals)
+            }
+            }>
+            <Text style={styles.modalText}>Add Food Entry</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  )
+}
 
 export function FoodRecs(props) {
   const [recommendedTime, setRecommendedTime] = useState('');
@@ -347,6 +417,7 @@ export function FoodRecs(props) {
   }
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [prevModalVisible, setPrevModalVisible] = useState(false);
   const [selectedServings, setSelectedServings] = useState('1');
   const possible_num_servings = ['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75', '2']
   const [selectedLike, setSelectedLike] = useState('1');
@@ -362,7 +433,7 @@ export function FoodRecs(props) {
     setEnteredCalories(enteredText);
   };
 
-  const addFoodHandler = () => {
+  const addFoodHandler = (recommendation, recommendationCals) => {
 
     props.addNewFoodItem(props.index, recommendation, recommendationCals, selectedServings, selectedLike)
 
@@ -372,79 +443,94 @@ export function FoodRecs(props) {
     setSelectedLike('1');
   };
 
+  const [previousRecommendation, setPreviousRecommendation] = useState('')
+  const [previousRecommendationCals, setPreviousRecommendationCals] = useState(0)
+
+  useEffect(() => {
+    const loadFoodItems = async () => {
+      try {
+        const snapshot = await database()
+          .ref('user/' + props.user.uid + '/Food Entries')
+          .once('value');
+
+        if (snapshot.exists()) {
+          const foodEntries = snapshot.val();
+          const foodItems = [];
+
+          for (const date in foodEntries) {
+            const meals = foodEntries[date];
+
+            if (meals[props.meal] && meals[props.meal].Items) {
+              const items = meals[props.meal].Items;
+              Object.keys(items).forEach(itemKey => {
+                const foodItem = items[itemKey];
+                foodItems.push({ name: itemKey, ...foodItem });
+              });
+            }
+          }
+
+          const likedFoodItems = foodItems.filter(item => item.selectedLike >= 3);
+
+          if (likedFoodItems.length > 0) {
+            const randomRec = Math.floor(Math.random() * likedFoodItems.length);
+            console.log(likedFoodItems);
+            setPreviousRecommendation(likedFoodItems[randomRec].name);
+            setPreviousRecommendationCals(likedFoodItems[randomRec].enteredCalories);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading food items:', error);
+      }
+    };
+
+    loadFoodItems();
+  }, [props.meal, props.user.uid]);
+
+
   return (
     <>
       {props.meal === recommendedTime && (
-        <View style={styles.recommendationView}>
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              Alert.alert('Modal has been closed.');
-              setModalVisible(!modalVisible);
-            }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={[styles.item, { flexDirection: 'row', justifyContent: 'space-between' }]}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder={"Food name here"}
-                    onChangeText={foodInputHandler}
-                    value={recommendation}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder={"Cals per serving"}
-                    onChangeText={caloriesInputHandler}
-                    value={recommendationCals.toString()}
-                  />
-                </View>
-                <View style={styles.pickerSection}>
-                  <View style={{flex: 1}}>
-                    <Text style={styles.modalText}># of Servings</Text>
-                  </View>
-                  <View style={{flex: 1}}>
-                    <Text style={styles.modalText}>Like Rating</Text>
-                  </View>
-                </View>
-                <View style={styles.pickerSection}>
-                  <Picker
-                    style={{ flex: 1 }}
-                    selectedValue={selectedServings}
-                    onValueChange={(itemValue, itemIndex) =>
-                      setSelectedServings(itemValue)
-                    }>
-                    {possible_num_servings.map((item, index) => (
-                      <Picker.Item label={item} value={item} />
-                    ))}
-                  </Picker>
-                  <Picker
-                    style={{ flex: 1 }}
-                    selectedValue={selectedLike}
-                    onValueChange={(itemValue, itemIndex) =>
-                      setSelectedLike(itemValue)
-                    }>
-                    {like_scale.map((item, index) => (
-                      <Picker.Item label={item} value={item} />
-                    ))}
-                  </Picker>
-                </View>
-                <Pressable
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => {
-                    setModalVisible(!modalVisible)
-                    addFoodHandler()
-                  }
-                  }>
-                  <Text style={styles.modalText}>Add Food Entry</Text>
-                </Pressable>
-              </View>
-            </View>
-          </Modal>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
-          </TouchableOpacity>
+        <View>
+          <View style={styles.recommendationView}>
+            <FoodRecModal
+              setModalVisible={setModalVisible}
+              modalVisible={modalVisible}
+              foodInputHandler={foodInputHandler}
+              recommendation={recommendation}
+              caloriesInputHandler={caloriesInputHandler}
+              recommendationCals={recommendationCals}
+              setSelectedServings={setSelectedServings}
+              selectedServings={selectedServings}
+              possible_num_servings={possible_num_servings}
+              setSelectedLike={setSelectedLike}
+              selectedLike={selectedLike}
+              like_scale={like_scale}
+              addFoodHandler={addFoodHandler}
+            ></FoodRecModal>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <Text style={styles.baseText}>{recommendedTime === props.meal && recommendation}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.recommendationView}>
+            <FoodRecModal
+              setModalVisible={setPrevModalVisible}
+              modalVisible={prevModalVisible}
+              foodInputHandler={foodInputHandler}
+              recommendation={previousRecommendation}
+              caloriesInputHandler={caloriesInputHandler}
+              recommendationCals={previousRecommendationCals}
+              setSelectedServings={setSelectedServings}
+              selectedServings={selectedServings}
+              possible_num_servings={possible_num_servings}
+              setSelectedLike={setSelectedLike}
+              selectedLike={selectedLike}
+              like_scale={like_scale}
+              addFoodHandler={addFoodHandler}
+            ></FoodRecModal>
+            <TouchableOpacity onPress={() => setPrevModalVisible(true)}>
+              <Text style={styles.baseText}>{recommendedTime === props.meal && previousRecommendation}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </>
@@ -459,12 +545,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 30,
     marginRight: 10,
-    opacity: 0.4
+    opacity: 0.4,
   },
   recommendationView: {
     backgroundColor: 'rgba(255,218,191,0.77)',
     borderRadius: 10,
-    padding: 10
+    padding: 10,
+    margin: 5
   },
   sectionHeading: {
     fontFamily: 'American Typewriter',
