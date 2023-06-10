@@ -69,28 +69,26 @@ export default function App() {
     const [bio_sex, setBio_sex] = useState("");
     const [weight, setWeight] = useState(0);
     const [energyConsumedSamps, setEnergyConsumedSamps] = useState([])
-    const [activities, setActivities] = useState([]);
     const scrollViewRef = useRef(null);
-    let stepGoal = 0;
 
     const scrollToTop = () => {
         scrollViewRef.current.scrollTo({ y: 0, animated: true });
     };
 
-    const lifescore_chart_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{
-            data: [
-                calculate_lifescore(50, 100, 75, 100, 100, 100),
-                calculate_lifescore(50, 100, 75, 100, 90, 100),
-                calculate_lifescore(60, 100, 85, 100, 120, 100),
-                calculate_lifescore(100, 100, 75, 100, 90, 100),
-                calculate_lifescore(90, 100, 105, 100, 110, 100),
-                calculate_lifescore(100, 100, 100, 100, 100, 100),
-                calculate_lifescore(150, 100, 90, 100, 90, 100),
-            ]
-        }]
-    }), []);
+    // const lifescore_chart_data = useMemo(() => ({
+    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     datasets: [{
+    //         data: [
+    //             calculate_lifescore(50, 100, 75, 100, 100, 100),
+    //             calculate_lifescore(50, 100, 75, 100, 90, 100),
+    //             calculate_lifescore(60, 100, 85, 100, 120, 100),
+    //             calculate_lifescore(100, 100, 75, 100, 90, 100),
+    //             calculate_lifescore(90, 100, 105, 100, 110, 100),
+    //             calculate_lifescore(100, 100, 100, 100, 100, 100),
+    //             calculate_lifescore(150, 100, 90, 100, 90, 100),
+    //         ]
+    //     }]
+    // }), []);
 
     RNFirebase()
 
@@ -102,7 +100,9 @@ export default function App() {
     const [caloriesBurnedChartData, setCaloriesBurnedChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [workoutHoursChartData, setWorkoutHoursChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [steps, setSteps] = useState([0, 0, 0, 0, 0, 0, 0]);
-    // const [lifescoreChartData, setLifescoreChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [stepGoal, setStepGoal] = useState([]);
+    const [lifescoreChartData, setLifescoreChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [activities, setActivities] = useState([]);
 
     const sleep_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -124,10 +124,10 @@ export default function App() {
         datasets: [{ data: workoutHoursChartData }],
     }), [workoutHoursChartData]);
 
-    // const lifescore_chart_data = useMemo(() => ({
-    //     labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    //     datasets: [{ data: lifescoreChartData }]
-    // }), [lifescoreChartData]);
+    const lifescore_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: lifescoreChartData }]
+    }), [lifescoreChartData]);
 
     async function onGoogleButtonPress() {
         // Check if your device supports Google Play
@@ -147,26 +147,6 @@ export default function App() {
       setUser(user);
       if (initializing) setInitializing(false);
     }
-
-  // const [location, setLocation] = useState(null)
-  //
-  // useEffect(() => {
-  //   (async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== 'granted') {
-  //       console.log('Location permission denied');
-  //       return;
-  //     }
-  //
-  //     let location = await Location.getCurrentPositionAsync({});
-  //     setLocation(location)
-  //     // console.log(location.coords.latitude, location.coords.longitude);
-  //   })();
-  // }, []);
-  //
-  // if (location === null) {
-  //   return null
-  // }
 
     // Function to determine if two dates are within the same week (Sunday to Saturday)
     function inSameWeek(firstDay, secondDay) {
@@ -397,11 +377,18 @@ export default function App() {
         const fetchStepCountGoal = (currentUser) => {
             try {
                 const newReference = database().ref('user/' + currentUser.uid + '/goals');
+                let goal = 0;
 
-                // Add listener for 'value' event
+                newReference.once('value', (snapshot) => {
+                    goal = snapshot.val().stepCountGoalGoal;
+                    setStepGoal(goal);
+                    // console.log("GOALS: ", goal)
+                });
+
                 newReference.on('value', (snapshot) => {
-                    const stepGoal = snapshot.val().stepCountGoalGoal;
-                    console.log("STEP GOAL: ", stepGoal);
+                    goal = snapshot.val().stepCountGoalGoal;
+                    setStepGoal(goal);
+                    // console.log("GOALS: ", goal)
                 });
             } catch (error) {
                 console.log("ERROR DETECTED FETCHING STEP COUNT GOAL: " + error);
@@ -433,39 +420,39 @@ export default function App() {
             }
         };
 
-        // const fetchLifescoreData = async (currentUser) => {
-        //     try {
-        //         const newReference = database().ref('user/' + currentUser.uid + '/Lifescore');
-        //         const snapshot = await newReference.once('value');
-        //         // console.log(currentUser)
-        //
-        //         // Array for sleep hours
-        //         let daysOfWeek = Array(7).fill(0);
-        //
-        //         snapshot.forEach((childSnapshot) => {
-        //             // Step 1: Parse the timestamp into a Date object
-        //             const start = new Date(childSnapshot.val().startDate);
-        //             // console.log("START DATE: " + start)
-        //             // console.log("END DATE: " + end)
-        //             // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
-        //
-        //             // Determining if the day is on the same week
-        //             if (inSameWeek(start, new Date())) {
-        //                 // Step 2: Get the day from the start date
-        //                 const options = { weekday: 'long' };
-        //                 const day = start.toLocaleDateString('en-US', options).split(',')[0];
-        //                 // console.log("DAY: " + day)
-        //
-        //                 daysOfWeek[daysDict[day]] = childSnapshot.val();
-        //             } else { return true; }
-        //         });
-        //
-        //         // console.log("Workout hours reading done!")
-        //         setLifescoreChartData(daysOfWeek);
-        //     } catch (error) {
-        //         console.log("ERROR DETECTED FETCHING LIFESCORE SAMPLES: " + error)
-        //     }
-        // };
+        const fetchLifescoreData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Lifescore');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("END DATE: " + end)
+                    // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
+
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
+
+                        daysOfWeek[daysDict[day]] = childSnapshot.val();
+                    } else { return true; }
+                });
+
+                // console.log("Workout hours reading done!")
+                setLifescoreChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING LIFESCORE SAMPLES: " + error)
+            }
+        };
 
         const onAuthStateChanged = (user) => {
             setUser(user);
@@ -516,14 +503,7 @@ export default function App() {
                         console.log('Error fetching step count data: ', error);
                     });
 
-                // fetchStepCountGoal(user)
-                //     .then(() => {
-                //         // Step count goal fetching completed
-                //         // console.log('Step count goal fetched');
-                //     })
-                //     .catch((error) => {
-                //         console.log('Error fetching step count goal: ', error);
-                //     });
+                fetchStepCountGoal(user);
 
                 fetchActivitiesData(user)
                     .then(() => {
@@ -534,14 +514,14 @@ export default function App() {
                         console.log('Error fetching workout hours data: ', error);
                     });
 
-                // fetchLifescoreData(user)
-                //     .then(() => {
-                //         // Lifescore data fetching completed
-                //         // console.log('Lifescore data fetched');
-                //     })
-                //     .catch((error) => {
-                //         console.log('Error fetching lifescore data: ', error);
-                //     });
+                fetchLifescoreData(user)
+                    .then(() => {
+                        // Lifescore data fetching completed
+                        // console.log('Lifescore data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching lifescore data: ', error);
+                    });
             }
         };
 
@@ -781,8 +761,6 @@ export default function App() {
                 >
                     <Text style={styles.title}>Today's Lifestyle Score: {calculate_lifescore(100,100,100,100,100,100)}</Text>
 
-                    <Text style={styles.title}>Sleep at {sleep(user)}</Text>
-
                     <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
                         data={lifescore_chart_data}
@@ -843,7 +821,10 @@ export default function App() {
                         <Text style={styles.title}>Personicle</Text>
 
                         {/*<ScrollView contentContainerStyle={styles.scrollView}>*/}
-                        <Text style={styles.baseText}>Sleep</Text>
+                        <Text style={[styles.baseText, { marginBottom: -3 }]}>Sleep</Text>
+                        <Text style={styles.baseText}>Sleep Recommendation Time:&nbsp;&nbsp;&nbsp;
+                            <Text style={{ fontWeight: 'bold' }}>{sleep(user)}</Text>
+                        </Text>
                         <BarChart
                             data={sleep_chart_data}
                             width={screenWidth}
