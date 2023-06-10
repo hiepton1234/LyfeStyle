@@ -73,27 +73,26 @@ function FoodPage(props) {
       };
 
       // DELETE RECORDS
-      const uuids = energyConsumedSamps.map(sample => sample.id);
+      // const uuids = energyConsumedSamps.map(sample => sample.id);
+      // for (let i = 0; i < 7; i++)
+      //   await HealthKit.deleteQuantitySample(HKQuantityTypeIdentifier.dietaryEnergyConsumed, uuids[i]);
 
-      for (let i = 0; i < 7; i++)
-        await HealthKit.deleteQuantitySample(HKQuantityTypeIdentifier.dietaryEnergyConsumed, uuids[i]);
+      const valueExists = energyConsumedSamps.some(sample => ((sample.value === energyConsumed) && sample.sourceName === 'LyfeStyle'));
 
-      // const valueExists = energyConsumedSamps.some(sample => ((sample.value === energyConsumed) && sample.sourceName === 'LyfeStyle'));
-      //
-      // // If energyConsumed does not exist, save the quantity sample
-      // if (!valueExists) {
-      //   await HealthKit.saveQuantitySample(
-      //     HKQuantityTypeIdentifier.dietaryEnergyConsumed,
-      //     'kcal',
-      //     energyConsumed,
-      //     {
-      //       metadata: {
-      //         meal: mealtime,
-      //       }
-      //     }
-      //   );
-      //   console.log('Quantity sample saved successfully!');
-      // }
+      // If energyConsumed does not exist, save the quantity sample
+      if (!valueExists) {
+        await HealthKit.saveQuantitySample(
+          HKQuantityTypeIdentifier.dietaryEnergyConsumed,
+          'kcal',
+          energyConsumed,
+          {
+            metadata: {
+              meal: mealtime,
+            }
+          }
+        );
+        console.log('Quantity sample saved successfully!');
+      }
 
       // await readEnergyConsumedSamples(option, newReference)
       // await fetchCaloricData(props.user)
@@ -190,11 +189,14 @@ function FoodPage(props) {
 
         writeEnergyConsumedSamples(totalCalsForMeal, mealList[i].meal, props.energyConsumedSamps, currentSelectedDate, props.fetchCaloricData, props.readEnergyConsumedSamples, props.options, newReference)
 
-        await mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded, totalCalsForMeal: totalCalsForMeal})
-        mealReference.child('Items/' + foodName).update(foodEntry)
+        mealReference.update({hour_recorded: mealList[i].hour_recorded, minute_recorded: mealList[i].minute_recorded, totalCalsForMeal: totalCalsForMeal})
+        await mealReference.child('Items/' + foodName).set(foodEntry)
           .then(() => console.log('Food updated.'));
       }
     }
+
+    await props.readEnergyConsumedSamples(props.options, newReference)
+    props.fetchCaloricData(props.user)
   }
 
   useEffect(() => {
@@ -258,8 +260,6 @@ function FoodPage(props) {
             onPress={() => {
               setModalVisible(!modalVisible)
               saveFoods()
-              props.readEnergyConsumedSamples(props.options, newReference)
-              props.fetchCaloricData(props.user)
             }}
             style={({pressed}) => [{opacity : pressed ? 0.3 : 1}]}>
             <Text style={styles.customButton}>❌</Text>

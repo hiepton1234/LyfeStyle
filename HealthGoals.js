@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Alert, Modal, Pressable, StyleSheet, Switch, Text, TextInput, View} from 'react-native';
 import database from "@react-native-firebase/database";
 import ModalSelector from 'react-native-modal-selector'
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 function HealthGoals (props) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -14,6 +15,9 @@ function HealthGoals (props) {
   const [sleepEarlier, setSleepEarlier] = useState(true)
   const [betterSleep, setBetterSleep] = useState(true)
   const [stepCountGoal, setStepCountGoal] = useState('')
+  const [sleepTime, setSleepTime] = useState(new Date());
+  const [timeModalVisible, setTimeModalVisible] = useState(false);
+
 
   useEffect(() => {
     loadHealthGoals();
@@ -119,6 +123,7 @@ function HealthGoals (props) {
               value={stepCountGoal}
               onChangeText={newText => setStepCountGoal(newText)}/>
           </View>
+
           {/*<FlatList*/}
           {/*  data={goalList}*/}
           {/*  renderItem={(itemData) => (*/}
