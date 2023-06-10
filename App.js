@@ -9,8 +9,8 @@ import {AddActivity} from './AddActivity';
 import {RNFirebase} from "./RNFirebase";
 import database from "@react-native-firebase/database";
 import auth from '@react-native-firebase/auth'
-import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin';
-import AppleHealthKit, {HealthValue, HealthKitPermissions} from 'react-native-health'
+import {GoogleSignin, GoogleSigninButton} from '@react-native-google-signin/google-signin';
+import AppleHealthKit from 'react-native-health'
 import moment from "moment";
 
 const screenWidth = Dimensions.get('window').width;
@@ -49,7 +49,7 @@ const permissions = {
   },
 }
 
-export function score(calories_burned, calories_burned_goal, sleep, sleep_goal, caloric_intake, caloric_intake_goal) {
+export function calculate_lifescore(calories_burned, calories_burned_goal, sleep, sleep_goal, caloric_intake, caloric_intake_goal) {
     const calories_burned_dev = 100 * Math.abs((calories_burned - calories_burned_goal) / calories_burned_goal);
     const sleep_dev = 100 * Math.abs((sleep - sleep_goal) / sleep_goal);
     const caloric_intake_dev = 100 * Math.abs((caloric_intake - caloric_intake_goal) / caloric_intake_goal);
@@ -74,19 +74,6 @@ export default function App() {
         scrollViewRef.current.scrollTo({ y: 0, animated: true });
     };
 
-    const lifescore_data = useMemo(() => ({
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{
-            data: [score(100, 100, 100, 100, 100, 100),
-                score(50, 100, 75, 100, 90, 100),
-                score(60, 100, 85, 100, 120, 100),
-                score(100, 100, 75, 100, 90, 100),
-                score(90, 100, 105, 100, 110, 100),
-                score(50, 100, 75, 100, 100, 100),
-                score(150, 100, 90, 100, 90, 100),]
-        }]
-    }), []);
-
     RNFirebase()
 
     // Set an initializing state whilst Firebase connects
@@ -96,6 +83,7 @@ export default function App() {
     const [caloricChartData, setCaloricChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [caloriesBurnedChartData, setCaloriesBurnedChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [workoutHoursChartData, setWorkoutHoursChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [lifescoreChartData, setLifescoreChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
 
     const sleep_chart_data = useMemo(() => ({
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -116,6 +104,11 @@ export default function App() {
         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{ data: workoutHoursChartData }],
     }), [workoutHoursChartData]);
+
+    const lifescore_chart_data = useMemo(() => ({
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [{ data: lifescoreChartData }]
+    }), [lifescoreChartData]);
 
     async function onGoogleButtonPress() {
         // Check if your device supports Google Play
@@ -347,9 +340,7 @@ export default function App() {
 
         const fetchActivitiesData = async (currentUser) => {
             try {
-                const newReference = database().ref(
-                    'user/' + currentUser.uid + '/Activities'
-                );
+                const newReference = database().ref('user/' + currentUser.uid + '/Activities');
 
                 newReference.on('value', (snapshot) => {
                     let activityArr = [];
@@ -369,6 +360,67 @@ export default function App() {
                 });
             } catch (error) {
                 console.log("ERROR DETECTED FETCHING ACTIVITIES SAMPLES: " + error);
+            }
+        };
+
+        const fetchLifescoreData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Lifescore');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                // Array for sleep hours
+                let daysOfWeek = Array(7).fill(0);
+
+                snapshot.forEach((childSnapshot) => {
+                    // Step 1: Parse the timestamp into a Date object
+                    const start = new Date(childSnapshot.val().startDate);
+                    const end = new Date(childSnapshot.val().endDate);
+                    // console.log("START DATE: " + start)
+                    // console.log("END DATE: " + end)
+                    // console.log("IN SAME WEEK?: " + inSameWeek(start, new Date()))
+
+                    // Determining if the day is on the same week
+                    if (inSameWeek(start, new Date())) {
+                        // Step 2: Get the day from the start date
+                        const options = { weekday: 'long' };
+                        const day = start.toLocaleDateString('en-US', options).split(',')[0];
+                        // console.log("DAY: " + day)
+
+                        daysOfWeek[daysDict[day]] = childSnapshot.val();
+                    } else { return true; }
+                });
+
+                // console.log("Workout hours reading done!")
+                setLifescoreChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING LIFESCORE SAMPLES: " + error)
+            }
+        };
+
+        const saveLifescoreData = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/Lifescore');
+
+                const lifescoreKey = newReference.push().key;
+
+                // Save the activity under the generated key
+                newReference.child(lifescoreKey).set({
+                    activity: activity.activity,
+                    startTime: activity.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    selectedDate: activity.selectedDate.toISOString()
+                })
+                    .then(() => {
+                        console.log('Lifescore saved successfully');
+                    })
+                    .catch((error) => {
+                        console.error('Failed to save lifescore:', error);
+                    });
+
+                // console.log("Workout hours reading done!")
+                setLifescoreChartData(daysOfWeek);
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING LIFESCORE SAMPLES: " + error)
             }
         };
 
@@ -419,6 +471,15 @@ export default function App() {
                     })
                     .catch((error) => {
                         console.log('Error fetching workout hours data: ', error);
+                    });
+
+                fetchLifescoreData(user)
+                    .then(() => {
+                        // Lifescore data fetching completed
+                        console.log('Lifescore data fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching lifescore data: ', error);
                     });
             }
         };
@@ -604,7 +665,7 @@ export default function App() {
                     <Text style={styles.title}>Today's Lifestyle Score: {score(100,100,100,100,100,100)}</Text>
                     <Text style={styles.baseText}>Current Week's Lifestyle Scores</Text>
                     <LineChart
-                        data={lifescore_data}
+                        data={lifescore_chart_data}
                         width={screenWidth}
                         height={250}
                         chartConfig={{
