@@ -73,26 +73,26 @@ function FoodPage(props) {
       };
 
       // DELETE RECORDS
-      // const uuids = energyConsumedSamps.map(sample => sample.id);
-      // for (let i = 0; i < 7; i++)
-      //   await HealthKit.deleteQuantitySample(HKQuantityTypeIdentifier.dietaryEnergyConsumed, uuids[i]);
+      const uuids = energyConsumedSamps.map(sample => sample.id);
+      for (let i = 0; i < uuids.length; i++)
+        await HealthKit.deleteQuantitySample(HKQuantityTypeIdentifier.dietaryEnergyConsumed, uuids[i]);
 
-      const valueExists = energyConsumedSamps.some(sample => ((sample.value === energyConsumed) && sample.sourceName === 'LyfeStyle'));
-
-      // If energyConsumed does not exist, save the quantity sample
-      if (!valueExists) {
-        await HealthKit.saveQuantitySample(
-          HKQuantityTypeIdentifier.dietaryEnergyConsumed,
-          'kcal',
-          energyConsumed,
-          {
-            metadata: {
-              meal: mealtime,
-            }
-          }
-        );
-        console.log('Quantity sample saved successfully!');
-      }
+      // const valueExists = energyConsumedSamps.some(sample => ((sample.value === energyConsumed) && sample.sourceName === 'LyfeStyle'));
+      //
+      // // If energyConsumed does not exist, save the quantity sample
+      // if (!valueExists) {
+      //   await HealthKit.saveQuantitySample(
+      //     HKQuantityTypeIdentifier.dietaryEnergyConsumed,
+      //     'kcal',
+      //     energyConsumed,
+      //     {
+      //       metadata: {
+      //         meal: mealtime,
+      //       }
+      //     }
+      //   );
+      //   console.log('Quantity sample saved successfully!');
+      // }
 
       // await readEnergyConsumedSamples(option, newReference)
       // await fetchCaloricData(props.user)
