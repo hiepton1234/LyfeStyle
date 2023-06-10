@@ -70,6 +70,7 @@ export default function App() {
     const [energyConsumedSamps, setEnergyConsumedSamps] = useState([])
     const [activities, setActivities] = useState([]);
     const scrollViewRef = useRef(null);
+    let stepGoal = 0;
 
     const scrollToTop = () => {
         scrollViewRef.current.scrollTo({ y: 0, animated: true });
@@ -377,6 +378,19 @@ export default function App() {
             }
         };
 
+        const fetchStepCountGoal = async (currentUser) => {
+            try {
+                const newReference = database().ref('user/' + currentUser.uid + '/goals');
+                const snapshot = await newReference.once('value');
+                // console.log(currentUser)
+
+                stepGoal = snapshot.val().stepCountGoalGoal;
+                console.log(stepGoal)
+            } catch (error) {
+                console.log("ERROR DETECTED FETCHING STEP COUNT GOAL: " + error)
+            }
+        };
+
         const fetchActivitiesData = async (currentUser) => {
             try {
                 const newReference = database().ref('user/' + currentUser.uid + '/Activities');
@@ -485,6 +499,15 @@ export default function App() {
                         console.log('Error fetching step count data: ', error);
                     });
 
+                fetchStepCountGoal(user)
+                    .then(() => {
+                        // Step count goal fetching completed
+                        console.log('Step count goal fetched');
+                    })
+                    .catch((error) => {
+                        console.log('Error fetching step count goal: ', error);
+                    });
+
                 fetchActivitiesData(user)
                     .then(() => {
                         // Activities data fetching completed
@@ -551,7 +574,7 @@ export default function App() {
 
         // Save the activity under the generated key
         newReference.child(lifescoreKey).set({
-            lifescore: calculate_lifescore(0, 0, sleep_chart_data[day], 0, caloric_chart_data[day], 0),
+            lifescore: calculate_lifescore(steps[day], stepGoal, sleep_chart_data[day], 0, caloric_chart_data[day], 0),
             startTime: new Date()
         })
             .then(() => {
